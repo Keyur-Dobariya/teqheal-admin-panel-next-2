@@ -1,16 +1,21 @@
 'use client';
 
-import {useSearchParams} from "next/navigation";
-import CardProfilePage from "../CardProfilePage";
-import {Suspense} from "react";
+import { useSearchParams } from 'next/navigation';
+import { useEffect, useState } from 'react';
+import CardProfilePage from '../CardProfilePage';
 
 export default function Page() {
     const searchParams = useSearchParams();
-    const employeeCode = searchParams.get('user');
+    const [employeeCode, setEmployeeCode] = useState(null);
 
-    return (
-        <Suspense fallback={<div>Loading...</div>}>
-            <CardProfilePage employeeCode={employeeCode} />
-        </Suspense>
-    );
+    useEffect(() => {
+        const user = searchParams.get('user');
+        setEmployeeCode(user);
+    }, [searchParams]);
+
+    if (employeeCode === null) {
+        return <div>Loading...</div>;
+    }
+
+    return <CardProfilePage employeeCode={employeeCode} />;
 }
