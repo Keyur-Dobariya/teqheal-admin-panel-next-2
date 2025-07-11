@@ -54,11 +54,11 @@ export default function HomePage({children}) {
     const containerRef = useRef(null);
 
     const appDataContext = useAppData();
-    const {isLoading, setIsLoading} = useRef(false);
+    const [isLoading, setIsLoading] = useState(false);
+    const isApiCalledRef = useRef(false);
 
     const fetchMasterData = async () => {
         try {
-            const pathname = usePathname();
             const response = await apiCall({
                 method: HttpMethod.GET,
                 url: endpoints.getMasterData,
@@ -69,17 +69,6 @@ export default function HomePage({children}) {
             if (response?.data) {
                 appDataContext.setAllMasterData(response.data);
                 storeLoginData(response?.data?.loginUserData, false);
-
-                if(pathname === '/') {
-                    const token = getLocalData(appKey.jwtToken);
-                    if (token) {
-                        router.push(pageRoutes.dashboard);
-                    } else {
-                        router.push(pageRoutes.loginPage);
-                    }
-                } else {
-                    router.push(pathname);
-                }
             }
         } catch (error) {
             console.error('Failed to fetch master data:', error);
@@ -87,16 +76,9 @@ export default function HomePage({children}) {
     };
 
     useEffect(() => {
-        const userAgent = navigator.userAgent;
-        const detected = detectPlatform(userAgent);
-
-        if(detected.isElectron) {
-            router.push(pageRoutes.tracker);
-        } else {
-            const isLoggedIn = getLocalData(appKey.isLogin) === 'true';
-            if (isLoggedIn) {
-                fetchMasterData();
-            }
+        if (!isApiCalledRef.current) {
+            isApiCalledRef.current = true;
+            fetchMasterData();
         }
     }, []);
 
@@ -324,13 +306,25 @@ export default function HomePage({children}) {
 
     const [ready, setReady] = useState(false);
     useEffect(() => setReady(true), []);
-    if (!ready) return null;
+    if (!ready && isLoading) {
+        return (
+            <div className="w-full h-full flex justify-center items-center">
+                <LoadingComponent />
+            </div>
+        );
+    }
 
-    return isLoading ? (
-        <div className="w-full h-full flex justify-center items-center">
-            <LoadingComponent />
-        </div>
-    ) : (
+    if(isLoading) {
+        return (
+            <div className="w-full h-full flex justify-center items-center">
+                <div className="loader flex items-center justify-center">
+                    <img src={imagePaths.icon_sm_dark} alt="logo" width={35} height={35}/>
+                </div>
+            </div>
+        );
+    }
+
+    return (
         <div className="w-screen h-screen flex flex-row overflow-hidden" style={{backgroundColor: appColor.mainBg}}>
             {!isMobile && (
                 <Sider
