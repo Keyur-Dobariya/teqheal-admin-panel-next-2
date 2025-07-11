@@ -57,7 +57,7 @@ export default function RootLayout({children}) {
             >
                 {contextHolder}
                 <AppDataProvider>
-                    <InnerAppLayout>{children}</InnerAppLayout>
+                    {children}
                 </AppDataProvider>
             </ConfigProvider>
         </AntdRegistry>

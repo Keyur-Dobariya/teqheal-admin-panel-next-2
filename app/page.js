@@ -9,24 +9,22 @@ import appKey from "./utils/appKey";
 import {detectPlatform} from "./utils/utils";
 
 export default function Home() {
-    // const router = useRouter();
+    const router = useRouter();
 
-    // useEffect(() => {
-    //     const userAgent = navigator.userAgent;
-    //     const detected = detectPlatform(userAgent);
-    //     const token = getLocalData(appKey.jwtToken);
-    //     if (token) {
-    //         if(!detected.isElectron) {
-    //             router.push(pageRoutes.dashboard);
-    //         }
-    //     } else {
-    //         router.push(pageRoutes.loginPage);
-    //     }
-    // }, []);
+    useEffect(() => {
+        const userAgent = navigator.userAgent;
+        const detected = detectPlatform(userAgent);
+        const token = getLocalData(appKey.jwtToken);
+        if (token) {
+            if(detected.isElectron) {
+                router.push(pageRoutes.tracker);
+            } else {
+                router.push(pageRoutes.dashboard);
+            }
+        } else {
+            router.push(pageRoutes.loginPage);
+        }
+    }, []);
 
-    return (
-        <div className="w-full h-full flex justify-center items-center">
-            {/*<LoadingComponent />*/}
-        </div>
-    );
+    return null;
 }

@@ -24,15 +24,18 @@ import {
 import {Button, Drawer, Layout, Menu, Grid, ConfigProvider, Breadcrumb, Badge} from 'antd';
 import {useEffect, useRef, useState} from "react";
 import AnimatedDiv, { Direction } from "../../components/AnimatedDiv";
-import {capitalizeLastPathSegment} from "../../utils/utils";
+import {capitalizeLastPathSegment, detectPlatform} from "../../utils/utils";
 import pageRoutes from "../../utils/pageRoutes";
 import {router} from "next/client";
 import {usePathname, useRouter} from "next/navigation";
 import appColor from "../../utils/appColor";
 import appKey from "../../utils/appKey";
-import {getLocalData} from "../../dataStorage/DataPref";
+import {getLocalData, storeLoginData} from "../../dataStorage/DataPref";
 import {LoadingComponent} from "../../components/LoadingComponent";
 import Link from "next/link";
+import {useAppData} from "../../masterData/AppDataContext";
+import apiCall, {HttpMethod} from "../../api/apiServiceProvider";
+import {endpoints} from "../../api/apiEndpoints";
 
 const { Header, Sider, Content } = Layout;
 const { useBreakpoint } = Grid;
@@ -49,6 +52,53 @@ export default function HomePage({children}) {
     const [breadcrumbItems, setBreadcrumbItems] = useState([]);
 
     const containerRef = useRef(null);
+
+    const appDataContext = useAppData();
+    const {isLoading, setIsLoading} = useRef(false);
+
+    const fetchMasterData = async () => {
+        try {
+            const pathname = usePathname();
+            const response = await apiCall({
+                method: HttpMethod.GET,
+                url: endpoints.getMasterData,
+                setIsLoading,
+                showSuccessMessage: false,
+            });
+
+            if (response?.data) {
+                appDataContext.setAllMasterData(response.data);
+                storeLoginData(response?.data?.loginUserData, false);
+
+                if(pathname === '/') {
+                    const token = getLocalData(appKey.jwtToken);
+                    if (token) {
+                        router.push(pageRoutes.dashboard);
+                    } else {
+                        router.push(pageRoutes.loginPage);
+                    }
+                } else {
+                    router.push(pathname);
+                }
+            }
+        } catch (error) {
+            console.error('Failed to fetch master data:', error);
+        }
+    };
+
+    useEffect(() => {
+        const userAgent = navigator.userAgent;
+        const detected = detectPlatform(userAgent);
+
+        if(detected.isElectron) {
+            router.push(pageRoutes.tracker);
+        } else {
+            const isLoggedIn = getLocalData(appKey.isLogin) === 'true';
+            if (isLoggedIn) {
+                fetchMasterData();
+            }
+        }
+    }, []);
 
     const commonMenuTheme = {
         components: {
@@ -276,7 +326,11 @@ export default function HomePage({children}) {
     useEffect(() => setReady(true), []);
     if (!ready) return null;
 
-    return (
+    return isLoading ? (
+        <div className="w-full h-full flex justify-center items-center">
+            <LoadingComponent />
+        </div>
+    ) : (
         <div className="w-screen h-screen flex flex-row overflow-hidden" style={{backgroundColor: appColor.mainBg}}>
             {!isMobile && (
                 <Sider
