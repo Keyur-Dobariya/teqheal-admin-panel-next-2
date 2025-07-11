@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+    <title>Screenshot Preview</title>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="style.css"/>
+</head>
+<body>
+<div class="container">
+    <div class="header">
+        <div class="status">⏸️ Paused</div>
+        <div class="shortcut">Ctrl + Win + R to Reject</div>
+    </div>
+
+    <div class="image-wrapper">
+        <img src="${imageDataUrl}" alt="Screenshot Preview"/>
+    </div>
+
+    <div class="footer">
+        <button class="btn accept">✅ Accept <span id="count">3 s</span></button>
+        <button class="btn reject" onclick="window.close()">❌ Reject</button>
+    </div>
+</div>
+
+<script>
+    let seconds = 3;
+    const countEl = document.getElementById('count');
+    const interval = setInterval(() => {
+        seconds--;
+        if (seconds <= 0) {
+            clearInterval(interval);
+            window.close();
+        } else {
+            countEl.textContent = seconds + ' s';
+        }
+    }, 1000);
+</script>
+</body>
+</html>

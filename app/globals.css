@@ -1,0 +1,70 @@
+@import url('https://fonts.googleapis.com/css2?family=Outfit:wght@100..900&display=swap');
+@import "tailwindcss";
+
+:root {
+  --font-sans: "Outfit", sans-serif;
+  --primary-color: #1E2538;
+  --second-primary-color: #465FFF;
+  --main-bg-color: #F9FAFB;
+}
+
+@theme inline {
+  --color-background: var(--main-bg-color);
+  --color-foreground: var(--primary-color);
+  --font-sans: var(--font-sans);
+}
+
+html, body {
+  background: var(--main-bg-color);
+  color: var(--primary-color);
+  font-family: var(--font-sans);
+  height: 100%;
+  width: 100%;
+  scrollbar-width: thin !important;
+}
+
+* {
+  scrollbar-width: thin;
+  scrollbar-color: #888 #f1f1f1;
+}
+
+.ant-table-body {
+  scrollbar-width: thin !important;
+  overflow: auto !important;
+}
+
+.ant-table-container {
+  scrollbar-width: thin !important;
+  overflow: auto !important;
+}
+
+.ant-upload-list-item-image {
+  object-fit: cover !important;
+  width: 100% !important;
+  height: 100% !important;
+}
+
+/*============ Loader ============*/
+
+.loader {
+  position: relative;
+  width: 90px;
+  height: 90px;
+}
+
+.loader:before , .loader:after{
+  content: '';
+  border-radius: 50%;
+  position: absolute;
+  inset: 0;
+  box-shadow: 0 0 10px 2px rgba(0, 0, 0, 0.3) inset;
+}
+.loader:after {
+  box-shadow: 0 3px 0 var(--second-primary-color) inset;
+  animation: rotate 2s linear infinite;
+}
+
+@keyframes rotate {
+  0% {  transform: rotate(0)}
+  100% { transform: rotate(360deg)}
+}

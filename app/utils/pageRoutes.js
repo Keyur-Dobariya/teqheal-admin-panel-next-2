@@ -1,0 +1,25 @@
+const pageRoutes = {
+    loginPage: '/auth/login',
+    signupPage: '/auth/signup',
+    forgotPasswordPage: '/auth/forgot-password',
+    dashboard: '/home/dashboard',
+    tracker: '/tracker',
+    employees: '/home/employees',
+    employeeDetail: '/home/employees/employee-detail',
+    todayReport: '/home/today-report',
+    basicSalary: '/home/basic-salary',
+    client: '/home/client',
+    project: '/home/project',
+    tasks: '/home/tasks',
+    leave: '/home/leave',
+    leaveReport: '/home/leave-report',
+    salaryReport: '/home/salary-report',
+    punchReport: '/home/punch-report',
+    calendar: '/home/calendar',
+    chatting: '/home/chatting',
+    myProfile: '/home/my-profile',
+    settings: '/home/settings',
+    calling: '/home/dashboard',
+};
+
+export default pageRoutes;

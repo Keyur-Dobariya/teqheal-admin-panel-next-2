@@ -1,0 +1,36 @@
+{
+  "name": "teqheal-admin-panel-next",
+  "version": "0.1.0",
+  "private": true,
+  "main": "electron/main.js",
+  "scripts": {
+    "dev": "next dev --turbopack",
+    "build": "next build",
+    "start": "next start",
+    "lint": "next lint",
+    "electron": "electron .",
+    "dev:all": "concurrently \"npm run dev\" \"npm run electron\""
+  },
+  "dependencies": {
+    "@ant-design/nextjs-registry": "^1.0.2",
+    "antd": "^5.26.2",
+    "axios": "^1.10.0",
+    "date-fns": "^4.1.0",
+    "firebase": "^11.10.0",
+    "framer-motion": "^12.19.2",
+    "next": "15.3.5",
+    "node-global-key-listener": "^0.3.0",
+    "prop-types": "^15.8.1",
+    "react": "^19.0.0",
+    "react-dom": "^19.0.0",
+    "react-image-gallery": "^1.4.0"
+  },
+  "devDependencies": {
+    "@tailwindcss/postcss": "^4",
+    "@types/react": "19.1.8",
+    "concurrently": "^9.2.0",
+    "electron": "^37.2.0",
+    "tailwindcss": "^4",
+    "typescript": "5.8.3"
+  }
+}

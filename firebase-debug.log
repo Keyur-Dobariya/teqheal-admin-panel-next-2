@@ -1,0 +1,209 @@
+[debug] [2025-07-11T05:31:59.013Z] ----------------------------------------------------------------------
+[debug] [2025-07-11T05:31:59.017Z] Command:       C:\Program Files\nodejs\node.exe C:\Program Files\nodejs\node_modules\firebase-tools\lib\bin\firebase.js deploy --debug
+[debug] [2025-07-11T05:31:59.017Z] CLI Version:   14.10.1
+[debug] [2025-07-11T05:31:59.017Z] Platform:      win32
+[debug] [2025-07-11T05:31:59.018Z] Node Version:  v20.18.1
+[debug] [2025-07-11T05:31:59.018Z] Time:          Fri Jul 11 2025 11:01:59 GMT+0530 (India Standard Time)
+[debug] [2025-07-11T05:31:59.018Z] ----------------------------------------------------------------------
+[debug] 
+[debug] [2025-07-11T05:31:59.395Z] > command requires scopes: ["email","openid","https://www.googleapis.com/auth/cloudplatformprojects.readonly","https://www.googleapis.com/auth/firebase","https://www.googleapis.com/auth/cloud-platform"]
+[debug] [2025-07-11T05:31:59.397Z] > authorizing via signed-in user (keyur.teqheal@gmail.com)
+[debug] [2025-07-11T05:31:59.398Z] [iam] checking project teqheal-tracker for permissions ["firebase.projects.get","firebasehosting.sites.update"]
+[debug] [2025-07-11T05:31:59.400Z] Checked if tokens are valid: true, expires at: 1752214551725
+[debug] [2025-07-11T05:31:59.400Z] Checked if tokens are valid: true, expires at: 1752214551725
+[debug] [2025-07-11T05:31:59.402Z] >>> [apiv2][query] POST https://cloudresourcemanager.googleapis.com/v1/projects/teqheal-tracker:testIamPermissions [none]
+[debug] [2025-07-11T05:31:59.402Z] >>> [apiv2][(partial)header] POST https://cloudresourcemanager.googleapis.com/v1/projects/teqheal-tracker:testIamPermissions x-goog-quota-user=projects/teqheal-tracker
+[debug] [2025-07-11T05:31:59.403Z] >>> [apiv2][body] POST https://cloudresourcemanager.googleapis.com/v1/projects/teqheal-tracker:testIamPermissions {"permissions":["firebase.projects.get","firebasehosting.sites.update"]}
+[debug] [2025-07-11T05:32:00.919Z] <<< [apiv2][status] POST https://cloudresourcemanager.googleapis.com/v1/projects/teqheal-tracker:testIamPermissions 200
+[debug] [2025-07-11T05:32:00.920Z] <<< [apiv2][body] POST https://cloudresourcemanager.googleapis.com/v1/projects/teqheal-tracker:testIamPermissions {"permissions":["firebase.projects.get","firebasehosting.sites.update"]}
+[debug] [2025-07-11T05:32:00.921Z] Checked if tokens are valid: true, expires at: 1752214551725
+[debug] [2025-07-11T05:32:00.922Z] Checked if tokens are valid: true, expires at: 1752214551725
+[debug] [2025-07-11T05:32:00.922Z] >>> [apiv2][query] GET https://firebase.googleapis.com/v1beta1/projects/teqheal-tracker [none]
+[debug] [2025-07-11T05:32:01.343Z] <<< [apiv2][status] GET https://firebase.googleapis.com/v1beta1/projects/teqheal-tracker 200
+[debug] [2025-07-11T05:32:01.344Z] <<< [apiv2][body] GET https://firebase.googleapis.com/v1beta1/projects/teqheal-tracker {"projectId":"teqheal-tracker","projectNumber":"931695379074","displayName":"Teqheal-Tracker","name":"projects/teqheal-tracker","resources":{"hostingSite":"teqheal-tracker"},"state":"ACTIVE","etag":"1_37a568b2-3b01-43b3-8743-dfc686c8d1aa"}
+[info] 
+[info] === Deploying to 'teqheal-tracker'...
+[info] 
+[info] i  deploying hosting 
+[debug] [2025-07-11T05:32:01.378Z] Checked if tokens are valid: true, expires at: 1752214551725
+[debug] [2025-07-11T05:32:01.379Z] Checked if tokens are valid: true, expires at: 1752214551725
+[debug] [2025-07-11T05:32:01.380Z] >>> [apiv2][query] POST https://firebasehosting.googleapis.com/v1beta1/projects/-/sites/teqheal-tracker/versions [none]
+[debug] [2025-07-11T05:32:01.381Z] >>> [apiv2][body] POST https://firebasehosting.googleapis.com/v1beta1/projects/-/sites/teqheal-tracker/versions {"status":"CREATED","labels":{"deployment-tool":"cli-firebase"}}
+[debug] [2025-07-11T05:32:03.583Z] <<< [apiv2][status] POST https://firebasehosting.googleapis.com/v1beta1/projects/-/sites/teqheal-tracker/versions 200
+[debug] [2025-07-11T05:32:03.584Z] <<< [apiv2][body] POST https://firebasehosting.googleapis.com/v1beta1/projects/-/sites/teqheal-tracker/versions {"name":"projects/931695379074/sites/teqheal-tracker/versions/6858d8fbe15f0a55","status":"CREATED","config":{},"labels":{"deployment-tool":"cli-firebase"}}
+[info] i  hosting[teqheal-tracker]: beginning deploy... 
+[info] i  hosting[teqheal-tracker]: found 19 files in public 
+[debug] [2025-07-11T05:32:03.641Z] [hosting] uploading with 200 concurrency
+[debug] [2025-07-11T05:32:03.644Z] [hosting] hash cache [cHVibGlj] not populated
+[debug] [2025-07-11T05:32:03.708Z] Checked if tokens are valid: true, expires at: 1752214551725
+[debug] [2025-07-11T05:32:03.709Z] Checked if tokens are valid: true, expires at: 1752214551725
+[debug] [2025-07-11T05:32:03.711Z] [hosting] hash cache [cHVibGlj] stored for 19 files
+[debug] [2025-07-11T05:32:03.711Z] [hosting][hash queue][FINAL] {"max":56,"min":49,"avg":52.36842105263158,"active":0,"complete":19,"success":19,"errored":0,"retried":0,"total":19,"elapsed":65}
+[debug] [2025-07-11T05:32:03.712Z] >>> [apiv2][query] POST https://firebasehosting.googleapis.com/v1beta1/projects/931695379074/sites/teqheal-tracker/versions/6858d8fbe15f0a55:populateFiles [none]
+[debug] [2025-07-11T05:32:03.713Z] >>> [apiv2][body] POST https://firebasehosting.googleapis.com/v1beta1/projects/931695379074/sites/teqheal-tracker/versions/6858d8fbe15f0a55:populateFiles {"files":{"/window.svg":"6bd2003bd35bb32c1c0d99ab3aeac0cc1edaefd79f27df1d954bc87184048d74","/vercel.svg":"529a1a21b4a82475a82db26173c28d7b27e2dc9d4b900eaf1c5329d96eea4ddd","/next.svg":"0665b9ab4493aa9d7e988b57024e28772ae543e804b8cf6b0a3633854b7c3c7f","/index.html":"9409f3cf190ffa84961602ef66073081109ea6d7827f9961f4c9831e254c158e","/globe.svg":"6502a3e6120bf2d6e8417e7c40bb57fb8a6954de9c86d3f43076a75b60cd23a2","/file.svg":"5a09df6187e21aa9a7d05094389385876ac93c818e1dcbb77a26a8fe408bf79c","/assets/images/right_tick.svg":"4a11bdd3207b2d6179f953e0862ad635b2926e622c80d086c7d5796cb406f47c","/assets/images/icon_sm_white.png":"17f756acb7e7cb271ccf8848fcc9ce585e05a29865a10244d03416798cfdb92e","/assets/images/icon_sm_multi.png":"bf45ae4afc70aee6998663e8067a3ebbfa97ce3239b2af15a084b003dd111405","/assets/images/icon_sm_dark.png":"6112d2be6b76a9f428f93e8b8051536a33dc5d707df53064f91a1e4a7545f2a4","/assets/images/icon_big_white.png":"f66a450b146560d5f29b1d8f4a1873c2c8e5696456e1269329abda519da46eea","/assets/images/icon_big_dark.png":"c2e3cf62d2d35012617b0d8c4e52b74c5e854381ad8c664b057280ffc3385aec","/assets/images/auth_design_bg.svg":"712ab1804d6058d72dc4bfb5bf9258232757580ce1831c1b9d6c69a3cbd430d5","/assets/images/auth_design_dot_square.png":"a289d1fb760591fddbdb1f90e9ad71b573ff6fa76d6a38e9457604d7a5fabf2d","/assets/images/heyWaveHand.png":"e468895c1251b38c13bee48c44e5866c9cd877a8f8b65c36897630e07f01fcd4","/assets/images/auth_design_round_big.png":"938aaf7da3b5bb5d9e23e2e8dbf707076f409c35cded3b05f380305df5aeffb7","/assets/images/male_profile.png":"0719c2805b549ef38ef36a37eac2ee2c87db89e3581782c8073f387b9bc034b5","/assets/images/female_profile.png":"103c966e91188b8cf1fbef36912839dd1573813c819535c98ec78d205526a820","/assets/images/auth_design_round_small.png":"e53f3739b89c20a551a8a1c24de1f5a8058bb090f3908430f0170cb01292f1f6"}}
+[debug] [2025-07-11T05:32:04.175Z] <<< [apiv2][status] POST https://firebasehosting.googleapis.com/v1beta1/projects/931695379074/sites/teqheal-tracker/versions/6858d8fbe15f0a55:populateFiles 200
+[debug] [2025-07-11T05:32:04.176Z] <<< [apiv2][body] POST https://firebasehosting.googleapis.com/v1beta1/projects/931695379074/sites/teqheal-tracker/versions/6858d8fbe15f0a55:populateFiles {"uploadRequiredHashes":["e468895c1251b38c13bee48c44e5866c9cd877a8f8b65c36897630e07f01fcd4","a289d1fb760591fddbdb1f90e9ad71b573ff6fa76d6a38e9457604d7a5fabf2d","103c966e91188b8cf1fbef36912839dd1573813c819535c98ec78d205526a820","f66a450b146560d5f29b1d8f4a1873c2c8e5696456e1269329abda519da46eea","529a1a21b4a82475a82db26173c28d7b27e2dc9d4b900eaf1c5329d96eea4ddd","17f756acb7e7cb271ccf8848fcc9ce585e05a29865a10244d03416798cfdb92e","6112d2be6b76a9f428f93e8b8051536a33dc5d707df53064f91a1e4a7545f2a4","6502a3e6120bf2d6e8417e7c40bb57fb8a6954de9c86d3f43076a75b60cd23a2","e53f3739b89c20a551a8a1c24de1f5a8058bb090f3908430f0170cb01292f1f6","0665b9ab4493aa9d7e988b57024e28772ae543e804b8cf6b0a3633854b7c3c7f","712ab1804d6058d72dc4bfb5bf9258232757580ce1831c1b9d6c69a3cbd430d5","938aaf7da3b5bb5d9e23e2e8dbf707076f409c35cded3b05f380305df5aeffb7","bf45ae4afc70aee6998663e8067a3ebbfa97ce3239b2af15a084b003dd111405","0719c2805b549ef38ef36a37eac2ee2c87db89e3581782c8073f387b9bc034b5","9409f3cf190ffa84961602ef66073081109ea6d7827f9961f4c9831e254c158e","6bd2003bd35bb32c1c0d99ab3aeac0cc1edaefd79f27df1d954bc87184048d74","5a09df6187e21aa9a7d05094389385876ac93c818e1dcbb77a26a8fe408bf79c","c2e3cf62d2d35012617b0d8c4e52b74c5e854381ad8c664b057280ffc3385aec","4a11bdd3207b2d6179f953e0862ad635b2926e622c80d086c7d5796cb406f47c"],"uploadUrl":"https://upload-firebasehosting.googleapis.com/upload/sites/teqheal-tracker/versions/6858d8fbe15f0a55/files"}
+[debug] [2025-07-11T05:32:04.180Z] Checked if tokens are valid: true, expires at: 1752214551725
+[debug] [2025-07-11T05:32:04.181Z] Checked if tokens are valid: true, expires at: 1752214551725
+[debug] [2025-07-11T05:32:04.182Z] Checked if tokens are valid: true, expires at: 1752214551725
+[debug] [2025-07-11T05:32:04.185Z] Checked if tokens are valid: true, expires at: 1752214551725
+[debug] [2025-07-11T05:32:04.187Z] Checked if tokens are valid: true, expires at: 1752214551725
+[debug] [2025-07-11T05:32:04.187Z] Checked if tokens are valid: true, expires at: 1752214551725
+[debug] [2025-07-11T05:32:04.188Z] Checked if tokens are valid: true, expires at: 1752214551725
+[debug] [2025-07-11T05:32:04.188Z] Checked if tokens are valid: true, expires at: 1752214551725
+[debug] [2025-07-11T05:32:04.189Z] Checked if tokens are valid: true, expires at: 1752214551725
+[debug] [2025-07-11T05:32:04.190Z] Checked if tokens are valid: true, expires at: 1752214551725
+[debug] [2025-07-11T05:32:04.191Z] Checked if tokens are valid: true, expires at: 1752214551725
+[debug] [2025-07-11T05:32:04.191Z] Checked if tokens are valid: true, expires at: 1752214551725
+[debug] [2025-07-11T05:32:04.192Z] Checked if tokens are valid: true, expires at: 1752214551725
+[debug] [2025-07-11T05:32:04.193Z] Checked if tokens are valid: true, expires at: 1752214551725
+[debug] [2025-07-11T05:32:04.194Z] Checked if tokens are valid: true, expires at: 1752214551725
+[debug] [2025-07-11T05:32:04.194Z] Checked if tokens are valid: true, expires at: 1752214551725
+[debug] [2025-07-11T05:32:04.196Z] Checked if tokens are valid: true, expires at: 1752214551725
+[debug] [2025-07-11T05:32:04.196Z] Checked if tokens are valid: true, expires at: 1752214551725
+[debug] [2025-07-11T05:32:04.197Z] Checked if tokens are valid: true, expires at: 1752214551725
+[debug] [2025-07-11T05:32:04.197Z] Checked if tokens are valid: true, expires at: 1752214551725
+[debug] [2025-07-11T05:32:04.198Z] Checked if tokens are valid: true, expires at: 1752214551725
+[debug] [2025-07-11T05:32:04.199Z] Checked if tokens are valid: true, expires at: 1752214551725
+[debug] [2025-07-11T05:32:04.200Z] Checked if tokens are valid: true, expires at: 1752214551725
+[debug] [2025-07-11T05:32:04.200Z] Checked if tokens are valid: true, expires at: 1752214551725
+[debug] [2025-07-11T05:32:04.201Z] Checked if tokens are valid: true, expires at: 1752214551725
+[debug] [2025-07-11T05:32:04.202Z] Checked if tokens are valid: true, expires at: 1752214551725
+[debug] [2025-07-11T05:32:04.203Z] Checked if tokens are valid: true, expires at: 1752214551725
+[debug] [2025-07-11T05:32:04.204Z] Checked if tokens are valid: true, expires at: 1752214551725
+[debug] [2025-07-11T05:32:04.205Z] Checked if tokens are valid: true, expires at: 1752214551725
+[debug] [2025-07-11T05:32:04.205Z] Checked if tokens are valid: true, expires at: 1752214551725
+[debug] [2025-07-11T05:32:04.206Z] Checked if tokens are valid: true, expires at: 1752214551725
+[debug] [2025-07-11T05:32:04.207Z] Checked if tokens are valid: true, expires at: 1752214551725
+[debug] [2025-07-11T05:32:04.208Z] Checked if tokens are valid: true, expires at: 1752214551725
+[debug] [2025-07-11T05:32:04.209Z] Checked if tokens are valid: true, expires at: 1752214551725
+[debug] [2025-07-11T05:32:04.211Z] Checked if tokens are valid: true, expires at: 1752214551725
+[debug] [2025-07-11T05:32:04.211Z] Checked if tokens are valid: true, expires at: 1752214551725
+[debug] [2025-07-11T05:32:04.212Z] Checked if tokens are valid: true, expires at: 1752214551725
+[debug] [2025-07-11T05:32:04.213Z] Checked if tokens are valid: true, expires at: 1752214551725
+[debug] [2025-07-11T05:32:04.214Z] >>> [apiv2][query] POST https://upload-firebasehosting.googleapis.com/upload/sites/teqheal-tracker/versions/6858d8fbe15f0a55/files/e468895c1251b38c13bee48c44e5866c9cd877a8f8b65c36897630e07f01fcd4 [none]
+[debug] [2025-07-11T05:32:04.214Z] >>> [apiv2][body] POST https://upload-firebasehosting.googleapis.com/upload/sites/teqheal-tracker/versions/6858d8fbe15f0a55/files/e468895c1251b38c13bee48c44e5866c9cd877a8f8b65c36897630e07f01fcd4 [stream]
+[debug] [2025-07-11T05:32:04.218Z] >>> [apiv2][query] POST https://upload-firebasehosting.googleapis.com/upload/sites/teqheal-tracker/versions/6858d8fbe15f0a55/files/a289d1fb760591fddbdb1f90e9ad71b573ff6fa76d6a38e9457604d7a5fabf2d [none]
+[debug] [2025-07-11T05:32:04.218Z] >>> [apiv2][body] POST https://upload-firebasehosting.googleapis.com/upload/sites/teqheal-tracker/versions/6858d8fbe15f0a55/files/a289d1fb760591fddbdb1f90e9ad71b573ff6fa76d6a38e9457604d7a5fabf2d [stream]
+[debug] [2025-07-11T05:32:04.221Z] >>> [apiv2][query] POST https://upload-firebasehosting.googleapis.com/upload/sites/teqheal-tracker/versions/6858d8fbe15f0a55/files/103c966e91188b8cf1fbef36912839dd1573813c819535c98ec78d205526a820 [none]
+[debug] [2025-07-11T05:32:04.221Z] >>> [apiv2][body] POST https://upload-firebasehosting.googleapis.com/upload/sites/teqheal-tracker/versions/6858d8fbe15f0a55/files/103c966e91188b8cf1fbef36912839dd1573813c819535c98ec78d205526a820 [stream]
+[debug] [2025-07-11T05:32:04.224Z] >>> [apiv2][query] POST https://upload-firebasehosting.googleapis.com/upload/sites/teqheal-tracker/versions/6858d8fbe15f0a55/files/f66a450b146560d5f29b1d8f4a1873c2c8e5696456e1269329abda519da46eea [none]
+[debug] [2025-07-11T05:32:04.225Z] >>> [apiv2][body] POST https://upload-firebasehosting.googleapis.com/upload/sites/teqheal-tracker/versions/6858d8fbe15f0a55/files/f66a450b146560d5f29b1d8f4a1873c2c8e5696456e1269329abda519da46eea [stream]
+[debug] [2025-07-11T05:32:04.228Z] >>> [apiv2][query] POST https://upload-firebasehosting.googleapis.com/upload/sites/teqheal-tracker/versions/6858d8fbe15f0a55/files/529a1a21b4a82475a82db26173c28d7b27e2dc9d4b900eaf1c5329d96eea4ddd [none]
+[debug] [2025-07-11T05:32:04.228Z] >>> [apiv2][body] POST https://upload-firebasehosting.googleapis.com/upload/sites/teqheal-tracker/versions/6858d8fbe15f0a55/files/529a1a21b4a82475a82db26173c28d7b27e2dc9d4b900eaf1c5329d96eea4ddd [stream]
+[debug] [2025-07-11T05:32:04.232Z] >>> [apiv2][query] POST https://upload-firebasehosting.googleapis.com/upload/sites/teqheal-tracker/versions/6858d8fbe15f0a55/files/17f756acb7e7cb271ccf8848fcc9ce585e05a29865a10244d03416798cfdb92e [none]
+[debug] [2025-07-11T05:32:04.234Z] >>> [apiv2][body] POST https://upload-firebasehosting.googleapis.com/upload/sites/teqheal-tracker/versions/6858d8fbe15f0a55/files/17f756acb7e7cb271ccf8848fcc9ce585e05a29865a10244d03416798cfdb92e [stream]
+[debug] [2025-07-11T05:32:04.237Z] >>> [apiv2][query] POST https://upload-firebasehosting.googleapis.com/upload/sites/teqheal-tracker/versions/6858d8fbe15f0a55/files/6112d2be6b76a9f428f93e8b8051536a33dc5d707df53064f91a1e4a7545f2a4 [none]
+[debug] [2025-07-11T05:32:04.237Z] >>> [apiv2][body] POST https://upload-firebasehosting.googleapis.com/upload/sites/teqheal-tracker/versions/6858d8fbe15f0a55/files/6112d2be6b76a9f428f93e8b8051536a33dc5d707df53064f91a1e4a7545f2a4 [stream]
+[debug] [2025-07-11T05:32:04.241Z] >>> [apiv2][query] POST https://upload-firebasehosting.googleapis.com/upload/sites/teqheal-tracker/versions/6858d8fbe15f0a55/files/6502a3e6120bf2d6e8417e7c40bb57fb8a6954de9c86d3f43076a75b60cd23a2 [none]
+[debug] [2025-07-11T05:32:04.242Z] >>> [apiv2][body] POST https://upload-firebasehosting.googleapis.com/upload/sites/teqheal-tracker/versions/6858d8fbe15f0a55/files/6502a3e6120bf2d6e8417e7c40bb57fb8a6954de9c86d3f43076a75b60cd23a2 [stream]
+[debug] [2025-07-11T05:32:04.244Z] >>> [apiv2][query] POST https://upload-firebasehosting.googleapis.com/upload/sites/teqheal-tracker/versions/6858d8fbe15f0a55/files/e53f3739b89c20a551a8a1c24de1f5a8058bb090f3908430f0170cb01292f1f6 [none]
+[debug] [2025-07-11T05:32:04.245Z] >>> [apiv2][body] POST https://upload-firebasehosting.googleapis.com/upload/sites/teqheal-tracker/versions/6858d8fbe15f0a55/files/e53f3739b89c20a551a8a1c24de1f5a8058bb090f3908430f0170cb01292f1f6 [stream]
+[debug] [2025-07-11T05:32:04.247Z] >>> [apiv2][query] POST https://upload-firebasehosting.googleapis.com/upload/sites/teqheal-tracker/versions/6858d8fbe15f0a55/files/0665b9ab4493aa9d7e988b57024e28772ae543e804b8cf6b0a3633854b7c3c7f [none]
+[debug] [2025-07-11T05:32:04.248Z] >>> [apiv2][body] POST https://upload-firebasehosting.googleapis.com/upload/sites/teqheal-tracker/versions/6858d8fbe15f0a55/files/0665b9ab4493aa9d7e988b57024e28772ae543e804b8cf6b0a3633854b7c3c7f [stream]
+[debug] [2025-07-11T05:32:04.250Z] >>> [apiv2][query] POST https://upload-firebasehosting.googleapis.com/upload/sites/teqheal-tracker/versions/6858d8fbe15f0a55/files/712ab1804d6058d72dc4bfb5bf9258232757580ce1831c1b9d6c69a3cbd430d5 [none]
+[debug] [2025-07-11T05:32:04.251Z] >>> [apiv2][body] POST https://upload-firebasehosting.googleapis.com/upload/sites/teqheal-tracker/versions/6858d8fbe15f0a55/files/712ab1804d6058d72dc4bfb5bf9258232757580ce1831c1b9d6c69a3cbd430d5 [stream]
+[debug] [2025-07-11T05:32:04.253Z] >>> [apiv2][query] POST https://upload-firebasehosting.googleapis.com/upload/sites/teqheal-tracker/versions/6858d8fbe15f0a55/files/938aaf7da3b5bb5d9e23e2e8dbf707076f409c35cded3b05f380305df5aeffb7 [none]
+[debug] [2025-07-11T05:32:04.254Z] >>> [apiv2][body] POST https://upload-firebasehosting.googleapis.com/upload/sites/teqheal-tracker/versions/6858d8fbe15f0a55/files/938aaf7da3b5bb5d9e23e2e8dbf707076f409c35cded3b05f380305df5aeffb7 [stream]
+[debug] [2025-07-11T05:32:04.257Z] >>> [apiv2][query] POST https://upload-firebasehosting.googleapis.com/upload/sites/teqheal-tracker/versions/6858d8fbe15f0a55/files/bf45ae4afc70aee6998663e8067a3ebbfa97ce3239b2af15a084b003dd111405 [none]
+[debug] [2025-07-11T05:32:04.257Z] >>> [apiv2][body] POST https://upload-firebasehosting.googleapis.com/upload/sites/teqheal-tracker/versions/6858d8fbe15f0a55/files/bf45ae4afc70aee6998663e8067a3ebbfa97ce3239b2af15a084b003dd111405 [stream]
+[debug] [2025-07-11T05:32:04.259Z] >>> [apiv2][query] POST https://upload-firebasehosting.googleapis.com/upload/sites/teqheal-tracker/versions/6858d8fbe15f0a55/files/0719c2805b549ef38ef36a37eac2ee2c87db89e3581782c8073f387b9bc034b5 [none]
+[debug] [2025-07-11T05:32:04.260Z] >>> [apiv2][body] POST https://upload-firebasehosting.googleapis.com/upload/sites/teqheal-tracker/versions/6858d8fbe15f0a55/files/0719c2805b549ef38ef36a37eac2ee2c87db89e3581782c8073f387b9bc034b5 [stream]
+[debug] [2025-07-11T05:32:04.262Z] >>> [apiv2][query] POST https://upload-firebasehosting.googleapis.com/upload/sites/teqheal-tracker/versions/6858d8fbe15f0a55/files/9409f3cf190ffa84961602ef66073081109ea6d7827f9961f4c9831e254c158e [none]
+[debug] [2025-07-11T05:32:04.263Z] >>> [apiv2][body] POST https://upload-firebasehosting.googleapis.com/upload/sites/teqheal-tracker/versions/6858d8fbe15f0a55/files/9409f3cf190ffa84961602ef66073081109ea6d7827f9961f4c9831e254c158e [stream]
+[debug] [2025-07-11T05:32:04.266Z] >>> [apiv2][query] POST https://upload-firebasehosting.googleapis.com/upload/sites/teqheal-tracker/versions/6858d8fbe15f0a55/files/6bd2003bd35bb32c1c0d99ab3aeac0cc1edaefd79f27df1d954bc87184048d74 [none]
+[debug] [2025-07-11T05:32:04.266Z] >>> [apiv2][body] POST https://upload-firebasehosting.googleapis.com/upload/sites/teqheal-tracker/versions/6858d8fbe15f0a55/files/6bd2003bd35bb32c1c0d99ab3aeac0cc1edaefd79f27df1d954bc87184048d74 [stream]
+[debug] [2025-07-11T05:32:04.268Z] >>> [apiv2][query] POST https://upload-firebasehosting.googleapis.com/upload/sites/teqheal-tracker/versions/6858d8fbe15f0a55/files/5a09df6187e21aa9a7d05094389385876ac93c818e1dcbb77a26a8fe408bf79c [none]
+[debug] [2025-07-11T05:32:04.269Z] >>> [apiv2][body] POST https://upload-firebasehosting.googleapis.com/upload/sites/teqheal-tracker/versions/6858d8fbe15f0a55/files/5a09df6187e21aa9a7d05094389385876ac93c818e1dcbb77a26a8fe408bf79c [stream]
+[debug] [2025-07-11T05:32:04.271Z] >>> [apiv2][query] POST https://upload-firebasehosting.googleapis.com/upload/sites/teqheal-tracker/versions/6858d8fbe15f0a55/files/c2e3cf62d2d35012617b0d8c4e52b74c5e854381ad8c664b057280ffc3385aec [none]
+[debug] [2025-07-11T05:32:04.271Z] >>> [apiv2][body] POST https://upload-firebasehosting.googleapis.com/upload/sites/teqheal-tracker/versions/6858d8fbe15f0a55/files/c2e3cf62d2d35012617b0d8c4e52b74c5e854381ad8c664b057280ffc3385aec [stream]
+[debug] [2025-07-11T05:32:04.273Z] >>> [apiv2][query] POST https://upload-firebasehosting.googleapis.com/upload/sites/teqheal-tracker/versions/6858d8fbe15f0a55/files/4a11bdd3207b2d6179f953e0862ad635b2926e622c80d086c7d5796cb406f47c [none]
+[debug] [2025-07-11T05:32:04.274Z] >>> [apiv2][body] POST https://upload-firebasehosting.googleapis.com/upload/sites/teqheal-tracker/versions/6858d8fbe15f0a55/files/4a11bdd3207b2d6179f953e0862ad635b2926e622c80d086c7d5796cb406f47c [stream]
+[debug] [2025-07-11T05:32:04.275Z] [hosting][populate queue][FINAL] {"max":505,"min":505,"avg":505,"active":0,"complete":1,"success":1,"errored":0,"retried":0,"total":1,"elapsed":567}
+[debug] [2025-07-11T05:32:04.276Z] [hosting] uploads queued: 19
+[debug] [2025-07-11T05:32:05.371Z] <<< [apiv2][status] POST https://upload-firebasehosting.googleapis.com/upload/sites/teqheal-tracker/versions/6858d8fbe15f0a55/files/529a1a21b4a82475a82db26173c28d7b27e2dc9d4b900eaf1c5329d96eea4ddd 200
+[debug] [2025-07-11T05:32:05.372Z] <<< [apiv2][body] POST https://upload-firebasehosting.googleapis.com/upload/sites/teqheal-tracker/versions/6858d8fbe15f0a55/files/529a1a21b4a82475a82db26173c28d7b27e2dc9d4b900eaf1c5329d96eea4ddd [stream]
+[debug] [2025-07-11T05:32:05.379Z] <<< [apiv2][status] POST https://upload-firebasehosting.googleapis.com/upload/sites/teqheal-tracker/versions/6858d8fbe15f0a55/files/9409f3cf190ffa84961602ef66073081109ea6d7827f9961f4c9831e254c158e 200
+[debug] [2025-07-11T05:32:05.379Z] <<< [apiv2][body] POST https://upload-firebasehosting.googleapis.com/upload/sites/teqheal-tracker/versions/6858d8fbe15f0a55/files/9409f3cf190ffa84961602ef66073081109ea6d7827f9961f4c9831e254c158e [stream]
+[debug] [2025-07-11T05:32:05.382Z] <<< [apiv2][status] POST https://upload-firebasehosting.googleapis.com/upload/sites/teqheal-tracker/versions/6858d8fbe15f0a55/files/6502a3e6120bf2d6e8417e7c40bb57fb8a6954de9c86d3f43076a75b60cd23a2 200
+[debug] [2025-07-11T05:32:05.382Z] <<< [apiv2][body] POST https://upload-firebasehosting.googleapis.com/upload/sites/teqheal-tracker/versions/6858d8fbe15f0a55/files/6502a3e6120bf2d6e8417e7c40bb57fb8a6954de9c86d3f43076a75b60cd23a2 [stream]
+[debug] [2025-07-11T05:32:05.386Z] <<< [apiv2][status] POST https://upload-firebasehosting.googleapis.com/upload/sites/teqheal-tracker/versions/6858d8fbe15f0a55/files/0665b9ab4493aa9d7e988b57024e28772ae543e804b8cf6b0a3633854b7c3c7f 200
+[debug] [2025-07-11T05:32:05.387Z] <<< [apiv2][body] POST https://upload-firebasehosting.googleapis.com/upload/sites/teqheal-tracker/versions/6858d8fbe15f0a55/files/0665b9ab4493aa9d7e988b57024e28772ae543e804b8cf6b0a3633854b7c3c7f [stream]
+[debug] [2025-07-11T05:32:05.391Z] <<< [apiv2][status] POST https://upload-firebasehosting.googleapis.com/upload/sites/teqheal-tracker/versions/6858d8fbe15f0a55/files/938aaf7da3b5bb5d9e23e2e8dbf707076f409c35cded3b05f380305df5aeffb7 200
+[debug] [2025-07-11T05:32:05.392Z] <<< [apiv2][body] POST https://upload-firebasehosting.googleapis.com/upload/sites/teqheal-tracker/versions/6858d8fbe15f0a55/files/938aaf7da3b5bb5d9e23e2e8dbf707076f409c35cded3b05f380305df5aeffb7 [stream]
+[debug] [2025-07-11T05:32:05.399Z] <<< [apiv2][status] POST https://upload-firebasehosting.googleapis.com/upload/sites/teqheal-tracker/versions/6858d8fbe15f0a55/files/a289d1fb760591fddbdb1f90e9ad71b573ff6fa76d6a38e9457604d7a5fabf2d 200
+[debug] [2025-07-11T05:32:05.399Z] <<< [apiv2][body] POST https://upload-firebasehosting.googleapis.com/upload/sites/teqheal-tracker/versions/6858d8fbe15f0a55/files/a289d1fb760591fddbdb1f90e9ad71b573ff6fa76d6a38e9457604d7a5fabf2d [stream]
+[debug] [2025-07-11T05:32:05.417Z] <<< [apiv2][status] POST https://upload-firebasehosting.googleapis.com/upload/sites/teqheal-tracker/versions/6858d8fbe15f0a55/files/6bd2003bd35bb32c1c0d99ab3aeac0cc1edaefd79f27df1d954bc87184048d74 200
+[debug] [2025-07-11T05:32:05.417Z] <<< [apiv2][body] POST https://upload-firebasehosting.googleapis.com/upload/sites/teqheal-tracker/versions/6858d8fbe15f0a55/files/6bd2003bd35bb32c1c0d99ab3aeac0cc1edaefd79f27df1d954bc87184048d74 [stream]
+[debug] [2025-07-11T05:32:05.422Z] <<< [apiv2][status] POST https://upload-firebasehosting.googleapis.com/upload/sites/teqheal-tracker/versions/6858d8fbe15f0a55/files/712ab1804d6058d72dc4bfb5bf9258232757580ce1831c1b9d6c69a3cbd430d5 200
+[debug] [2025-07-11T05:32:05.422Z] <<< [apiv2][body] POST https://upload-firebasehosting.googleapis.com/upload/sites/teqheal-tracker/versions/6858d8fbe15f0a55/files/712ab1804d6058d72dc4bfb5bf9258232757580ce1831c1b9d6c69a3cbd430d5 [stream]
+[debug] [2025-07-11T05:32:05.451Z] <<< [apiv2][status] POST https://upload-firebasehosting.googleapis.com/upload/sites/teqheal-tracker/versions/6858d8fbe15f0a55/files/5a09df6187e21aa9a7d05094389385876ac93c818e1dcbb77a26a8fe408bf79c 200
+[debug] [2025-07-11T05:32:05.451Z] <<< [apiv2][body] POST https://upload-firebasehosting.googleapis.com/upload/sites/teqheal-tracker/versions/6858d8fbe15f0a55/files/5a09df6187e21aa9a7d05094389385876ac93c818e1dcbb77a26a8fe408bf79c [stream]
+[debug] [2025-07-11T05:32:05.494Z] <<< [apiv2][status] POST https://upload-firebasehosting.googleapis.com/upload/sites/teqheal-tracker/versions/6858d8fbe15f0a55/files/6112d2be6b76a9f428f93e8b8051536a33dc5d707df53064f91a1e4a7545f2a4 200
+[debug] [2025-07-11T05:32:05.494Z] <<< [apiv2][body] POST https://upload-firebasehosting.googleapis.com/upload/sites/teqheal-tracker/versions/6858d8fbe15f0a55/files/6112d2be6b76a9f428f93e8b8051536a33dc5d707df53064f91a1e4a7545f2a4 [stream]
+[debug] [2025-07-11T05:32:05.549Z] <<< [apiv2][status] POST https://upload-firebasehosting.googleapis.com/upload/sites/teqheal-tracker/versions/6858d8fbe15f0a55/files/f66a450b146560d5f29b1d8f4a1873c2c8e5696456e1269329abda519da46eea 200
+[debug] [2025-07-11T05:32:05.550Z] <<< [apiv2][body] POST https://upload-firebasehosting.googleapis.com/upload/sites/teqheal-tracker/versions/6858d8fbe15f0a55/files/f66a450b146560d5f29b1d8f4a1873c2c8e5696456e1269329abda519da46eea [stream]
+[info] i  hosting: uploading new files [11/19] (57%) 
+[debug] [2025-07-11T05:32:05.721Z] <<< [apiv2][status] POST https://upload-firebasehosting.googleapis.com/upload/sites/teqheal-tracker/versions/6858d8fbe15f0a55/files/bf45ae4afc70aee6998663e8067a3ebbfa97ce3239b2af15a084b003dd111405 200
+[debug] [2025-07-11T05:32:05.721Z] <<< [apiv2][body] POST https://upload-firebasehosting.googleapis.com/upload/sites/teqheal-tracker/versions/6858d8fbe15f0a55/files/bf45ae4afc70aee6998663e8067a3ebbfa97ce3239b2af15a084b003dd111405 [stream]
+[debug] [2025-07-11T05:32:05.741Z] <<< [apiv2][status] POST https://upload-firebasehosting.googleapis.com/upload/sites/teqheal-tracker/versions/6858d8fbe15f0a55/files/e468895c1251b38c13bee48c44e5866c9cd877a8f8b65c36897630e07f01fcd4 200
+[debug] [2025-07-11T05:32:05.741Z] <<< [apiv2][body] POST https://upload-firebasehosting.googleapis.com/upload/sites/teqheal-tracker/versions/6858d8fbe15f0a55/files/e468895c1251b38c13bee48c44e5866c9cd877a8f8b65c36897630e07f01fcd4 [stream]
+[debug] [2025-07-11T05:32:05.819Z] <<< [apiv2][status] POST https://upload-firebasehosting.googleapis.com/upload/sites/teqheal-tracker/versions/6858d8fbe15f0a55/files/103c966e91188b8cf1fbef36912839dd1573813c819535c98ec78d205526a820 200
+[debug] [2025-07-11T05:32:05.820Z] <<< [apiv2][body] POST https://upload-firebasehosting.googleapis.com/upload/sites/teqheal-tracker/versions/6858d8fbe15f0a55/files/103c966e91188b8cf1fbef36912839dd1573813c819535c98ec78d205526a820 [stream]
+[debug] [2025-07-11T05:32:05.838Z] <<< [apiv2][status] POST https://upload-firebasehosting.googleapis.com/upload/sites/teqheal-tracker/versions/6858d8fbe15f0a55/files/4a11bdd3207b2d6179f953e0862ad635b2926e622c80d086c7d5796cb406f47c 200
+[debug] [2025-07-11T05:32:05.839Z] <<< [apiv2][body] POST https://upload-firebasehosting.googleapis.com/upload/sites/teqheal-tracker/versions/6858d8fbe15f0a55/files/4a11bdd3207b2d6179f953e0862ad635b2926e622c80d086c7d5796cb406f47c [stream]
+[debug] [2025-07-11T05:32:06.040Z] <<< [apiv2][status] POST https://upload-firebasehosting.googleapis.com/upload/sites/teqheal-tracker/versions/6858d8fbe15f0a55/files/e53f3739b89c20a551a8a1c24de1f5a8058bb090f3908430f0170cb01292f1f6 200
+[debug] [2025-07-11T05:32:06.040Z] <<< [apiv2][body] POST https://upload-firebasehosting.googleapis.com/upload/sites/teqheal-tracker/versions/6858d8fbe15f0a55/files/e53f3739b89c20a551a8a1c24de1f5a8058bb090f3908430f0170cb01292f1f6 [stream]
+[debug] [2025-07-11T05:32:06.188Z] <<< [apiv2][status] POST https://upload-firebasehosting.googleapis.com/upload/sites/teqheal-tracker/versions/6858d8fbe15f0a55/files/0719c2805b549ef38ef36a37eac2ee2c87db89e3581782c8073f387b9bc034b5 200
+[debug] [2025-07-11T05:32:06.188Z] <<< [apiv2][body] POST https://upload-firebasehosting.googleapis.com/upload/sites/teqheal-tracker/versions/6858d8fbe15f0a55/files/0719c2805b549ef38ef36a37eac2ee2c87db89e3581782c8073f387b9bc034b5 [stream]
+[debug] [2025-07-11T05:32:06.276Z] <<< [apiv2][status] POST https://upload-firebasehosting.googleapis.com/upload/sites/teqheal-tracker/versions/6858d8fbe15f0a55/files/17f756acb7e7cb271ccf8848fcc9ce585e05a29865a10244d03416798cfdb92e 200
+[debug] [2025-07-11T05:32:06.276Z] <<< [apiv2][body] POST https://upload-firebasehosting.googleapis.com/upload/sites/teqheal-tracker/versions/6858d8fbe15f0a55/files/17f756acb7e7cb271ccf8848fcc9ce585e05a29865a10244d03416798cfdb92e [stream]
+[debug] [2025-07-11T05:32:06.308Z] <<< [apiv2][status] POST https://upload-firebasehosting.googleapis.com/upload/sites/teqheal-tracker/versions/6858d8fbe15f0a55/files/c2e3cf62d2d35012617b0d8c4e52b74c5e854381ad8c664b057280ffc3385aec 200
+[debug] [2025-07-11T05:32:06.308Z] <<< [apiv2][body] POST https://upload-firebasehosting.googleapis.com/upload/sites/teqheal-tracker/versions/6858d8fbe15f0a55/files/c2e3cf62d2d35012617b0d8c4e52b74c5e854381ad8c664b057280ffc3385aec [stream]
+[debug] [2025-07-11T05:32:06.309Z] [hosting][upload queue][FINAL] {"max":2099,"min":1176,"avg":1466.6842105263158,"active":0,"complete":19,"success":19,"errored":0,"retried":0,"total":19,"elapsed":2131}
+[info] i  hosting: upload complete 
+[info] +  hosting[teqheal-tracker]: file upload complete 
+[debug] [2025-07-11T05:32:06.310Z] [hosting] deploy completed after 2718ms
+[debug] [2025-07-11T05:32:06.311Z] [
+  {
+    "config": {
+      "public": "public",
+      "ignore": [
+        "firebase.json",
+        "**/.*",
+        "**/node_modules/**"
+      ],
+      "rewrites": [
+        {
+          "source": "**",
+          "destination": "/index.html"
+        }
+      ],
+      "site": "teqheal-tracker"
+    },
+    "version": "projects/931695379074/sites/teqheal-tracker/versions/6858d8fbe15f0a55"
+  }
+]
+[info] i  hosting[teqheal-tracker]: finalizing version... 
+[debug] [2025-07-11T05:32:06.315Z] Checked if tokens are valid: true, expires at: 1752214551725
+[debug] [2025-07-11T05:32:06.315Z] Checked if tokens are valid: true, expires at: 1752214551725
+[debug] [2025-07-11T05:32:06.317Z] >>> [apiv2][query] PATCH https://firebasehosting.googleapis.com/v1beta1/projects/-/sites/teqheal-tracker/versions/6858d8fbe15f0a55 updateMask=status%2Cconfig
+[debug] [2025-07-11T05:32:06.318Z] >>> [apiv2][body] PATCH https://firebasehosting.googleapis.com/v1beta1/projects/-/sites/teqheal-tracker/versions/6858d8fbe15f0a55 {"status":"FINALIZED","config":{"rewrites":[{"glob":"**","path":"/index.html"}]}}
+[debug] [2025-07-11T05:32:06.802Z] <<< [apiv2][status] PATCH https://firebasehosting.googleapis.com/v1beta1/projects/-/sites/teqheal-tracker/versions/6858d8fbe15f0a55 200
+[debug] [2025-07-11T05:32:06.803Z] <<< [apiv2][body] PATCH https://firebasehosting.googleapis.com/v1beta1/projects/-/sites/teqheal-tracker/versions/6858d8fbe15f0a55 {"name":"projects/931695379074/sites/teqheal-tracker/versions/6858d8fbe15f0a55","status":"FINALIZED","config":{"rewrites":[{"glob":"**","path":"/index.html"}]},"labels":{"deployment-tool":"cli-firebase"},"createTime":"2025-07-11T05:32:03.665610Z","createUser":{"email":"keyur.teqheal@gmail.com"},"finalizeTime":"2025-07-11T05:32:07.874573Z","finalizeUser":{"email":"keyur.teqheal@gmail.com"}}
+[debug] [2025-07-11T05:32:06.804Z] [hosting] finalized version for teqheal-tracker:[object Object]
+[info] +  hosting[teqheal-tracker]: version finalized 
+[info] i  hosting[teqheal-tracker]: releasing new version... 
+[debug] [2025-07-11T05:32:06.806Z] Checked if tokens are valid: true, expires at: 1752214551725
+[debug] [2025-07-11T05:32:06.806Z] Checked if tokens are valid: true, expires at: 1752214551725
+[debug] [2025-07-11T05:32:06.807Z] >>> [apiv2][query] POST https://firebasehosting.googleapis.com/v1beta1/projects/-/sites/teqheal-tracker/channels/live/releases versionName=projects%2F931695379074%2Fsites%2Fteqheal-tracker%2Fversions%2F6858d8fbe15f0a55
+[debug] [2025-07-11T05:32:06.807Z] >>> [apiv2][body] POST https://firebasehosting.googleapis.com/v1beta1/projects/-/sites/teqheal-tracker/channels/live/releases {}
+[debug] [2025-07-11T05:32:07.281Z] <<< [apiv2][status] POST https://firebasehosting.googleapis.com/v1beta1/projects/-/sites/teqheal-tracker/channels/live/releases 200
+[debug] [2025-07-11T05:32:07.282Z] <<< [apiv2][body] POST https://firebasehosting.googleapis.com/v1beta1/projects/-/sites/teqheal-tracker/channels/live/releases {"name":"projects/931695379074/sites/teqheal-tracker/channels/live/releases/1752211927782000","version":{"name":"projects/931695379074/sites/teqheal-tracker/versions/6858d8fbe15f0a55","status":"FINALIZED","config":{"rewrites":[{"glob":"**","path":"/index.html"}]},"labels":{"deployment-tool":"cli-firebase"},"createTime":"2025-07-11T05:32:03.665610Z","createUser":{"email":"keyur.teqheal@gmail.com","imageUrl":"https://lh3.googleusercontent.com/a/ACg8ocJF_m_mHmshVa7Ums_3ARFwkre32Y6TTudpnAZXuAWbrahuGQ=mo"},"finalizeTime":"2025-07-11T05:32:07.874573Z","finalizeUser":{"email":"keyur.teqheal@gmail.com","imageUrl":"https://lh3.googleusercontent.com/a/ACg8ocJF_m_mHmshVa7Ums_3ARFwkre32Y6TTudpnAZXuAWbrahuGQ=mo"}},"type":"DEPLOY","releaseTime":"2025-07-11T05:32:07.782Z","releaseUser":{"email":"keyur.teqheal@gmail.com","imageUrl":"https://lh3.googleusercontent.com/a/ACg8ocJF_m_mHmshVa7Ums_3ARFwkre32Y6TTudpnAZXuAWbrahuGQ=mo"}}
+[debug] [2025-07-11T05:32:07.283Z] [hosting] release: {"name":"projects/931695379074/sites/teqheal-tracker/channels/live/releases/1752211927782000","version":{"name":"projects/931695379074/sites/teqheal-tracker/versions/6858d8fbe15f0a55","status":"FINALIZED","config":{"rewrites":[{"glob":"**","path":"/index.html"}]},"labels":{"deployment-tool":"cli-firebase"},"createTime":"2025-07-11T05:32:03.665610Z","createUser":{"email":"keyur.teqheal@gmail.com","imageUrl":"https://lh3.googleusercontent.com/a/ACg8ocJF_m_mHmshVa7Ums_3ARFwkre32Y6TTudpnAZXuAWbrahuGQ=mo"},"finalizeTime":"2025-07-11T05:32:07.874573Z","finalizeUser":{"email":"keyur.teqheal@gmail.com","imageUrl":"https://lh3.googleusercontent.com/a/ACg8ocJF_m_mHmshVa7Ums_3ARFwkre32Y6TTudpnAZXuAWbrahuGQ=mo"}},"type":"DEPLOY","releaseTime":"2025-07-11T05:32:07.782Z","releaseUser":{"email":"keyur.teqheal@gmail.com","imageUrl":"https://lh3.googleusercontent.com/a/ACg8ocJF_m_mHmshVa7Ums_3ARFwkre32Y6TTudpnAZXuAWbrahuGQ=mo"}}
+[info] +  hosting[teqheal-tracker]: release complete 
+[info] 
+[info] +  Deploy complete! 
+[info] 
+[info] Project Console: https://console.firebase.google.com/project/teqheal-tracker/overview
+[info] Hosting URL: https://teqheal-tracker.web.app
