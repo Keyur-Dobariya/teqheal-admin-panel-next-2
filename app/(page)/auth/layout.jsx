@@ -4,6 +4,8 @@ import Image from "next/image";
 import imagePaths from "../../utils/imagesPath";
 import appString from "../../utils/appString";
 import PlanetSystem from "../../components/PlanetSystem";
+import {useEffect, useState} from "react";
+import {detectPlatform} from "../../utils/utils";
 
 const CoreValueItem = ({ text }) => (
     <div className="flex flex-row flex-1 items-center gap-[10px]">
@@ -13,13 +15,29 @@ const CoreValueItem = ({ text }) => (
 );
 
 export default function AuthLayout({ children }) {
+    const [isElectron, setIsElectron] = useState(false);
+
+    useEffect(() => {
+        const userAgent = navigator.userAgent;
+        const detected = detectPlatform(userAgent);
+        setIsElectron(detected.isElectron)
+    }, []);
+
     return (
         <div className="w-screen h-screen flex flex-col xl:flex-row justify-center items-center overflow-hidden">
             <div
                 className="w-full bg-(--primary-color) bg-cover bg-center p-5 xl:w-2/5 xl:h-full flex flex-col justify-around items-center"
                 style={{ backgroundImage: `url('${imagePaths.auth_design_bg}')` }}
             >
-                <div className="text-center">
+                {isElectron ? <div className="text-center">
+                    <Image
+                        className="place-self-center w-45 h-11"
+                        src={imagePaths.icon_big_white}
+                        alt="icon"
+                        width={200}
+                        height={60}
+                    />
+                </div> : <div className="text-center">
                     <Image
                         className="mb-2 place-self-center w-10 h-15 xl:w-17 xl:h-25"
                         src={imagePaths.icon_sm_multi}
@@ -31,9 +49,9 @@ export default function AuthLayout({ children }) {
                         {appString.authTitle} <span className="text-amber-500">{appString.appName1}</span>{" "}
                         {appString.appName2}
                     </div>
-                    <div className="w-[25px] h-[5px] rounded-xl bg-amber-500 place-self-center my-3" />
+                    <div className="w-[25px] h-[5px] rounded-xl bg-amber-500 place-self-center my-3"/>
                     <div className="text-white text-sm xl:text-base">{appString.authDes}</div>
-                </div>
+                </div>}
 
                 <div className="hidden xl:flex justify-center items-center my-3">
                     <PlanetSystem />

@@ -20,6 +20,7 @@ const pageRoutes = {
     myProfile: '/home/my-profile',
     settings: '/home/settings',
     calling: '/home/dashboard',
+    dailyUpdate: '/tracker/daily-update',
 };
 
 export default pageRoutes;

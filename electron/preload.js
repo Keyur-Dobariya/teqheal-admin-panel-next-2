@@ -6,4 +6,5 @@ contextBridge.exposeInMainWorld('electronAPI', {
     showScreenshotWindow: (imageData) => ipcRenderer.send('show-screenshot-window', imageData),
     sendLoginData: (data) => ipcRenderer.send('login-data', data),
     sendAttendanceData: (data) => ipcRenderer.send('attendance-data', data),
+    sendOfficeUpdateData: (data) => ipcRenderer.send('office-update-data', data),
 });

@@ -11,17 +11,18 @@ import {profilePhotoManager} from "../../utils/utils";
 import {useRouter} from "next/navigation";
 import pageRoutes from "../../utils/pageRoutes";
 import {useState} from "react";
+import {environment} from "../../api/apiEndpoints";
 
 export default function CardTrackerAppBar() {
 
     const router = useRouter();
     const [isLogoutModalOpen, setIsLogoutModalOpen] = useState(false);
 
-    const handleMenuClick = ({ key }) => {
+    const handleMenuClick = async ({key}) => {
         if (key === '0') {
             window.location.reload();
         } else if (key === '1') {
-            console.log("Tasks clicked");
+            await window.electronAPI.openExternalLink("https://whogetsa.web.app/tasks");
         } else if (key === '2') {
             console.log("Check for update clicked");
         } else if (key === '3') {
@@ -43,7 +44,8 @@ export default function CardTrackerAppBar() {
         {
             label: "Check For Update",
             key: '2',
-            icon: <RefreshCw size={15} />
+            icon: <RefreshCw size={15} />,
+            disabled: true,
         },
         { type: 'divider' },
         {

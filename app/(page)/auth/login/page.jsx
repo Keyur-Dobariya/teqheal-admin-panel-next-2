@@ -10,7 +10,7 @@ import AnimatedDiv, {Direction} from "../../../components/AnimatedDiv";
 import {useEffect, useState} from "react";
 import apiCall, {HttpMethod} from "../../../api/apiServiceProvider";
 import {storeLoginData} from "../../../dataStorage/DataPref";
-import {endpoints, environment} from "../../../api/apiEndpoints";
+import {endpoints, environment, isDevMode} from "../../../api/apiEndpoints";
 import validationRules from "../../../utils/validationRules";
 import {detectPlatform} from "../../../utils/utils";
 
@@ -28,10 +28,12 @@ export default function SignIn() {
     const [loading, setLoading] = useState(false);
 
     useEffect(() => {
-        form.setFieldsValue({
-            emailAddress: 'admin@gmail.com',
-            password: 'Admin@123'
-        })
+        if(isDevMode) {
+            form.setFieldsValue({
+                emailAddress: 'admin@gmail.com',
+                password: 'Admin@123'
+            })
+        }
     }, []);
 
     const onFormSubmit = async () => {
@@ -53,11 +55,6 @@ export default function SignIn() {
                     } else {
                         router.push(pageRoutes.dashboard);
                     }
-
-                    if (window.electronAPI) {
-                        console.log("Send Login Data=>", data);
-                        window.electronAPI.sendLoginData(data);
-                    }
                 },
             });
         } catch (error) {
@@ -69,7 +66,7 @@ export default function SignIn() {
 
     return (
         <AnimatedDiv className={`z-10 w-full p-4 ${isElectron ? "max-w-90" : "max-w-110"}`} style={{ marginLeft: "2px" }} direction={Direction.TOP_TO_BOTTOM}>
-            <div className="font-medium text-2xl xl:text-3xl">{appString.signInTitle}</div>
+            {isElectron ? <div className="font-medium text-[18px]">{appString.signInTitle}</div> : <div className="font-medium text-2xl xl:text-3xl">{appString.signInTitle}</div>}
             <div className="w-[25px] h-[5px] rounded-xl bg-amber-500 my-2" />
             <div className="text-gray-500 text-sm mb-7 xl:text-base">{appString.signInDes}</div>
             <Form
@@ -113,29 +110,23 @@ export default function SignIn() {
                 {appString.forgotPassword}
             </div>
             <Button type="primary" htmlType="submit" loading={loading} className="w-full my-2" onClick={onFormSubmit}>{appString.login}</Button>
-            {!isElectron && <div className="text-gray-500 text-center my-2">
+            <div className="text-gray-500 text-center my-2">
                 {appString.dontAcc}
                 <span
                     className="cursor-pointer text-blue-700 font-semibold hover:text-blue-500"
-                    onClick={() => {
-                        router.push(pageRoutes.signupPage);
-                        // const signupUrl = `${environment.webBaseUrl}${pageRoutes.signupPage}`;
-                        //
-                        // if (typeof window !== 'undefined' &&
-                        //     window.electronAPI &&
-                        //     typeof window.electronAPI.openExternalLink === 'function'
-                        // ) {
-                        //     window.electronAPI.openExternalLink("http://localhost:3000/auth/signup");
-                        // } else {
-                        //     // Fallback for normal browsers
-                        //     window.open("http://localhost:3000/auth/signup", '_blank');
-                        // }
+                    onClick={async () => {
+                        if(isElectron) {
+                            const signupUrl = `${environment.webBaseUrl}${pageRoutes.signupPage}`;
+                            await window.electronAPI.openExternalLink(signupUrl);
+                        } else {
+                            router.push(pageRoutes.signupPage);
+                        }
                     }}
                 >
                         {" "}
                     {appString.signUp}
                     </span>
-            </div>}
+            </div>
         </AnimatedDiv>
     );
 }

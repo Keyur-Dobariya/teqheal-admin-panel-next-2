@@ -1,4 +1,4 @@
-export const isDevMode = false;
+export const isDevMode = true;
 
 // firebase target:apply hosting default whogetsa
 // firebase deploy --only hosting:devtracker
@@ -8,7 +8,7 @@ export const isDevMode = false;
 // https://empbackend-16ns.onrender.com
 const environment = {
   apiBaseUrl: isDevMode ? 'http://192.168.0.104:5201' : 'https://empbackend-aru4.onrender.com',
-  webBaseUrl: isDevMode ? 'http://192.168.0.104:3000' : 'https://empbackend-aru4.onrender.com',
+  webBaseUrl: isDevMode ? 'http://192.168.0.104:4000' : 'https://teqheal-admin-panel-next-2.vercel.app',
 };
 
 const endpoints = {
@@ -94,6 +94,17 @@ const endpoints = {
   // tasksChange: `${environment.apiBaseUrl}/tasksChange?userId=${localStorage.getItem(appKey._id)}&role=${localStorage.getItem(appKey.role)}`,
   // employeesChange: `${environment.apiBaseUrl}/employeesChange?userId=${localStorage.getItem(appKey._id)}&role=${localStorage.getItem(appKey.role)}`,
   // chatUpdates: `${environment.apiBaseUrl}/chatUpdates?userId=${localStorage.getItem(appKey._id)}`,
+  officeUpdatesStream: `${environment.apiBaseUrl}/officeUpdate`,
+  appSettingStream: `${environment.apiBaseUrl}/appSetting`,
+  addDailyUpdate: `${environment.apiBaseUrl}/api/addDailyUpdate`,
+  editDailyUpdate: `${environment.apiBaseUrl}/api/editDailyUpdate/`,
+  getDailyUpdate: `${environment.apiBaseUrl}/api/getDailyUpdate/`,
+  getAllDailyUpdate: `${environment.apiBaseUrl}/api/getAllDailyUpdate`,
+  addOfficeUpdate: `${environment.apiBaseUrl}/api/addOfficeUpdate`,
+  editOfficeUpdate: `${environment.apiBaseUrl}/api/editOfficeUpdate/`,
+  getOfficeUpdate: `${environment.apiBaseUrl}/api/getOfficeUpdate/`,
+  deleteOfficeUpdate: `${environment.apiBaseUrl}/api/deleteOfficeUpdate/`,
+  dailyUpdate: `${environment.webBaseUrl}/tracker/daily-update`,
 };
 
 export { environment, endpoints };

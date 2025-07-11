@@ -1,6 +1,7 @@
 const { app, BrowserWindow, ipcMain, Menu, desktopCapturer, screen} = require('electron');
 const path = require('path');
 const { GlobalKeyboardListener } = require("node-global-key-listener");
+const {endpoints, environment} = require("../app/api/apiEndpoints");
 
 let mainWindow;
 let screenshotWindow;
@@ -15,30 +16,189 @@ function createWindow() {
     mainWindow = new BrowserWindow({
         width: 370,
         height: 510,
-        resizable: true,
+        resizable: false,
         autoHideMenuBar: true,
         fullscreen: false,
         webPreferences: {
+            nodeIntegration: true,
             contextIsolation: true,
             preload: path.join(__dirname, 'preload.js'),
         },
     });
 
-    // Menu.setApplicationMenu(null);
-    mainWindow.webContents.openDevTools();
+    Menu.setApplicationMenu(null);
+    // mainWindow.webContents.openDevTools();
 
-    mainWindow.loadURL('http://localhost:3000');
+    mainWindow.loadURL(environment.webBaseUrl);
+}
+
+let scheduledWindows = [];
+let loginData;
+
+// function scheduleWindowsFromData(dataArray) {
+//     const now = new Date();
+//
+//     dataArray.forEach(item => {
+//         const alreadyScheduled = scheduledWindows.some(s => s.id === item._id);
+//         if (alreadyScheduled) {
+//             console.log(`Event "${item.title}" with ID ${item._id} is already scheduled. Skipping...`);
+//             return;
+//         }
+//
+//         const showTime = new Date(item.showTime);
+//         const delay = showTime - now;
+//
+//         if (delay > 0) {
+//             console.log(`Scheduling window for "${item.title}" in ${delay / 1000} seconds`);
+//
+//             const timer = setTimeout(() => {
+//                 openScheduledWindow(item.windowLink, item.title);
+//                 scheduledWindows.splice(scheduledWindows.findIndex(s => s.id === item._id), 1);
+//             }, delay);
+//
+//             scheduledWindows.push({ id: item._id, timer });
+//         } else {
+//             console.log(`Skipped "${item.title}" — showTime already passed`);
+//         }
+//     });
+// }
+
+function scheduleWindowsFromData(dataArray) {
+    const now = new Date();
+
+    dataArray.forEach(item => {
+        const alreadyScheduled = scheduledWindows.some(s => s.id === item._id);
+        if (alreadyScheduled && !item.isDaily) {
+            console.log(`"${item.title}" already scheduled. Skipping...`);
+            return;
+        }
+
+        if (item.isDaily) {
+            const [hour, minute, second] = new Date(item.showTime).toTimeString().split(':');
+            const nextTime = new Date();
+
+            nextTime.setHours(parseInt(hour));
+            nextTime.setMinutes(parseInt(minute));
+            nextTime.setSeconds(parseInt(second));
+            nextTime.setMilliseconds(0);
+
+            if (nextTime <= now) {
+                nextTime.setDate(nextTime.getDate() + 1); // schedule for tomorrow
+            }
+
+            const delay = nextTime - now;
+            console.log(`Scheduling DAILY "${item.title}" in ${delay / 1000}s`);
+
+            // Clear existing timer if re-scheduling
+            const existing = scheduledWindows.find(s => s.id === item._id);
+            if (existing) {
+                clearTimeout(existing.timer);
+                scheduledWindows = scheduledWindows.filter(s => s.id !== item._id);
+            }
+
+            const timer = setTimeout(() => {
+                launchWindow(item);
+
+                // Re-schedule for next day
+                scheduleWindowsFromData([item]);
+            }, delay);
+
+            scheduledWindows.push({ id: item._id, timer });
+        } else {
+            const showTime = new Date(item.showTime);
+            const delay = showTime - now;
+
+            if (delay > 0) {
+                console.log(`Scheduling ONCE "${item.title}" in ${delay / 1000}s`);
+
+                const timer = setTimeout(() => {
+                    launchWindow(item);
+                }, delay);
+
+                scheduledWindows.push({ id: item._id, timer });
+            } else {
+                console.log(`Skipped "${item.title}" — showTime already passed`);
+            }
+        }
+    });
+}
+
+function launchWindow(item) {
+    if (item.isForDailyUpdate && (!item.windowLink || item.windowLink.trim() === '')) {
+        console.log(`Opening fallback daily update window for "${item.title}"`);
+        openDailyUpdateWindow();
+    } else {
+        openScheduledWindow(item.windowLink, item.title);
+    }
+}
+
+let isDailyUpdateWindowOpen = false;
+
+function openDailyUpdateWindow() {
+    if (isDailyUpdateWindowOpen) return;
+
+    isDailyUpdateWindowOpen = true;
+
+    const win = new BrowserWindow({
+        width: 400,
+        height: 500,
+        alwaysOnTop: true,
+        resizable: false,
+        autoHideMenuBar: true,
+        fullscreen: false,
+        webPreferences: {
+            nodeIntegration: false,
+            contextIsolation: true,
+        }
+    });
+
+    Menu.setApplicationMenu(null);
+    // win.webContents.openDevTools();
+
+    const signupUrl = `${endpoints.dailyUpdate}?user=${loginData?._id}`;
+    win.loadURL(signupUrl);
+
+    win.on('closed', () => {
+        isDailyUpdateWindowOpen = false;
+    });
+}
+
+function openScheduledWindow(url, title = 'Scheduled Window') {
+    const win = new BrowserWindow({
+        width: 800,
+        height: 600,
+        title,
+        resizable: false,
+        autoHideMenuBar: true,
+        fullscreen: false,
+        alwaysOnTop: true,
+        webPreferences: {
+            nodeIntegration: false,
+            contextIsolation: true,
+        },
+    });
+
+    Menu.setApplicationMenu(null);
+    // win.webContents.openDevTools();
+
+    win.loadURL(url);
 }
 
 ipcMain.on('login-data', (event, data) => {
-    console.log('Login data received from renderer:', data);
+    loginData = data;
 });
 
 ipcMain.on('attendance-data', (event, data) => {
     attendanceData = data;
 });
 
-app.whenReady().then(createWindow);
+ipcMain.on('office-update-data', (event, data) => {
+    scheduleWindowsFromData(data);
+});
+
+app.whenReady().then(() => {
+    createWindow();
+});
 
 keyboard.addListener((event) => {
     if (
@@ -90,11 +250,15 @@ ipcMain.on('show-screenshot-window', (event, imageDataUrl) => {
         alwaysOnTop: true,
         fullscreen: false,
         skipTaskbar: true,
+        autoHideMenuBar: true,
         webPreferences: {
             nodeIntegration: false,
             contextIsolation: true,
         }
     });
+
+    Menu.setApplicationMenu(null);
+    // win.webContents.openDevTools();
 
     const { width } = screen.getPrimaryDisplay().workAreaSize;
     screenshotWindow.setBounds({ x: width - 260, y: 50 });
@@ -126,7 +290,7 @@ function getScreenshotHtml(imageDataUrl) {
 
         .container {
             background: #fff;
-            border-radius: 12px;
+            border-radius: 5px;
             border: 1px solid #ddd;
             width: 320px;
             box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
@@ -136,7 +300,7 @@ function getScreenshotHtml(imageDataUrl) {
         }
 
         .header {
-            background: #f1f1f1;
+            background: #fbfcff;
             padding: 5px 10px;
             display: flex;
             justify-content: space-between;
@@ -144,7 +308,7 @@ function getScreenshotHtml(imageDataUrl) {
             font-size: 13px;
             color: #444;
             font-weight: 450;
-            border-bottom: 1px solid #ddd;
+            border-bottom: 1px solid #ededed;
         }
 
         .close-btn {

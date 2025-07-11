@@ -9,6 +9,8 @@ import {getLocalData} from "../../dataStorage/DataPref";
 import appKey from "../../utils/appKey";
 import {LoadingOutlined, LoginOutlined, LogoutOutlined} from "@ant-design/icons";
 import {getAttendanceData, handlePunchBreak, handleScreenShotUpload} from "./trackerUtils";
+import {endpoints} from "../../api/apiEndpoints";
+import apiCall, {HttpMethod} from "../../api/apiServiceProvider";
 
 const STATUS = {
     CLOCKED_OUT: 'CLOCKED_OUT',
@@ -57,12 +59,98 @@ export default function CardTrackerClockInOut() {
         lastBreakInTime: null,
         punchInAt: null,
     });
+    const [appSettingData, setAppSettingData] = useState([]);
+    const [officeUpdates, setOfficeUpdates] = useState([]);
     const [totalHoursMs, setTotalHoursMs] = useState(0);
     const [breakHoursMs, setBreakHoursMs] = useState(0);
     const [isClockLoading, setIsClockLoading] = useState(false);
     const [isBreakLoading, setIsBreakLoading] = useState(false);
     const [isLoading, setIsLoading] = useState(false);
     const [, setTicker] = useState(0);
+
+    useEffect(() => {
+        sendOfficeUpdateToExe(officeUpdates);
+    }, [officeUpdates]);
+
+    const sendOfficeUpdateToExe = async (data) => {
+        if (window.electronAPI) {
+            await window.electronAPI.sendOfficeUpdateData(data);
+        }
+    }
+
+    const getOfficeUpdateData = async () => {
+        try {
+            if (window.electronAPI) {
+                await window.electronAPI.sendLoginData({
+                    employeeCode: getLocalData(appKey.employeeCode),
+                    fullName: getLocalData(appKey.fullName),
+                    emailAddress: getLocalData(appKey.emailAddress),
+                    mobileNumber: getLocalData(appKey.mobileNumber),
+                    profilePhoto: getLocalData(appKey.profilePhoto),
+                    _id: getLocalData(appKey._id),
+                });
+            }
+
+            await apiCall({
+                method: HttpMethod.GET,
+                url: endpoints.getOfficeUpdate,
+                showSuccessMessage: false,
+                successCallback: (data) => {
+                    setOfficeUpdates(data.data);
+                },
+                setIsLoading,
+            });
+        } catch (error) {
+            console.error('Failed to fetch attendance:', error);
+        }
+    }
+
+    const getAppSettingData = async () => {
+        try {
+            await apiCall({
+                method: HttpMethod.GET,
+                url: endpoints.getAppSetting,
+                showSuccessMessage: false,
+                successCallback: (data) => {
+                    setAppSettingData(data?.data?.appSettings);
+                },
+                setIsLoading,
+            });
+        } catch (error) {
+            console.error('Failed to fetch attendance:', error);
+        }
+    }
+
+    useEffect(() => {
+        getOfficeUpdateData();
+        getAppSettingData();
+
+        const evtSource = new EventSource(endpoints.officeUpdatesStream);
+
+        evtSource.onmessage = async (event) => {
+            if (event.data) {
+                setOfficeUpdates(JSON.parse(event.data));
+            }
+        };
+
+        evtSource.addEventListener('end', () => {
+            console.log('Stream ended');
+            evtSource.close();
+        });
+
+        const evtAppSettingSource = new EventSource(endpoints.appSettingStream);
+
+        evtAppSettingSource.onmessage = async (event) => {
+            if (event.data) {
+                setAppSettingData(JSON.parse(event?.data?.appSettings));
+            }
+        };
+
+        evtAppSettingSource.addEventListener('end', () => {
+            console.log('Stream ended');
+            evtAppSettingSource.close();
+        });
+    }, []);
 
     const fetchAttendanceData = async () => {
         await getAttendanceData(getLocalData(appKey._id), setIsLoading, (data) => {
@@ -87,7 +175,6 @@ export default function CardTrackerClockInOut() {
 
     const sendDataToExe = async (data) => {
         if (window.electronAPI) {
-            console.log("Send Login Data=>", data);
             await window.electronAPI.sendAttendanceData(data);
         }
     }
@@ -143,7 +230,7 @@ export default function CardTrackerClockInOut() {
         });
     };
 
-    const isClockedIn = status === STATUS.CLOCKED_IN || status === STATUS.ON_BREAKを超
+    const isClockedIn = status === STATUS.CLOCKED_IN || status === STATUS.ON_BREAK;
 
     const isOnBreak = status === STATUS.ON_BREAK;
     const liveTotalWorkMs = totalHoursMs - breakHoursMs;
@@ -164,14 +251,17 @@ export default function CardTrackerClockInOut() {
 
         await handleScreenShotUpload(getLocalData(appKey._id), imageUrl, mouseEventCount, keyboardKeyPressCount);
 
-        window.electronAPI.showScreenshotWindow(imageUrl);
+        if(appSettingData?.showScreenShot) {
+            window.electronAPI.showScreenshotWindow(imageUrl);
+        }
     };
 
     useEffect(() => {
         const intervalId = setInterval(() => {
-            takeScreenshot();
-        // }, 10000);
-        }, 3 * 60 * 1000);
+            if(appSettingData?.isTakeScreenShot && attendanceData.isPunchIn && !attendanceData.isBreakIn) {
+                takeScreenshot();
+            }
+        }, Number(appSettingData?.screenshotTime || 15) * 60 * 1000);
 
         return () => clearInterval(intervalId);
     }, []);
