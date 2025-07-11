@@ -50,13 +50,13 @@ export default function InnerAppLayout({ children }) {
         const userAgent = navigator.userAgent;
         const detected = detectPlatform(userAgent);
 
-        if(!detected.isElectron) {
+        if(detected.isElectron) {
+            router.push(pageRoutes.tracker);
+        } else {
             const isLoggedIn = getLocalData(appKey.isLogin) === 'true';
             if (isLoggedIn) {
                 fetchMasterData();
             }
-        } else {
-            router.push(pageRoutes.tracker);
         }
     }, []);
 
