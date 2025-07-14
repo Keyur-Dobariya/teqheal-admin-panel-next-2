@@ -251,19 +251,17 @@ export default function CardTrackerClockInOut() {
 
         await handleScreenShotUpload(getLocalData(appKey._id), imageUrl, mouseEventCount, keyboardKeyPressCount);
 
-        if (appSettingData.showScreenShot === true) {
+        if (appSettingData?.showScreenShot === true) {
             window.electronAPI.showScreenshotWindow(imageUrl);
         }
     };
 
     useEffect(() => {
         const intervalId = setInterval(() => {
-            if (appSettingData.isTakeScreenShot === true && attendanceData.isPunchIn && !attendanceData.isBreakIn) {
+            if (appSettingData?.isTakeScreenShot === true && attendanceData.isPunchIn && !attendanceData.isBreakIn) {
                 takeScreenshot();
             }
-            console.log("appSettingData=>", appSettingData)
-        }, Number(appSettingData.screenshotTime || 15) * 60 * 1000);
-        // }, 1 * 30 * 1000);
+        }, Number(appSettingData?.screenshotTime || 15) * 60 * 1000);
 
         return () => clearInterval(intervalId);
     }, [appSettingData, attendanceData]);

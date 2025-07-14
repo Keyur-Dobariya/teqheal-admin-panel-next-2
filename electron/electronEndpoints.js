@@ -8,7 +8,7 @@ const config = {
 };
 
 const electronCommon = {
-    isForTest: false,
+    isForTest: true,
     appIcon: "../app/favicon.ico",
 };
 
