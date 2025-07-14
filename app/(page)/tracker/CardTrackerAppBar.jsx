@@ -99,7 +99,10 @@ export default function CardTrackerAppBar() {
                 centered
                 closeIcon={false}
                 open={isLogoutModalOpen}
-                onOk={() => {
+                onOk={async () => {
+                    if (window.electronAPI) {
+                        await window.electronAPI.sendLogout();
+                    }
                     router.push(pageRoutes.loginPage);
                 }}
                 onCancel={() => {

@@ -49,7 +49,7 @@
     },
     "win": {
       "target": "nsis",
-      "icon": "app/favicon.ico"
+      "icon": "app/teqheal.ico"
     }
   }
 }

@@ -4,7 +4,7 @@ import {useEffect} from "react";
 import {useRouter} from "next/navigation";
 import {LoadingComponent} from "./components/LoadingComponent";
 import pageRoutes from "./utils/pageRoutes";
-import {getLocalData} from "./dataStorage/DataPref";
+import {getLocalData, storeLoginData} from "./dataStorage/DataPref";
 import appKey from "./utils/appKey";
 import {detectPlatform} from "./utils/utils";
 
@@ -14,16 +14,34 @@ export default function Home() {
     useEffect(() => {
         const userAgent = navigator.userAgent;
         const detected = detectPlatform(userAgent);
-        const token = getLocalData(appKey.jwtToken);
-        if (token) {
-            if(detected.isElectron) {
-                router.push(pageRoutes.tracker);
+        const redirectToPage = async () => {
+            if (detected.isElectron) {
+                try {
+                    const loginData = await window.electronAPI.getLoginData();
+                    if(loginData) {
+                        storeLoginData(loginData, true);
+                    }
+                    console.log("loginData=>", loginData);
+                    if (loginData && loginData.jwtToken) {
+                        router.push(pageRoutes.tracker);
+                    } else {
+                        router.push(pageRoutes.loginPage);
+                    }
+                } catch (error) {
+                    console.error("Failed to fetch login data:", error);
+                    router.push(pageRoutes.loginPage);
+                }
             } else {
-                router.push(pageRoutes.dashboard);
+                const isLogin = getLocalData(appKey.isLogin);
+                if (isLogin === 'true') {
+                    router.push(pageRoutes.dashboard);
+                } else {
+                    router.push(pageRoutes.loginPage);
+                }
             }
-        } else {
-            router.push(pageRoutes.loginPage);
-        }
+        };
+
+        redirectToPage();
     }, []);
 
     return null;

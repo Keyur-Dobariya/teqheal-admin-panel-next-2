@@ -9,7 +9,7 @@ import pageRoutes from "../../../utils/pageRoutes";
 import AnimatedDiv, {Direction} from "../../../components/AnimatedDiv";
 import {useEffect, useState} from "react";
 import apiCall, {HttpMethod} from "../../../api/apiServiceProvider";
-import {storeLoginData} from "../../../dataStorage/DataPref";
+import {getLocalData, storeLoginData} from "../../../dataStorage/DataPref";
 import {endpoints, environment, isDevMode} from "../../../api/apiEndpoints";
 import validationRules from "../../../utils/validationRules";
 import {detectPlatform} from "../../../utils/utils";
@@ -46,11 +46,15 @@ export default function SignIn() {
                 url: endpoints.login,
                 data: formData,
                 setIsLoading: setLoading,
-                successCallback: (data) => {
+                successCallback: async (data) => {
                     form.resetFields();
                     storeLoginData(data, true);
 
-                    if(isElectron) {
+                    if (window.electronAPI) {
+                        await window.electronAPI.sendLoginData(data);
+                    }
+
+                    if (isElectron) {
                         router.push(pageRoutes.tracker);
                     } else {
                         router.push(pageRoutes.dashboard);

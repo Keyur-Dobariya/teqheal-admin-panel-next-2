@@ -4,16 +4,13 @@ import { useState } from 'react';
 import { Form, Input, Button, Typography } from 'antd';
 import apiCall, { HttpMethod } from "../../../api/apiServiceProvider";
 import { endpoints } from "../../../api/apiEndpoints";
-import {getLocalData} from "../../../dataStorage/DataPref";
-import appKey from "../../../utils/appKey";
-import {useSearchParams} from "next/navigation";
 
 const { TextArea } = Input;
 const { Title } = Typography;
 
 export default function Page() {
-    const searchParams = useSearchParams();
-    const employeeCode = searchParams.get('user');
+    // const searchParams = useSearchParams();
+    // const employeeCode = searchParams.get('user');
 
     const [loading, setLoading] = useState(false);
 
@@ -25,7 +22,7 @@ export default function Page() {
                 data: {
                     todayWorkUpdate: values.todayWorkUpdate,
                     tomorrowPlanning: values.tomorrowPlanning,
-                    user: employeeCode,
+                    // user: getLocalData(appKey._id),
                 },
                 setIsLoading: setLoading,
                 successCallback: async () => {

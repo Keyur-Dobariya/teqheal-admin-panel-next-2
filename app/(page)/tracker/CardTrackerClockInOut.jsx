@@ -1,9 +1,9 @@
 'use client';
 
 import {Button, Card, Col, Progress, Row, Tooltip} from "antd";
-import { useState, useEffect } from "react";
+import {useState, useEffect} from "react";
 import {Clock, Coffee, Fingerprint, Info} from "../../utils/icons";
-import { appColor } from "../../utils/appColor";
+import {appColor} from "../../utils/appColor";
 import appString from "../../utils/appString";
 import {getLocalData} from "../../dataStorage/DataPref";
 import appKey from "../../utils/appKey";
@@ -60,7 +60,7 @@ export default function CardTrackerClockInOut() {
         lastBreakInTime: null,
         punchInAt: null,
     });
-    const [appSettingData, setAppSettingData] = useState([]);
+    const [appSettingData, setAppSettingData] = useState(null);
     const [officeUpdates, setOfficeUpdates] = useState([]);
     const [totalHoursMs, setTotalHoursMs] = useState(0);
     const [breakHoursMs, setBreakHoursMs] = useState(0);
@@ -82,16 +82,6 @@ export default function CardTrackerClockInOut() {
 
     const getOfficeUpdateData = async () => {
         try {
-            if (window.electronAPI) {
-                await window.electronAPI.sendLoginData({
-                    employeeCode: getLocalData(appKey.employeeCode),
-                    fullName: getLocalData(appKey.fullName),
-                    emailAddress: getLocalData(appKey.emailAddress),
-                    mobileNumber: getLocalData(appKey.mobileNumber),
-                    profilePhoto: getLocalData(appKey.profilePhoto),
-                    _id: getLocalData(appKey._id),
-                });
-            }
 
             await apiCall({
                 method: HttpMethod.GET,
@@ -114,6 +104,7 @@ export default function CardTrackerClockInOut() {
                 url: endpoints.getAppSetting,
                 showSuccessMessage: false,
                 successCallback: (data) => {
+                    console.log('Fetched App Setting:', data?.data?.appSettings);
                     setAppSettingData(data?.data?.appSettings);
                 },
                 setIsLoading,
@@ -144,7 +135,14 @@ export default function CardTrackerClockInOut() {
 
         evtAppSettingSource.onmessage = async (event) => {
             if (event.data) {
-                setAppSettingData(JSON.parse(event?.data?.appSettings));
+                const appSetting = JSON.parse(event?.data?.appSettings);
+                if(appSetting) {
+                    setAppSettingData({
+                        showScreenShot: appSetting?.showScreenShot,
+                        isTakeScreenShot: appSetting?.isTakeScreenShot,
+                        screenshotTime: appSetting?.screenshotTime,
+                    });
+                }
             }
         };
 
@@ -204,8 +202,8 @@ export default function CardTrackerClockInOut() {
 
     const handlePunch = async () => {
         const postData = attendanceData.isPunchIn
-            ? { punchOutTime: Date.now() }
-            : { punchInTime: Date.now() };
+            ? {punchOutTime: Date.now()}
+            : {punchInTime: Date.now()};
 
         await handlePunchBreak(getLocalData(appKey._id), postData, setIsClockLoading, (data) => {
             const newAttendanceData = data.data;
@@ -219,8 +217,8 @@ export default function CardTrackerClockInOut() {
 
     const handleBreak = async () => {
         const postData = attendanceData.isBreakIn
-            ? { breakOutTime: Date.now() }
-            : { breakInTime: Date.now() };
+            ? {breakOutTime: Date.now()}
+            : {breakInTime: Date.now()};
 
         await handlePunchBreak(getLocalData(appKey._id), postData, setIsBreakLoading, (data) => {
             const newAttendanceData = data.data;
@@ -253,32 +251,41 @@ export default function CardTrackerClockInOut() {
 
         await handleScreenShotUpload(getLocalData(appKey._id), imageUrl, mouseEventCount, keyboardKeyPressCount);
 
-        if(appSettingData?.showScreenShot) {
+        if (appSettingData.showScreenShot === true) {
             window.electronAPI.showScreenshotWindow(imageUrl);
         }
     };
 
     useEffect(() => {
         const intervalId = setInterval(() => {
-            if(appSettingData?.isTakeScreenShot && attendanceData.isPunchIn && !attendanceData.isBreakIn) {
+            if (appSettingData.isTakeScreenShot === true && attendanceData.isPunchIn && !attendanceData.isBreakIn) {
                 takeScreenshot();
             }
-        }, Number(appSettingData?.screenshotTime || 15) * 60 * 1000);
+            console.log("appSettingData=>", appSettingData)
+        }, Number(appSettingData.screenshotTime || 15) * 60 * 1000);
+        // }, 1 * 30 * 1000);
 
         return () => clearInterval(intervalId);
-    }, []);
+    }, [appSettingData, attendanceData]);
 
     return (
         <>
             <Card title={(
                 <div className="flex items-center gap-2">
                     <Clock color={appColor.secondPrimary}/>
-                    <div className="flex-1 font-[550] text-[15px]">{appString.clockInOut}<LoadingOutlined className="ml-3" hidden={!isLoading && attendanceData} style={{ color: appColor.secondPrimary }} /></div>
+                    <div className="flex-1 font-[550] text-[15px]">{appString.clockInOut}<LoadingOutlined
+                        className="ml-3" hidden={!isLoading && attendanceData} style={{color: appColor.secondPrimary}}/>
+                    </div>
                     {attendanceData.punchInAt && (
-                        <div className="rounded-md flex items-center gap-[5px]" style={{ backgroundColor: appColor.secondPrimary, padding: "2px 5px" }}>
+                        <div className="rounded-md flex items-center gap-[5px]"
+                             style={{backgroundColor: appColor.secondPrimary, padding: "2px 5px"}}>
                             <Fingerprint size={12} color={appColor.white}/>
                             <div className="font-light text-[12px] text-white">
-                                {new Date(attendanceData.punchInAt).toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit', hour12: true })}
+                                {new Date(attendanceData.punchInAt).toLocaleTimeString('en-US', {
+                                    hour: '2-digit',
+                                    minute: '2-digit',
+                                    hour12: true
+                                })}
                             </div>
                         </div>
                     )}
@@ -322,7 +329,7 @@ export default function CardTrackerClockInOut() {
                                 color="danger"
                                 variant={isOnBreak ? "solid" : "outlined"}
                                 disabled={isLoading && !isClockedIn}
-                                icon={<Coffee size={16} />}
+                                icon={<Coffee size={16}/>}
                                 onClick={handleBreak}
                                 loading={isBreakLoading}
                             >
