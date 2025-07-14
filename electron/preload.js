@@ -7,4 +7,5 @@ contextBridge.exposeInMainWorld('electronAPI', {
     sendLoginData: (data) => ipcRenderer.send('login-data', data),
     sendAttendanceData: (data) => ipcRenderer.send('attendance-data', data),
     sendOfficeUpdateData: (data) => ipcRenderer.send('office-update-data', data),
+    onCompleteFillDailyUpdate: () => ipcRenderer.send('daily-update-complete'),
 });

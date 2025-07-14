@@ -1,24 +1,32 @@
-const { app, BrowserWindow, ipcMain, Menu, desktopCapturer, screen} = require('electron');
+const { app, BrowserWindow, ipcMain, Menu, desktopCapturer, screen, Tray} = require('electron');
 const path = require('path');
 const { GlobalKeyboardListener } = require("node-global-key-listener");
-const {endpoints, environment} = require("../app/api/apiEndpoints");
 
 let mainWindow;
 let screenshotWindow;
 
 const keyboard = new GlobalKeyboardListener();
 
+const isDevMode = false;
+
+const webBaseUrl = isDevMode ? 'http://192.168.0.104:4000' : 'https://teqheal-admin-panel-next-2.vercel.app';
+const dailyReportEndPoint = '/tracker/daily-update';
+
 let attendanceData = {};
 let mouseEventCount = 0;
 let keyboardKeyPressCount = 0;
+const isForTest = false;
+const appIcon = "../app/favicon.ico";
+let tray = null;
 
 function createWindow() {
     mainWindow = new BrowserWindow({
         width: 370,
         height: 510,
-        resizable: false,
+        resizable: isForTest,
         autoHideMenuBar: true,
         fullscreen: false,
+        icon: path.join(__dirname, appIcon),
         webPreferences: {
             nodeIntegration: true,
             contextIsolation: true,
@@ -26,11 +34,68 @@ function createWindow() {
         },
     });
 
-    Menu.setApplicationMenu(null);
+    if(!isForTest) {
+        Menu.setApplicationMenu(null);
+    }
     // mainWindow.webContents.openDevTools();
 
-    mainWindow.loadURL(environment.webBaseUrl);
+    mainWindow.loadURL(webBaseUrl);
+
+    mainWindow.on('close', (event) => {
+        if (!app.isQuiting) {
+            event.preventDefault();
+            mainWindow.hide();
+        }
+        return false;
+    });
+
+    createTray();
 }
+
+function createTray() {
+    if (tray) return;
+
+    tray = new Tray(path.join(__dirname, appIcon)); // .ico for Windows, .png for others
+
+    const contextMenu = Menu.buildFromTemplate([
+        {
+            label: 'Show App',
+            click: () => {
+                mainWindow.show();
+            },
+        },
+        {
+            label: 'Quit',
+            click: () => {
+                app.isQuiting = true;
+                app.quit();
+            },
+        },
+    ]);
+
+    tray.setToolTip('Teqheal Solution');
+    tray.setContextMenu(contextMenu);
+
+    tray.on('click', () => {
+        mainWindow.show();
+    });
+}
+
+app.whenReady().then(() => {
+    createWindow();
+});
+
+app.on('window-all-closed', () => {
+    // Do nothing here so app keeps running in background
+});
+
+app.on('activate', () => {
+    if (mainWindow === null) {
+        createWindow();
+    } else {
+        mainWindow.show();
+    }
+});
 
 let scheduledWindows = [];
 let loginData;
@@ -143,20 +208,28 @@ function openDailyUpdateWindow() {
         width: 400,
         height: 500,
         alwaysOnTop: true,
-        resizable: false,
+        resizable: isForTest,
         autoHideMenuBar: true,
         fullscreen: false,
+        closable: false,
+        icon: path.join(__dirname, appIcon),
         webPreferences: {
             nodeIntegration: false,
             contextIsolation: true,
         }
     });
 
-    Menu.setApplicationMenu(null);
+    if(!isForTest) {
+        Menu.setApplicationMenu(null);
+    }
     // win.webContents.openDevTools();
 
-    const signupUrl = `${endpoints.dailyUpdate}?user=${loginData?._id}`;
+    const signupUrl = `${webBaseUrl}${dailyReportEndPoint}?user=${loginData?._id}`;
     win.loadURL(signupUrl);
+
+    ipcMain.handle('daily-update-complete', async () => {
+        win.close();
+    });
 
     win.on('closed', () => {
         isDailyUpdateWindowOpen = false;
@@ -168,17 +241,20 @@ function openScheduledWindow(url, title = 'Scheduled Window') {
         width: 800,
         height: 600,
         title,
-        resizable: false,
+        resizable: true,
         autoHideMenuBar: true,
         fullscreen: false,
         alwaysOnTop: true,
+        icon: path.join(__dirname, appIcon),
         webPreferences: {
             nodeIntegration: false,
             contextIsolation: true,
         },
     });
 
-    Menu.setApplicationMenu(null);
+    if(!isForTest) {
+        Menu.setApplicationMenu(null);
+    }
     // win.webContents.openDevTools();
 
     win.loadURL(url);
@@ -194,10 +270,6 @@ ipcMain.on('attendance-data', (event, data) => {
 
 ipcMain.on('office-update-data', (event, data) => {
     scheduleWindowsFromData(data);
-});
-
-app.whenReady().then(() => {
-    createWindow();
 });
 
 keyboard.addListener((event) => {

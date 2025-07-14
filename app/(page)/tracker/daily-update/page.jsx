@@ -1,7 +1,7 @@
 'use client';
 
 import { useState } from 'react';
-import { Form, Input, Button, message, Typography } from 'antd';
+import { Form, Input, Button, Typography } from 'antd';
 import apiCall, { HttpMethod } from "../../../api/apiServiceProvider";
 import { endpoints } from "../../../api/apiEndpoints";
 import {getLocalData} from "../../../dataStorage/DataPref";
@@ -28,12 +28,14 @@ export default function Page() {
                     user: employeeCode,
                 },
                 setIsLoading: setLoading,
+                successCallback: async () => {
+                    if (window.electronAPI) {
+                        await window.electronAPI.onCompleteFillDailyUpdate();
+                    }
+                }
             });
-
-            message.success('Daily update submitted successfully.');
         } catch (error) {
             console.error(error);
-            message.error('Network error. Please try again.');
         }
     };
 
