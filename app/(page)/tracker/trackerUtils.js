@@ -125,7 +125,7 @@ export const liveDataStream = async (onOfficeUpdateChange, onSettingDataChange) 
     evtSource.onmessage = async (event) => {
         if (event.data) {
             if (window.electronAPI) {
-                await window.electronAPI.sendOfficeUpdateData(event?.data);
+                await window.electronAPI.sendOfficeUpdateData(JSON.parse(event.data));
             }
             onOfficeUpdateChange(JSON.parse(event.data));
         }
