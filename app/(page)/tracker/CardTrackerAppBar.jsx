@@ -24,7 +24,9 @@ export default function CardTrackerAppBar() {
         } else if (key === '1') {
             await window.electronAPI.openExternalLink("https://whogetsa.web.app/tasks");
         } else if (key === '2') {
-            console.log("Check for update clicked");
+            if (window.electronAPI) {
+                await window.electronAPI.sendCheckUpdate();
+            }
         } else if (key === '3') {
             setIsLogoutModalOpen(true);
         }
@@ -45,7 +47,6 @@ export default function CardTrackerAppBar() {
             label: "Check For Update",
             key: '2',
             icon: <RefreshCw size={15} />,
-            disabled: true,
         },
         { type: 'divider' },
         {
