@@ -1,6 +1,7 @@
 import apiCall, {HttpMethod} from "../../api/apiServiceProvider";
 import {endpoints} from "../../api/apiEndpoints";
 import appKey from "../../utils/appKey";
+import {useEffect} from "react";
 
 export const getAttendanceData = async (userId, setIsLoading, successCallback) => {
     try {
@@ -73,4 +74,82 @@ function base64ToBlob(base64Data, contentType = 'image/png') {
     }
 
     return new Blob(byteArrays, { type: contentType });
+}
+
+export const getOfficeUpdateData = async (successCallback) => {
+    try {
+
+        await apiCall({
+            method: HttpMethod.GET,
+            url: endpoints.getOfficeUpdate,
+            showSuccessMessage: false,
+            successCallback: async (data) => {
+                if(data?.data) {
+                    if (window.electronAPI) {
+                        await window.electronAPI.sendOfficeUpdateData(data?.data);
+                    }
+                    successCallback(data?.data);
+                }
+            },
+            setIsLoading: false,
+        });
+    } catch (error) {
+        console.error('Failed to fetch attendance:', error);
+    }
+}
+
+export const getAppSettingData = async (successCallback) => {
+    try {
+        await apiCall({
+            method: HttpMethod.GET,
+            url: endpoints.getAppSetting,
+            showSuccessMessage: false,
+            successCallback: async (data) => {
+                if(data?.data?.appSettings) {
+                    if (window.electronAPI) {
+                        await window.electronAPI.sendSettingData(data?.data?.appSettings);
+                    }
+                    successCallback(data?.data?.appSettings);
+                }
+            },
+            setIsLoading: false,
+        });
+    } catch (error) {
+        console.error('Failed to fetch attendance:', error);
+    }
+}
+
+export const liveDataStream = async (onOfficeUpdateChange, onSettingDataChange) => {
+    const evtSource = new EventSource(endpoints.officeUpdatesStream);
+
+    evtSource.onmessage = async (event) => {
+        if (event.data) {
+            if (window.electronAPI) {
+                await window.electronAPI.sendOfficeUpdateData(event?.data);
+            }
+            onOfficeUpdateChange(JSON.parse(event.data));
+        }
+    };
+
+    evtSource.addEventListener('end', () => {
+        evtSource.close();
+    });
+
+    const evtAppSettingSource = new EventSource(endpoints.appSettingStream);
+
+    evtAppSettingSource.onmessage = async (event) => {
+        if (event.data) {
+            const settingData = JSON.parse(event?.data);
+            if(settingData?.appSettings) {
+                if (window.electronAPI) {
+                    await window.electronAPI.sendSettingData(settingData?.appSettings);
+                }
+                onSettingDataChange(settingData?.appSettings);
+            }
+        }
+    };
+
+    evtAppSettingSource.addEventListener('end', () => {
+        evtAppSettingSource.close();
+    });
 }

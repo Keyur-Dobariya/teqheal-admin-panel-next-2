@@ -1,4 +1,4 @@
-export const isDevMode = false;
+export const isDevMode = true;
 
 // firebase target:apply hosting default whogetsa
 // firebase deploy --only hosting:devtracker

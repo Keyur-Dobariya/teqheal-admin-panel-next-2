@@ -3,11 +3,12 @@ const path = require('path');
 const {setupActivityTracking} = require('./activityTracker');
 const {setupScreenshotHandling} = require('./screenshotHandler');
 const {electronEnvironment, electronCommon} = require("./electronEndpoints");
-const {loadUserData, saveUserData, deleteUserData} = require("./localStorage");
+const {loadUserData, saveUserData, deleteUserData, saveSettingData, loadSettingData} = require("./localStorage");
 const {scheduleWindowsFromData} = require("./windowManager");
 
 let mainWindow;
 let tray = null;
+const isShowTest = true;
 
 function createMainWindow() {
     if (mainWindow) {
@@ -16,21 +17,26 @@ function createMainWindow() {
     }
 
     mainWindow = new BrowserWindow({
-        width: 370,
-        height: 515,
-        resizable: electronCommon.isForTest,
+        // width: 370,
+        // height: 510,
+        width: 1000,
+        height: 700,
+        resizable: isShowTest,
         autoHideMenuBar: true,
         fullscreen: false,
         icon: path.join(__dirname, electronCommon.appIcon),
         webPreferences: {
-            nodeIntegration: true,
+            nodeIntegration: false,
             contextIsolation: true,
+            sandbox: false,
             preload: path.join(__dirname, 'preload.js'),
         },
     });
 
-    if (!electronCommon.isForTest) {
+    if (!isShowTest) {
         Menu.setApplicationMenu(null);
+    } else {
+        mainWindow.webContents.openDevTools();
     }
 
     mainWindow.loadURL(electronEnvironment.webUrl);
@@ -91,8 +97,18 @@ ipcMain.on('login-data', (event, data) => {
     }
 });
 
+ipcMain.on('setting-data', (event, data) => {
+    if (data) {
+        saveSettingData(data);
+    }
+});
+
 ipcMain.handle('get-login-data', async () => {
     return loadUserData();
+});
+
+ipcMain.handle('get-setting-data', async () => {
+    return loadSettingData();
 });
 
 ipcMain.on('logout', () => {

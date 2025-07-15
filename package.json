@@ -38,6 +38,7 @@
     "typescript": "5.8.3"
   },
   "build": {
+    "asar": true,
     "appId": "com.teqheal.tracker",
     "productName": "TeqHeal Tracker",
     "files": [
@@ -50,6 +51,14 @@
     "win": {
       "target": "nsis",
       "icon": "app/teqheal.ico"
+    },
+    "nsis": {
+      "oneClick": true,
+      "perMachine": false,
+      "allowElevation": true,
+      "createDesktopShortcut": true,
+      "createStartMenuShortcut": true,
+      "shortcutName": "Teqheal Tracker"
     }
   }
 }

@@ -4,11 +4,11 @@ const config = {
     // apiBaseUrlProd: "https://empbackend-16ns.onrender.com",
     apiBaseUrlProd: "https://empbackend-aru4.onrender.com",
     webUrlProd: "https://teqheal-admin-panel-next-2.vercel.app",
-    isDev: false,
+    isDev: true,
 };
 
 const electronCommon = {
-    isForTest: true,
+    isForTest: false,
     appIcon: "../app/favicon.ico",
 };
 
