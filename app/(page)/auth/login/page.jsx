@@ -38,7 +38,7 @@ export default function SignIn() {
 
     const handleKeyDown = async (event) => {
         if (event.key === 'Enter') {
-            await handleSubmit();
+            await onFormSubmit();
         }
     };
 
