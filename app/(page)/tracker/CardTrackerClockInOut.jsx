@@ -24,6 +24,7 @@ import {
     scheduleScreenShot
 } from "./trackerUtils";
 import ModelDailyUpdate from "./ModelDailyUpdate";
+import CardTimeLineDrawer from "./CardTimeLineDrawer";
 
 export default function CardTrackerClockInOut() {
     const [status, setStatus] = useState(STATUS.CLOCKED_OUT);
@@ -149,6 +150,9 @@ export default function CardTrackerClockInOut() {
                     <div className="flex-1 font-[550] text-[15px]">{appString.clockInOut}<LoadingOutlined
                         className="ml-3" hidden={!isLoading && attendanceData} style={{color: appColor.secondPrimary}}/>
                     </div>
+                    <Tooltip title="Timeline">
+                        <div className="cursor-pointer" onClick={() => setIsDrawerOpen(true)}><Info color={appColor.secondPrimary}/></div>
+                    </Tooltip>
                     {attendanceData.punchInAt && (
                         <div className="rounded-md flex items-center gap-[5px]"
                              style={{backgroundColor: appColor.secondPrimary, padding: "2px 5px"}}>
@@ -162,9 +166,6 @@ export default function CardTrackerClockInOut() {
                             </div>
                         </div>
                     )}
-                    {/*<Tooltip title="Timeline">*/}
-                    {/*    <div className="cursor-pointer" onClick={() => setIsDrawerOpen(true)}><Info color={appColor.secondPrimary}/></div>*/}
-                    {/*</Tooltip>*/}
                 </div>
             )}>
                 <div className="flex flex-col gap-6 p-4">
@@ -226,6 +227,7 @@ export default function CardTrackerClockInOut() {
                 </div>
             </Card>
             {attendanceData && <ModelDailyUpdate attendanceData={attendanceData} />}
+            <CardTimeLineDrawer isDrawerOpen={isDrawerOpen} setIsDrawerOpen={setIsDrawerOpen} attendanceData={attendanceData} />
         </>
     );
 }

@@ -146,7 +146,7 @@ export default function ModelDailyUpdate({attendanceData}) {
             maskClosable={false}
             centered
             closeIcon={false}
-            cancelButtonProps={{hidden: true}}
+            // cancelButtonProps={{hidden: true}}
             open={isModelOpen}
             confirmLoading={loading}
             onOk={() => form.submit()}
