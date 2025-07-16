@@ -1,7 +1,7 @@
 'use client';
 
 import {Button, Card, Col, Progress, Row, Tooltip} from "antd";
-import {useState, useEffect} from "react";
+import {useState, useEffect, useRef} from "react";
 import {Clock, Coffee, Fingerprint, Info} from "../../utils/icons";
 import {appColor} from "../../utils/appColor";
 import appString from "../../utils/appString";
@@ -11,49 +11,19 @@ import {LoadingOutlined, LoginOutlined, LogoutOutlined, SmileOutlined} from "@an
 import {
     getAppSettingData,
     getAttendanceData,
-    getOfficeUpdateData,
     handlePunchBreak,
-    handleScreenShotUpload, liveDataStream
+    handleScreenShotUpload,
+    liveAppSettingDataStream,
+    startTimer,
+    STATUS,
+    stopTimer,
+    formatTime,
+    getWorkPercentage,
+    calculateTotalHours,
+    calculateBreakHours,
+    scheduleScreenShot
 } from "./trackerUtils";
-import {endpoints} from "../../api/apiEndpoints";
-import apiCall, {HttpMethod} from "../../api/apiServiceProvider";
-import dayjs from "dayjs";
-
-const STATUS = {
-    CLOCKED_OUT: 'CLOCKED_OUT',
-    CLOCKED_IN: 'CLOCKED_IN',
-    ON_BREAK: 'ON_BREAK',
-};
-
-const formatTime = (ms) => {
-    if (ms < 0) ms = 0;
-    const totalSeconds = Math.floor(ms / 1000);
-    const hours = String(Math.floor(totalSeconds / 3600)).padStart(2, '0');
-    const minutes = String(Math.floor((totalSeconds % 3600) / 60)).padStart(2, '0');
-    const seconds = String(totalSeconds % 60).padStart(2, '0');
-    return `${hours}:${minutes}:${seconds}`;
-};
-
-const getWorkPercentage = (totalMs) => {
-    const nineHoursInMs = 9 * 60 * 60 * 1000;
-    return Math.min((totalMs / nineHoursInMs) * 100, 100);
-};
-
-const calculateTotalHours = (punchTime, referenceTime) => {
-    return punchTime.reduce((sum, p) => {
-        const punchIn = p.punchInTime;
-        const punchOut = p.punchOutTime ?? referenceTime;
-        return sum + (punchOut - punchIn);
-    }, 0);
-};
-
-const calculateBreakHours = (breakTime, referenceTime) => {
-    return breakTime.reduce((sum, b) => {
-        const breakIn = b.breakInTime;
-        const breakOut = b.breakOutTime ?? referenceTime;
-        return sum + (breakOut - breakIn);
-    }, 0);
-};
+import ModelDailyUpdate from "./ModelDailyUpdate";
 
 export default function CardTrackerClockInOut() {
     const [status, setStatus] = useState(STATUS.CLOCKED_OUT);
@@ -66,12 +36,7 @@ export default function CardTrackerClockInOut() {
         lastBreakInTime: null,
         punchInAt: null,
     });
-    const [appSettingData, setAppSettingData] = useState({
-        isTakeScreenShot: true,
-        screenshotTime: 5,
-        showScreenShot: true,
-    });
-    const [officeUpdates, setOfficeUpdates] = useState([]);
+
     const [totalHoursMs, setTotalHoursMs] = useState(0);
     const [breakHoursMs, setBreakHoursMs] = useState(0);
     const [isClockLoading, setIsClockLoading] = useState(false);
@@ -79,20 +44,6 @@ export default function CardTrackerClockInOut() {
     const [isLoading, setIsLoading] = useState(false);
     const [isDrawerOpen, setIsDrawerOpen] = useState(false);
     const [, setTicker] = useState(0);
-
-    useEffect(() => {
-        getOfficeUpdateData((data) => {
-            setOfficeUpdates(data);
-        });
-        getAppSettingData((data) => {
-            setAppSettingData(data);
-        });
-        liveDataStream((data) => {
-            setOfficeUpdates(data);
-        }, (data) => {
-            setAppSettingData(data);
-        });
-    }, []);
 
     const fetchAttendanceData = async () => {
         await getAttendanceData(getLocalData(appKey._id), setIsLoading, (data) => {
@@ -112,14 +63,13 @@ export default function CardTrackerClockInOut() {
     };
 
     useEffect(() => {
-        sendDataToExe(attendanceData);
-    }, [attendanceData]);
-
-    const sendDataToExe = async (data) => {
-        if (window.electronAPI) {
-            await window.electronAPI.sendAttendanceData(data);
+        const sendDataToExe = async () => {
+            if (window.electronAPI) {
+                await window.electronAPI.sendAttendanceData(attendanceData);
+            }
         }
-    }
+        sendDataToExe();
+    }, [attendanceData]);
 
     useEffect(() => {
         fetchAttendanceData();
@@ -128,13 +78,9 @@ export default function CardTrackerClockInOut() {
     useEffect(() => {
         if (status === STATUS.CLOCKED_OUT && !attendanceData.isPunchIn) return;
 
-        const updateSettingData = async () => {
-            const appSetting = await window.electronAPI.getSettingData();
-            setAppSettingData(appSetting);
-        }
-
         const timer = setInterval(() => {
             setTicker(prev => prev + 1);
+
             const referenceTime = Date.now();
             if (attendanceData.isPunchIn) {
                 setTotalHoursMs(calculateTotalHours(attendanceData.punchTime || [], referenceTime));
@@ -142,8 +88,6 @@ export default function CardTrackerClockInOut() {
             if (attendanceData.isBreakIn) {
                 setBreakHoursMs(calculateBreakHours(attendanceData.breakTime || [], referenceTime));
             }
-
-            updateSettingData();
         }, 1000);
 
         return () => clearInterval(timer);
@@ -185,48 +129,21 @@ export default function CardTrackerClockInOut() {
     const liveTotalWorkMs = totalHoursMs - breakHoursMs;
     const progressPercent = getWorkPercentage(liveTotalWorkMs);
 
-    const takeScreenshot = async () => {
-        const imageData = await window.electronAPI.captureScreen();
-        const imageUrl = imageData.imageUrl;
-        const mouseEventCount = imageData.mouseEventCount;
-        const keyboardKeyPressCount = imageData.keyboardKeyPressCount;
-
-        const formData = new FormData();
-
-        formData.append(appKey.userId, getLocalData(appKey._id));
-        formData.append(appKey.screenshot, imageUrl);
-        formData.append(appKey.keyPressCount, mouseEventCount);
-        formData.append(appKey.mouseEventCount, keyboardKeyPressCount);
-
-        await handleScreenShotUpload(getLocalData(appKey._id), imageUrl, mouseEventCount, keyboardKeyPressCount);
-
-        if (appSettingData?.showScreenShot === true) {
-            window.electronAPI.showScreenshotWindow(imageUrl);
-        }
-    };
-
-    const minuteToMill = (minute) => {
-        if(minute) {
-            return Number(minute) * 60 * 1000;
-        }
-        return 5 * 60 * 1000;
-    }
-
     useEffect(() => {
-        const intervalId = setInterval(async () => {
-            console.log("appSettingData?.isTakeScreenShot=>", appSettingData?.isTakeScreenShot)
-            console.log("appSettingData?.screenshotTime=>", appSettingData?.screenshotTime)
-            if (appSettingData?.isTakeScreenShot === true && attendanceData.isPunchIn && !attendanceData.isBreakIn) {
-                takeScreenshot();
-            }
-        }, minuteToMill(appSettingData?.screenshotTime));
-
-        return () => clearInterval(intervalId);
+        const shouldStart =
+            attendanceData?.isPunchIn === true &&
+            attendanceData?.isBreakIn === false;
+        if (shouldStart) {
+            scheduleScreenShot();
+        } else {
+            stopTimer();
+        }
     }, [attendanceData]);
 
     return (
         <>
-            <Card title={(
+            <Card
+                title={(
                 <div className="flex items-center gap-2">
                     <Clock color={appColor.secondPrimary}/>
                     <div className="flex-1 font-[550] text-[15px]">{appString.clockInOut}<LoadingOutlined
@@ -308,6 +225,7 @@ export default function CardTrackerClockInOut() {
                     </Row>
                 </div>
             </Card>
+            {attendanceData && <ModelDailyUpdate attendanceData={attendanceData} />}
         </>
     );
 }

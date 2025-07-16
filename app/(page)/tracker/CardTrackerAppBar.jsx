@@ -5,15 +5,14 @@ import {appColor} from "../../utils/appColor";
 import appKey from "../../utils/appKey";
 import imagePaths from "../../utils/imagesPath";
 import appString from "../../utils/appString";
-import {getLocalData} from "../../dataStorage/DataPref";
 import {AlertCircle, Grid, MoreVertical, Power, RefreshCw, RotateCw} from "../../utils/icons";
 import {profilePhotoManager} from "../../utils/utils";
 import {useRouter} from "next/navigation";
 import pageRoutes from "../../utils/pageRoutes";
-import {useState} from "react";
+import {useEffect, useState} from "react";
 import {environment} from "../../api/apiEndpoints";
 
-export default function CardTrackerAppBar() {
+export default function CardTrackerAppBar({userData}) {
 
     const router = useRouter();
     const [isLogoutModalOpen, setIsLogoutModalOpen] = useState(false);
@@ -65,14 +64,14 @@ export default function CardTrackerAppBar() {
             <Card>
                 <div className="flex items-center gap-3 p-3">
                     <Avatar
-                        src={profilePhotoManager({url: getLocalData(appKey.profilePhoto), gender: getLocalData(appKey.gender)})}
+                        src={profilePhotoManager({url: userData?.profilePhoto, gender: userData?.gender})}
                         size={40}
                         className="shadow-md"
                     />
                     <div className="flex flex-col flex-1 min-w-0">
                         <div className="flex items-center text-sm font-medium gap-2">
                             <span>{appString.hey},</span>
-                            <span>{getLocalData(appKey.fullName)}</span>
+                            <span>{userData?.fullName}</span>
                             <img
                                 src={imagePaths.heyWaveHand}
                                 alt="wave"

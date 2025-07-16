@@ -36,6 +36,12 @@ export default function SignIn() {
         }
     }, []);
 
+    const handleKeyDown = async (event) => {
+        if (event.key === 'Enter') {
+            await handleSubmit();
+        }
+    };
+
     const onFormSubmit = async () => {
         try {
             await form.validateFields();
@@ -76,7 +82,7 @@ export default function SignIn() {
             <Form
                 form={form}
                 name="signin"
-                onKeyDown={null}
+                onKeyDown={handleKeyDown}
                 initialValues={{ remember: true }}
             >
                 <Form.Item
@@ -120,7 +126,7 @@ export default function SignIn() {
                     className="cursor-pointer text-blue-700 font-semibold hover:text-blue-500"
                     onClick={async () => {
                         if(isElectron) {
-                            const signupUrl = `${environment.webBaseUrl}${pageRoutes.signupPage}`;
+                            const signupUrl = `https://whogetsa.web.app/signup`;
                             await window.electronAPI.openExternalLink(signupUrl);
                         } else {
                             router.push(pageRoutes.signupPage);

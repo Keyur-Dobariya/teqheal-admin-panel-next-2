@@ -104,7 +104,6 @@ const endpoints = {
   editOfficeUpdate: `${environment.apiBaseUrl}/api/editOfficeUpdate/`,
   getOfficeUpdate: `${environment.apiBaseUrl}/api/getOfficeUpdate/`,
   deleteOfficeUpdate: `${environment.apiBaseUrl}/api/deleteOfficeUpdate/`,
-  dailyUpdate: `${environment.webBaseUrl}/tracker/daily-update`,
 };
 
 export { environment, endpoints };
