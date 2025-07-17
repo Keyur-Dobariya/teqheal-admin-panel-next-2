@@ -15,7 +15,7 @@ import {DateTimeFormat} from "../../../utils/enum";
 import {colorTag} from "../../../components/CommonComponents";
 import {endpoints} from "../../../api/apiEndpoints";
 import {getLocalData} from "../../../dataStorage/DataPref";
-import appKey from "../../../utils/appKey";
+import appKeys from "../../../utils/appKeys";
 import {useAppData} from "../../../masterData/AppDataContext";
 import apiCall, {HttpMethod} from "../../../api/apiServiceProvider";
 const { useBreakpoint } = Grid;
@@ -101,7 +101,7 @@ export default function CardEmpAttendanceReport() {
     const getEmpReportData = async () => {
         try {
             const baseUrl = `${endpoints.userWiseAttendanceData}${getLocalData(
-                appKey._id
+                appKeys._id
             )}`;
             let queryParams = [];
 

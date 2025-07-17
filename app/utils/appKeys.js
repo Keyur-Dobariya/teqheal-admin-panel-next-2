@@ -1,4 +1,4 @@
-const appKey = {
+const appKeys = {
     isLogin: "isLogin",
     jwtToken: "jwtToken",
     _id: "_id",
@@ -71,6 +71,14 @@ const appKey = {
     screenshot: 'screenshot',
     keyPressCount: 'keyPressCount',
     mouseEventCount: 'mouseEventCount',
+    user: 'user',
+    basicSalary: 'basicSalary',
+    code: 'code',
+    clientName: 'clientName',
+    projectName: 'projectName',
+    projectType: 'projectType',
+    projectStatus: 'projectStatus',
+    projectPriority: 'projectPriority',
 };
 
-export default appKey;
+export default appKeys;

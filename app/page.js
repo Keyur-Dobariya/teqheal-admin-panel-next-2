@@ -5,7 +5,7 @@ import {useRouter} from "next/navigation";
 import {LoadingComponent} from "./components/LoadingComponent";
 import pageRoutes from "./utils/pageRoutes";
 import {getLocalData, storeLoginData} from "./dataStorage/DataPref";
-import appKey from "./utils/appKey";
+import appKeys from "./utils/appKeys";
 import {detectPlatform} from "./utils/utils";
 
 export default function Home() {
@@ -32,7 +32,7 @@ export default function Home() {
                     router.push(pageRoutes.loginPage);
                 }
             } else {
-                const isLogin = getLocalData(appKey.isLogin);
+                const isLogin = getLocalData(appKeys.isLogin);
                 if (isLogin === 'true') {
                     router.push(pageRoutes.dashboard);
                 } else {

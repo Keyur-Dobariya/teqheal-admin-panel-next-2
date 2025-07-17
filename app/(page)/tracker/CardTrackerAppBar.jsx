@@ -2,7 +2,7 @@
 
 import {Avatar, Card, Dropdown, Modal} from "antd";
 import {appColor} from "../../utils/appColor";
-import appKey from "../../utils/appKey";
+import appKeys from "../../utils/appKeys";
 import imagePaths from "../../utils/imagesPath";
 import appString from "../../utils/appString";
 import {AlertCircle, Grid, MoreVertical, Power, RefreshCw, RotateCw} from "../../utils/icons";

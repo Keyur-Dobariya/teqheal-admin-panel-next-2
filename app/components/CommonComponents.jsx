@@ -35,3 +35,7 @@ export const antTag = (value, color) => {
         <Tag bordered={false} color={color} style={{fontWeight: "500", fontSize: 13, textAlign: "center"}}>{value}</Tag>
     ) : '-';
 }
+
+export const timeTag = (value, color) => {
+    return <Tag bordered={false} color={color} style={{width: 80, height: 22, display: "flex", alignItems: "center", justifyContent: "center", fontWeight: "500", fontSize: 13, textAlign: "center"}}>{value}</Tag>;
+}

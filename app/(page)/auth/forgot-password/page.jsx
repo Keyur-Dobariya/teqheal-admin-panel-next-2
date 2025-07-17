@@ -4,7 +4,7 @@ import { MailOutlined, LockOutlined } from "@ant-design/icons";
 import { Button, Form, Input } from "antd";
 import { useRouter } from "next/navigation";
 import appString from "../../../utils/appString";
-import appKey from "../../../utils/appKey";
+import appKeys from "../../../utils/appKeys";
 import pageRoutes from "../../../utils/pageRoutes";
 import {useEffect, useState} from "react";
 import AnimatedDiv, {Direction} from "../../../components/AnimatedDiv";
@@ -57,7 +57,7 @@ export default function ForgotPassword() {
                 initialValues={{ remember: true }}
             >
                 <Form.Item
-                    name={appKey.emailAddress}
+                    name={appKeys.emailAddress}
                     rules={[
                         { required: true, message: appString.emailAddressV1 },
                         {

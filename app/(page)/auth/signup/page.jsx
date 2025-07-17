@@ -4,7 +4,7 @@ import { UserOutlined, MailOutlined, PhoneOutlined, LockOutlined } from "@ant-de
 import { Button, Checkbox, Form, Input } from "antd";
 import { useRouter } from "next/navigation";
 import appString from "../../../utils/appString";
-import appKey from "../../../utils/appKey";
+import appKeys from "../../../utils/appKeys";
 import pageRoutes from "../../../utils/pageRoutes";
 import AnimatedDiv, {Direction} from "../../../components/AnimatedDiv";
 import {useState} from "react";
@@ -49,15 +49,15 @@ export default function SignUp() {
                 initialValues={{ remember: true }}
             >
                 <Form.Item
-                    name={appKey.fullName}
-                    rules={validationRules[appKey.fullName]}
+                    name={appKeys.fullName}
+                    rules={validationRules[appKeys.fullName]}
                     hasFeedback
                 >
                     <Input prefix={<UserOutlined />} placeholder={appString.fullName} />
                 </Form.Item>
                 <Form.Item
-                    name={appKey.emailAddress}
-                    rules={validationRules[appKey.emailAddress]}
+                    name={appKeys.emailAddress}
+                    rules={validationRules[appKeys.emailAddress]}
                     hasFeedback
                 >
                     <Input
@@ -69,8 +69,8 @@ export default function SignUp() {
                     />
                 </Form.Item>
                 <Form.Item
-                    name={appKey.mobileNumber}
-                    rules={validationRules[appKey.mobileNumber]}
+                    name={appKeys.mobileNumber}
+                    rules={validationRules[appKeys.mobileNumber]}
                     hasFeedback
                 >
                     <Input
@@ -82,8 +82,8 @@ export default function SignUp() {
                     />
                 </Form.Item>
                 <Form.Item
-                    name={appKey.password}
-                    rules={validationRules[appKey.password]}
+                    name={appKeys.password}
+                    rules={validationRules[appKeys.password]}
                     hasFeedback
                 >
                     <Input.Password
@@ -93,8 +93,8 @@ export default function SignUp() {
                     />
                 </Form.Item>
                 <Form.Item
-                    name={appKey.confirmPassword}
-                    rules={validationRules[appKey.confirmPassword](form.getFieldValue)}
+                    name={appKeys.confirmPassword}
+                    rules={validationRules[appKeys.confirmPassword](form.getFieldValue)}
                     hasFeedback
                 >
                     <Input.Password

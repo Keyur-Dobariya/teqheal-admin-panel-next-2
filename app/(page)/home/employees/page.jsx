@@ -17,7 +17,7 @@ import {useAppData, AppDataFields} from '../../../masterData/AppDataContext';
 import apiCall, {HttpMethod} from '../../../api/apiServiceProvider';
 import {endpoints} from '../../../api/apiEndpoints';
 import appString from '../../../utils/appString';
-import appKeys from '../../../utils/appKey';
+import appKeys from '../../../utils/appKeys';
 import {ApprovalStatus, DateTimeFormat} from '../../../utils/enum';
 import {appColor} from '../../../utils/appColor';
 import dayjs from 'dayjs';
@@ -38,16 +38,19 @@ export default function Page() {
 
     const [allData, setAllData] = useState(usersData);
     const [isModelOpen, setIsModelOpen] = useState(false);
-    const [isEditing, setIsEditing] = useState(false);
     const [searchText, setSearchText] = useState('');
-    const [loading, setLoading] = useState(false);
+    const [selectedRecord, setSelectedRecord] = useState(null);
+    const [isLoading, setIsLoading] = useState(false);
     const [actionLoading, setActionLoading] = useState(null);
-    const [loadingUsers, setLoadingUsers] = useState({});
-    const [selectedEmp, setSelectedEmp] = useState(null);
+    const [loadingRecord, setLoadingRecord] = useState({});
 
     useEffect(() => {
         setAllData(usersData);
     }, [usersData]);
+
+    const handleUpdatedData = (data) => {
+        updateAppDataField(AppDataFields.usersData, data?.data);
+    };
 
     const filteredData = useMemo(() => {
         if (!allData) return [];
@@ -65,53 +68,36 @@ export default function Page() {
         );
     }, [allData, searchText]);
 
-    const updateUser = async (id, data) => {
-        setLoading(true);
-        try {
-            await apiCall({
-                method: HttpMethod.POST,
-                url: `${endpoints.addUpdateUser}${id}`,
-                data,
-                successCallback: res => {
-                    updateAppDataField(AppDataFields.usersData, res?.data);
-                },
-            });
-        } catch (err) {
-            console.error('Update failed', err);
-        } finally {
-            setLoading(false);
-        }
+    const updateRecord = async (id, data) => {
+        await apiCall({
+            method: HttpMethod.POST,
+            url: `${endpoints.addUpdateUser}${id}`,
+            data,
+            setIsLoading,
+            successCallback: handleUpdatedData,
+        });
     };
 
-    const deleteUser = async (record) => {
-        setLoading(true);
-        try {
-            await apiCall({
-                method: HttpMethod.DELETE,
-                url: `${endpoints.deleteUser}${record._id}`,
-                successCallback: res => {
-                    updateAppDataField(AppDataFields.usersData, res?.data);
-                },
-            });
-        } catch (err) {
-            console.error('Delete failed', err);
-        } finally {
-            setLoading(false);
-        }
+    const deleteRecord = async (record) => {
+        await apiCall({
+            method: HttpMethod.DELETE,
+            url: `${endpoints.deleteUser}${record._id}`,
+            setIsLoading,
+            successCallback: handleUpdatedData,
+        });
     };
 
     const toggleUserStatus = async (user, checked) => {
-        setLoadingUsers(prev => ({...prev, [user._id]: true}));
-        await updateUser(user._id, {isActive: checked});
-        setLoadingUsers(prev => ({...prev, [user._id]: false}));
+        setLoadingRecord(prev => ({...prev, [user._id]: true}));
+        await updateRecord(user._id, {isActive: checked});
+        setLoadingRecord(prev => ({...prev, [user._id]: false}));
     };
 
     const openModalWithLoading = (isEditMode, record = null) => {
         const loadingId = isEditMode ? record._id : 'add';
         setActionLoading(loadingId);
 
-        setSelectedEmp(record);
-        setIsEditing(isEditMode);
+        setSelectedRecord(record);
 
         setTimeout(() => {
             setIsModelOpen(true);
@@ -130,11 +116,6 @@ export default function Page() {
 
     const handleViewClick = (record) => {
         router.push(`${pageRoutes.employeeDetail}?user=${record.employeeCode}`);
-    };
-
-    const handleSuccess = (updatedUser) => {
-        updateAppDataField(AppDataFields.usersData, updatedUser);
-        setIsModelOpen(false);
     };
 
     const columns = [
@@ -189,7 +170,7 @@ export default function Page() {
             render: (_, user) => (
                 <Switch
                     size="small"
-                    loading={!!loadingUsers[user._id]}
+                    loading={!!loadingRecord[user._id]}
                     checked={user.isActive}
                     onChange={checked => toggleUserStatus(user, checked)}
                 />
@@ -212,7 +193,7 @@ export default function Page() {
                             </div>
                         )}
                     </Tooltip>
-                    <Popconfirm title={appString.deleteConfirmation} onConfirm={() => deleteUser(record)}>
+                    <Popconfirm title={appString.deleteConfirmation} onConfirm={() => deleteRecord(record)}>
                         <Tooltip title={appString.delete}>
                             <Trash2 color={appColor.danger} style={{cursor: 'pointer'}}/>
                         </Tooltip>
@@ -232,7 +213,7 @@ export default function Page() {
             <Card>
                 <Table
                     rowKey={(record) => record._id}
-                    loading={loading}
+                    loading={isLoading}
                     columns={columns}
                     dataSource={filteredData}
                     title={() => (
@@ -260,9 +241,8 @@ export default function Page() {
                 <EmpAddUpdateModel
                     isModelOpen={isModelOpen}
                     setIsModelOpen={setIsModelOpen}
-                    employeeData={selectedEmp}
-                    isEditing={isEditing}
-                    onSuccessCallback={handleSuccess}
+                    selectedRecord={selectedRecord}
+                    onSuccessCallback={handleUpdatedData}
                 />
             )}
         </>

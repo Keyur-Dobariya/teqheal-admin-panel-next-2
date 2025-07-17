@@ -1,5 +1,10 @@
 import {Gender} from "./enum";
 import imagePaths from "./imagesPath";
+import CryptoJS from 'crypto-js';
+
+export const getDataById = (dataList, dataId) => {
+    return dataList.find((data) => data._id === dataId);
+};
 
 export function capitalizeLastPathSegment(input) {
     if (!input) return '';
@@ -112,3 +117,37 @@ export function detectPlatform(userAgent) {
 
     return platform;
 }
+
+export const decryptValue = (value) => {
+    console.log("value", value)
+    if (!value || !value.includes(':')) return value;
+
+    try {
+        const [ivHex, encryptedData] = value.split(':');
+
+        const key = CryptoJS.SHA256("12345678901234567890123456789012"); // same as backend
+        const iv = CryptoJS.enc.Hex.parse(ivHex);
+        const encryptedWordArray = CryptoJS.enc.Hex.parse(encryptedData);
+
+        const decrypted = CryptoJS.AES.decrypt(
+            { ciphertext: encryptedWordArray },
+            key,
+            { iv: iv, mode: CryptoJS.mode.CBC, padding: CryptoJS.pad.Pkcs7 }
+        );
+
+        return decrypted.toString(CryptoJS.enc.Utf8);
+    } catch (e) {
+        return value;
+    }
+};
+
+export const getTwoCharacter = (str) => {
+    if (str) {
+        const words = str.trim().split(" ");
+        const firstInitial = words[0].charAt(0).toUpperCase();
+        const secondInitial =
+            words.length > 1 ? words[1].charAt(0).toUpperCase() : "";
+        return firstInitial + secondInitial;
+    }
+    return "N/A";
+};

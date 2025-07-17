@@ -15,10 +15,9 @@ import {DateTimeFormat, getLabelByKey, leaveCategoryLabel, leaveLabelKeys, leave
 import {antTag, colorTag} from "../../../components/CommonComponents";
 import {endpoints} from "../../../api/apiEndpoints";
 import {getLocalData, isAdmin} from "../../../dataStorage/DataPref";
-import appKey from "../../../utils/appKey";
 import {useAppData} from "../../../masterData/AppDataContext";
 import apiCall, {HttpMethod} from "../../../api/apiServiceProvider";
-import appKeys from "../../../utils/appKey";
+import appKeys from "../../../utils/appKeys";
 import {capitalizeLastPathSegment} from "../../../utils/utils";
 
 export default function CardEmpLeaveReport() {
@@ -40,7 +39,7 @@ export default function CardEmpLeaveReport() {
     const getEmpReportData = async () => {
         try {
             const baseUrl = `${endpoints.userWiseAttendanceData}${getLocalData(
-                appKey._id
+                appKeys._id
             )}`;
             let queryParams = [];
 

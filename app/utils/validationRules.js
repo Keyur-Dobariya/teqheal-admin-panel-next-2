@@ -1,5 +1,5 @@
 import appString from "./appString";
-import appKey from "./appKey";
+import appKeys from "./appKeys";
 
 const emailPattern = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
 const mobilePattern = /^[6789]\d{9}$/;
@@ -8,29 +8,29 @@ const passwordHasNumber = /\d/;
 const passwordHasSpecialChar = /[@$!%*?&]/;
 
 const validationRules = {
-    [appKey.fullName]: [
+    [appKeys.fullName]: [
         { required: true, message: appString.fullNameV1 },
     ],
-    [appKey.emailAddress]: [
+    [appKeys.emailAddress]: [
         { required: true, message: appString.emailAddressV1 },
         { pattern: emailPattern, message: appString.emailAddressV2 },
     ],
-    [appKey.mobileNumber]: [
+    [appKeys.mobileNumber]: [
         { required: true, message: appString.mobileNumberV1 },
         { pattern: mobilePattern, message: appString.mobileNumberV2 },
     ],
-    [appKey.password]: [
+    [appKeys.password]: [
         { required: true, message: appString.passwordV1 },
         { pattern: passwordStartsWithCapital, message: appString.passwordV2 },
         { pattern: passwordHasNumber, message: appString.passwordV3 },
         { pattern: passwordHasSpecialChar, message: appString.passwordV4 },
         { min: 8, message: appString.passwordV5 },
     ],
-    [appKey.confirmPassword]: (getFieldValue) => [
+    [appKeys.confirmPassword]: (getFieldValue) => [
         { required: true, message: appString.confirmPasswordV1 },
         {
             validator: (_, value) => {
-                const password = getFieldValue(appKey.password);
+                const password = getFieldValue(appKeys.password);
                 if (value && value !== password) {
                     return Promise.reject(appString.confirmPasswordV2);
                 }

@@ -17,31 +17,28 @@ import {useAppData, AppDataFields} from '../../../masterData/AppDataContext';
 import apiCall, {HttpMethod} from '../../../api/apiServiceProvider';
 import {endpoints} from '../../../api/apiEndpoints';
 import appString from '../../../utils/appString';
-import appKeys from '../../../utils/appKey';
 import {ApprovalStatus, DateTimeFormat} from '../../../utils/enum';
 import {appColor} from '../../../utils/appColor';
 import dayjs from 'dayjs';
 import {formatMilliseconds, profilePhotoManager} from "../../../utils/utils";
-import EmpAddUpdateModel from "../../../models/EmpAddUpdateModel";
 import {LoadingOutlined} from "@ant-design/icons";
 import {useRouter} from "next/navigation";
 import pageRoutes from "../../../utils/pageRoutes";
-import appKey from "../../../utils/appKey";
-import {antTag} from "../../../components/CommonComponents";
+import appKeys from "../../../utils/appKeys";
+import {timeTag} from "../../../components/CommonComponents";
 import EmpScreenshotModel from "../../../models/EmpScreenshotModel";
-
-const {useBreakpoint} = Grid;
+import AttendanceDetailModel from "../../../models/AttendanceDetailModel";
 
 export default function Page() {
     const {attendancesData} = useAppData();
-    const screens = useBreakpoint();
-    const isMobile = !screens.md;
 
     const router = useRouter();
 
     const [allData, setAllData] = useState(attendancesData);
     const [isSsModelOpen, setSsModelOpen] = useState(false);
+    const [isAttendanceModelOpen, setIsAttendanceModelOpen] = useState(false);
     const [screenshots, setScreenshots] = useState([]);
+    const [selectedAttend, setSelectedAttend] = useState(null);
     const [selectedId, setSelectedId] = useState(null);
     const [searchText, setSearchText] = useState('');
     const [loading, setLoading] = useState(false);
@@ -77,7 +74,7 @@ export default function Page() {
     const columns = [
         {
             title: appString.userName,
-            dataIndex: appKey.userData,
+            dataIndex: appKeys.userData,
             key: 'userData.fullName',
             render: (text, record) => record?.userData ? (
                 <div className="flex items-center gap-2">
@@ -89,10 +86,10 @@ export default function Page() {
         },
         {
             title: appString.totalHours,
-            dataIndex: appKey.totalHours,
-            key: appKey.totalHours,
+            dataIndex: appKeys.totalHours,
+            key: appKeys.totalHours,
             render: (totalHours) => {
-                return antTag(
+                return timeTag(
                     timeFormater(totalHours),
                     'geekblue'
                 );
@@ -100,10 +97,10 @@ export default function Page() {
         },
         {
             title: appString.workingHours,
-            dataIndex: appKey.workingHours,
-            key: appKey.workingHours,
+            dataIndex: appKeys.workingHours,
+            key: appKeys.workingHours,
             render: (workingHours) => {
-                return antTag(
+                return timeTag(
                     timeFormater(workingHours),
                     'green'
                 );
@@ -111,31 +108,31 @@ export default function Page() {
         },
         {
             title: appString.breakHours,
-            dataIndex: appKey.breakHours,
-            key: appKey.breakHours,
+            dataIndex: appKeys.breakHours,
+            key: appKeys.breakHours,
             render: (breakHours) => {
-                return antTag(timeFormater(breakHours), 'red');
+                return timeTag(timeFormater(breakHours), 'red');
             },
         },
         {
             title: appString.lateArrival,
-            dataIndex: appKey.lateArrival,
-            key: appKey.lateArrival,
+            dataIndex: appKeys.lateArrival,
+            key: appKeys.lateArrival,
             render: (lateArrival) => {
-                return antTag(timeFormater(lateArrival), 'orange');
+                return timeTag(timeFormater(lateArrival), 'orange');
             },
         },
         {
             title: appString.overtime,
-            dataIndex: appKey.overtime,
-            key: appKey.overtime,
+            dataIndex: appKeys.overtime,
+            key: appKeys.overtime,
             render: (overtime) => {
-                return antTag(timeFormater(overtime), 'purple');
+                return timeTag(timeFormater(overtime), 'purple');
             },
         },
         {
             title: appString.screenshots,
-            key: appKey.screenshots,
+            key: appKeys.screenshots,
             render: (_, record) => {
                 let screenshots = record?.screenshots;
                 let attendanceID = record?._id;
@@ -173,8 +170,8 @@ export default function Page() {
         },
         {
             title: appString.eventCount,
-            dataIndex: appKey.keyPressCount,
-            key: appKey.keyPressCount,
+            dataIndex: appKeys.keyPressCount,
+            key: appKeys.keyPressCount,
             render: (_, record) => {
                 return (
                     <div className="min-w-40 font-medium text-blue-900">
@@ -185,25 +182,25 @@ export default function Page() {
         },
         {
             title: appString.view,
-            dataIndex: appKey.keyPressCount,
-            key: appKey.keyPressCount,
+            dataIndex: appKeys.keyPressCount,
+            key: appKeys.keyPressCount,
             fixed: 'right',
             render: (_, record) => {
                 return (
-                    <div className="flex justify-center items-center gap-5">
+                    <div className="flex justify-center items-center gap-7">
+                        <Tooltip title={appString.attendanceDetail}>
+                            <div className="cursor-pointer" onClick={() => handleAttendViewClick(record)}>
+                                <Eye color={appColor.primary} />
+                            </div>
+                        </Tooltip>
                         <Tooltip title={appString.userDetail}>
                             {actionLoading === record._id ? (
                                 <LoadingOutlined />
                             ) : (
-                                <div className="cursor-pointer" onClick={() => handleViewClick(record)}>
+                                <div className="cursor-pointer" onClick={() => handleEmpViewClick(record)}>
                                     <User color={appColor.secondPrimary} />
                                 </div>
                             )}
-                        </Tooltip>
-                        <Tooltip title={appString.view}>
-                            <div className="cursor-pointer" onClick={() => handleViewClick(record)}>
-                                <Eye color={appColor.primary} />
-                            </div>
                         </Tooltip>
                     </div>
                 );
@@ -224,7 +221,12 @@ export default function Page() {
     //     }, 100);
     // };
 
-    const handleViewClick = (record) => {
+    const handleAttendViewClick = (record) => {
+        setIsAttendanceModelOpen(true);
+        setSelectedAttend(record);
+    };
+
+    const handleEmpViewClick = (record) => {
         router.push(`${pageRoutes.employeeDetail}?user=${record?.userData?.employeeCode}`);
     };
 
@@ -263,7 +265,9 @@ export default function Page() {
                 //     setDetailModelOpen(true);
                 // }
             }}/>
-            <div className="flex flex-row h-full">
+            {isAttendanceModelOpen && <AttendanceDetailModel selectedAttendance={selectedAttend} isModelOpen={isAttendanceModelOpen}
+                                                             setIsModelOpen={setIsAttendanceModelOpen}/>}
+            {/*<div className="flex flex-row h-full">*/}
                 <Card>
                     <Table
                         rowKey={(record) => record._id}
@@ -290,8 +294,8 @@ export default function Page() {
                         )}
                     />
                 </Card>
-                <div></div>
-            </div>
+                {/*<div></div>*/}
+            {/*</div>*/}
         </>
     );
 }

@@ -12,6 +12,7 @@
     "@ant-design/nextjs-registry": "^1.0.2",
     "antd": "^5.26.2",
     "axios": "^1.10.0",
+    "crypto-js": "^4.2.0",
     "date-fns": "^4.1.0",
     "firebase": "^11.10.0",
     "framer-motion": "^12.19.2",

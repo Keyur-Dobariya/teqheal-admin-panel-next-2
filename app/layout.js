@@ -11,7 +11,7 @@ import appString from './utils/appString';
 import {setGlobalMessageApi} from './components/CommonComponents';
 import {AppDataProvider} from './masterData/AppDataContext';
 import {getLocalData} from './dataStorage/DataPref';
-import appKey from './utils/appKey';
+import appKeys from './utils/appKeys';
 import InnerAppLayout from './InnerAppLayout';
 import {PageRoutingProvider} from "./appContext/PageRoutingContext";
 

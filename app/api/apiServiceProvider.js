@@ -2,7 +2,7 @@ import axios from "axios";
 import {showToast} from "../components/CommonComponents";
 import pageRoutes from "../utils/pageRoutes";
 import {redirect} from "next/navigation";
-import appKey from "../utils/appKey";
+import appKeys from "../utils/appKeys";
 
 const apiCall = async ({
                            method,
@@ -20,7 +20,7 @@ const apiCall = async ({
         setIsLoading(true);
     }
 
-    const token = localStorage.getItem(appKey.jwtToken) ?? "";
+    const token = localStorage.getItem(appKeys.jwtToken) ?? "";
     const defaultHeaders = {
         Authorization: `Bearer ${token}`,
         'Content-Type': isMultipart ? 'multipart/form-data' : 'application/json',

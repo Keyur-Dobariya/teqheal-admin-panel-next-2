@@ -12,6 +12,12 @@ const imagePaths = {
     heyWaveHand: '/assets/images/heyWaveHand.png',
     male_profile: '/assets/images/male_profile.png',
     female_profile: '/assets/images/female_profile.png',
+    priority_clear: '/assets/images/priority_clear.png',
+    priority_high: '/assets/images/priority_high.png',
+    priority_low: '/assets/images/priority_low.png',
+    priority_normal: '/assets/images/priority_normal.png',
+    priority_on_hold: '/assets/images/priority_on_hold.png',
+    priority_urjent: '/assets/images/priority_urjent.png',
 };
 
 export default imagePaths;

@@ -273,44 +273,44 @@ export const taskColumnStatusLabel = [
     {label: taskColumnLabel.Reopened, key: "reopened"},
 ];
 
-// export const taskPriorityLabel = [
-//     {
-//         label: "No Priority",
-//         key: "noPriority",
-//         color: appColor.secondary,
-//         icon: <img src={imagePaths.clear_priority} style={{width: 18, height: 18, marginRight: 8}}/>,
-//     },
-//     {
-//         label: "Urgent",
-//         key: "urgent",
-//         color: appColor.danger,
-//         icon: <img src={imagePaths.urjent_priority} style={{width: 18, height: 18, marginRight: 8}}/>,
-//     },
-//     {
-//         label: "High Priority",
-//         key: "highPriority",
-//         color: appColor.warning,
-//         icon: <img src={imagePaths.high_priority} style={{width: 18, height: 18, marginRight: 8}}/>,
-//     },
-//     {
-//         label: "Medium Priority",
-//         key: "mediumPriority",
-//         color: appColor.success,
-//         icon: <img src={imagePaths.normal_priority} style={{width: 18, height: 18, marginRight: 8}}/>,
-//     },
-//     {
-//         label: "Low Priority",
-//         key: "lowPriority",
-//         color: appColor.info,
-//         icon: <img src={imagePaths.low_priority} style={{width: 18, height: 18, marginRight: 8}}/>,
-//     },
-//     {
-//         label: "On Hold",
-//         key: "onHold",
-//         color: appColor.secondary,
-//         icon: <img src={imagePaths.on_hold_priority} style={{width: 18, height: 18, marginRight: 8}}/>,
-//     },
-// ];
+export const taskPriorityLabel = [
+    {
+        label: "No Priority",
+        key: "noPriority",
+        color: appColor.secondary,
+        icon: <img src={imagePaths.priority_clear} style={{width: 18, height: 18, marginRight: 8}}/>,
+    },
+    {
+        label: "Urgent",
+        key: "urgent",
+        color: appColor.danger,
+        icon: <img src={imagePaths.priority_urjent} style={{width: 18, height: 18, marginRight: 8}}/>,
+    },
+    {
+        label: "High Priority",
+        key: "highPriority",
+        color: appColor.warning,
+        icon: <img src={imagePaths.priority_high} style={{width: 18, height: 18, marginRight: 8}}/>,
+    },
+    {
+        label: "Medium Priority",
+        key: "mediumPriority",
+        color: appColor.success,
+        icon: <img src={imagePaths.priority_normal} style={{width: 18, height: 18, marginRight: 8}}/>,
+    },
+    {
+        label: "Low Priority",
+        key: "lowPriority",
+        color: appColor.info,
+        icon: <img src={imagePaths.priority_low} style={{width: 18, height: 18, marginRight: 8}}/>,
+    },
+    {
+        label: "On Hold",
+        key: "onHold",
+        color: appColor.secondary,
+        icon: <img src={imagePaths.priority_on_hold} style={{width: 18, height: 18, marginRight: 8}}/>,
+    },
+];
 
 export const taskStatusLabel = [
     {label: "📌 To Do", key: "toDo"},

@@ -6,7 +6,7 @@ import {Clock, Coffee, Fingerprint, Info} from "../../utils/icons";
 import {appColor} from "../../utils/appColor";
 import appString from "../../utils/appString";
 import {getLocalData} from "../../dataStorage/DataPref";
-import appKey from "../../utils/appKey";
+import appKeys from "../../utils/appKeys";
 import {LoadingOutlined, LoginOutlined, LogoutOutlined, SmileOutlined} from "@ant-design/icons";
 import {
     getAppSettingData,
@@ -47,7 +47,7 @@ export default function CardTrackerClockInOut() {
     const [, setTicker] = useState(0);
 
     const fetchAttendanceData = async () => {
-        await getAttendanceData(getLocalData(appKey._id), setIsLoading, (data) => {
+        await getAttendanceData(getLocalData(appKeys._id), setIsLoading, (data) => {
             const newAttendanceData = data.data || {};
             setAttendanceData(newAttendanceData);
             setStatus(
@@ -99,7 +99,7 @@ export default function CardTrackerClockInOut() {
             ? {punchOutTime: Date.now()}
             : {punchInTime: Date.now()};
 
-        await handlePunchBreak(getLocalData(appKey._id), postData, setIsClockLoading, (data) => {
+        await handlePunchBreak(getLocalData(appKeys._id), postData, setIsClockLoading, (data) => {
             const newAttendanceData = data.data;
             setAttendanceData(newAttendanceData);
             setStatus(newAttendanceData.isPunchIn ? STATUS.CLOCKED_IN : STATUS.CLOCKED_OUT);
@@ -114,7 +114,7 @@ export default function CardTrackerClockInOut() {
             ? {breakOutTime: Date.now()}
             : {breakInTime: Date.now()};
 
-        await handlePunchBreak(getLocalData(appKey._id), postData, setIsBreakLoading, (data) => {
+        await handlePunchBreak(getLocalData(appKeys._id), postData, setIsBreakLoading, (data) => {
             const newAttendanceData = data.data;
             setAttendanceData(newAttendanceData);
             setStatus(newAttendanceData.isBreakIn ? STATUS.ON_BREAK : STATUS.CLOCKED_IN);

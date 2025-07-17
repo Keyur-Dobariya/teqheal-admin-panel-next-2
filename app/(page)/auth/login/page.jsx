@@ -4,7 +4,7 @@ import { MailOutlined, LockOutlined } from "@ant-design/icons";
 import { Button, Form, Input } from "antd";
 import { useRouter } from "next/navigation";
 import appString from "../../../utils/appString";
-import appKey from "../../../utils/appKey";
+import appKeys from "../../../utils/appKeys";
 import pageRoutes from "../../../utils/pageRoutes";
 import AnimatedDiv, {Direction} from "../../../components/AnimatedDiv";
 import {useEffect, useState} from "react";
@@ -86,8 +86,8 @@ export default function SignIn() {
                 initialValues={{ remember: true }}
             >
                 <Form.Item
-                    name={appKey.emailAddress}
-                    rules={validationRules[appKey.emailAddress]}
+                    name={appKeys.emailAddress}
+                    rules={validationRules[appKeys.emailAddress]}
                     hasFeedback
                 >
                     <Input
@@ -99,8 +99,8 @@ export default function SignIn() {
                     />
                 </Form.Item>
                 <Form.Item
-                    name={appKey.password}
-                    rules={validationRules[appKey.password]}
+                    name={appKeys.password}
+                    rules={validationRules[appKeys.password]}
                     hasFeedback
                 >
                     <Input.Password
@@ -114,7 +114,7 @@ export default function SignIn() {
                 router.push(pageRoutes.forgotPasswordPage);
                 // router.push({
                 //     pathname: pageRoutes.forgotPasswordPage,
-                //     query: { data: JSON.stringify({ [appKey.emailAddress]: form.getFieldValue(appKey.emailAddress) }) },
+                //     query: { data: JSON.stringify({ [appKeys.emailAddress]: form.getFieldValue(appKeys.emailAddress) }) },
                 // });
             }}>
                 {appString.forgotPassword}

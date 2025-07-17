@@ -4,7 +4,7 @@ import {Suspense, useEffect, useRef} from 'react';
 import {usePathname, useRouter} from 'next/navigation';
 import { useAppData } from './masterData/AppDataContext';
 import { getLocalData, storeLoginData } from './dataStorage/DataPref';
-import appKey from './utils/appKey';
+import appKeys from './utils/appKeys';
 import apiCall, { HttpMethod } from './api/apiServiceProvider';
 import { endpoints } from './api/apiEndpoints';
 import pageRoutes from './utils/pageRoutes';
@@ -31,7 +31,7 @@ export default function InnerAppLayout({ children }) {
                 storeLoginData(response?.data?.loginUserData, false);
 
                 if(pathname === '/') {
-                    const token = getLocalData(appKey.jwtToken);
+                    const token = getLocalData(appKeys.jwtToken);
                     if (token) {
                         router.push(pageRoutes.dashboard);
                     } else {
@@ -53,7 +53,7 @@ export default function InnerAppLayout({ children }) {
         if(detected.isElectron) {
             router.push(pageRoutes.tracker);
         } else {
-            const isLoggedIn = getLocalData(appKey.isLogin) === 'true';
+            const isLoggedIn = getLocalData(appKeys.isLogin) === 'true';
             if (isLoggedIn) {
                 fetchMasterData();
             }

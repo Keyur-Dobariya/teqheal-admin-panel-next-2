@@ -19,7 +19,7 @@ import {
 import { format } from 'date-fns';
 import {getLocalData} from "../../dataStorage/DataPref";
 import {capitalizeLastPathSegment, profilePhotoManager} from "../../utils/utils";
-import appKey from "../../utils/appKey";
+import appKeys from "../../utils/appKeys";
 import {CreditCard, Facebook, Instagram, Linkedin, User} from "../../utils/icons";
 import appColor from "../../utils/appColor";
 import EmpAddUpdateModel from "../../models/EmpAddUpdateModel";
@@ -85,7 +85,7 @@ export default function CardProfilePage({employeeCode}) {
                                 />
                                 <div className="flex flex-col gap-2 mt-2 md:mt-0">
                                     <div className="font-semibold text-lg md:text-base">
-                                        {userProfile.fullName} {userProfile._id === getLocalData(appKey._id) ? "(You)" : ''}
+                                        {userProfile.fullName} {userProfile._id === getLocalData(appKeys._id) ? "(You)" : ''}
                                     </div>
                                     <div className="text-sm text-gray-600">
                                         {userProfile.role} | {userProfile.employeeCode}
@@ -146,8 +146,7 @@ export default function CardProfilePage({employeeCode}) {
                 <EmpAddUpdateModel
                     isModelOpen={isModelOpen}
                     setIsModelOpen={setIsModelOpen}
-                    employeeData={userProfile}
-                    isEditing={true}
+                    selectedRecord={userProfile}
                     onSuccessCallback={handleSuccess}
                 />
             )}

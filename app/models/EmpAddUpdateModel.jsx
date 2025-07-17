@@ -29,7 +29,7 @@ import {
 import {isAdmin} from "../dataStorage/DataPref";
 import {profilePhotoManager} from "../utils/utils";
 import dayjs from "dayjs";
-import appKey from "../utils/appKey";
+import appKeys from "../utils/appKeys";
 import validationRules from "../utils/validationRules";
 import {CreditCard, Facebook, Globe, Instagram, Key, Linkedin, ToggleLeft, User} from "../utils/icons";
 import appColor from "../utils/appColor";
@@ -78,7 +78,7 @@ const FormUi = ({form, isEditing, uploadButton, fileList, setFileList, customReq
                             <Col xs={24} md={4}>
                                 <div className="flex justify-center md:justify-start">
                                     <Upload
-                                        name={appKey.profilePhoto}
+                                        name={appKeys.profilePhoto}
                                         listType="picture-circle"
                                         fileList={fileList}
                                         multiple={false}
@@ -125,7 +125,7 @@ const FormUi = ({form, isEditing, uploadButton, fileList, setFileList, customReq
                             )} styles={{body: {padding: 15}}}>
                             <Row gutter={16}>
                                 <Col xs={24} sm={12}>
-                                    <Form.Item name={appKey.approvalStatus} label={appString.approvalStatus}>
+                                    <Form.Item name={appKeys.approvalStatus} label={appString.approvalStatus}>
                                         <Select
                                             options={Object.values(ApprovalStatus).map(v => ({label: v, value: v}))}
                                         />
@@ -134,7 +134,7 @@ const FormUi = ({form, isEditing, uploadButton, fileList, setFileList, customReq
                                 <Col xs={24} sm={12}>
                                     <Row gutter={16}>
                                         <Col xs={12}>
-                                            <Form.Item name={appKey.role} label={appString.role}>
+                                            <Form.Item name={appKeys.role} label={appString.role}>
                                                 <Select
                                                     options={[
                                                         {label: appString.admin, value: UserRole.Admin},
@@ -144,7 +144,7 @@ const FormUi = ({form, isEditing, uploadButton, fileList, setFileList, customReq
                                             </Form.Item>
                                         </Col>
                                         <Col xs={12}>
-                                            <Form.Item name={appKey.isActive} label={appString.active}
+                                            <Form.Item name={appKeys.isActive} label={appString.active}
                                                        valuePropName="checked">
                                                 <Switch/>
                                             </Form.Item>
@@ -163,7 +163,7 @@ const FormUi = ({form, isEditing, uploadButton, fileList, setFileList, customReq
                         )} styles={{body: {padding: 15}}}>
                         <Row gutter={16}>
                             <Col xs={24} sm={12}>
-                                <Form.Item name={appKey.fullName} label={appString.fullName}
+                                <Form.Item name={appKeys.fullName} label={appString.fullName}
                                            rules={[{required: true, message: 'Full name is required'}]}>
                                     <Input
                                         placeholder={`Enter ${appString.fullName.toLowerCase()}`}/>
@@ -173,7 +173,7 @@ const FormUi = ({form, isEditing, uploadButton, fileList, setFileList, customReq
                             <Col xs={24} sm={12}>
                                 <Row gutter={16}>
                                     <Col xs={12}>
-                                        <Form.Item name={appKey.dateOfBirth} label={appString.dateOfBirth}
+                                        <Form.Item name={appKeys.dateOfBirth} label={appString.dateOfBirth}
                                                    rules={[{required: true, message: 'Date of birth is required'}]}>
                                             <DatePicker
                                                 placeholder={`Select ${appString.dateOfBirth.toLowerCase()}`}
@@ -181,7 +181,7 @@ const FormUi = ({form, isEditing, uploadButton, fileList, setFileList, customReq
                                         </Form.Item>
                                     </Col>
                                     <Col xs={12}>
-                                        <Form.Item name={appKey.gender} label={appString.gender}
+                                        <Form.Item name={appKeys.gender} label={appString.gender}
                                                    rules={[{required: true, message: 'Gender is required'}]}>
                                             <Select
                                                 options={Object.values(Gender).map(g => ({label: g, value: g}))}
@@ -193,11 +193,11 @@ const FormUi = ({form, isEditing, uploadButton, fileList, setFileList, customReq
                             </Col>
 
                             {[
-                                {key: appKey.mobileNumber, label: appString.mobileNumber, required: true},
-                                {key: appKey.emergencyContactNo, label: appString.emergencyContactNo, required: true},
-                                {key: appKey.emailAddress, label: appString.emailAddress, required: true, type: 'email'},
-                                {key: appKey.pincode, label: appString.pincode, required: false}
-                            ].map(({key, label, required, type}) => (
+                                {key: appKeys.mobileNumber, label: appString.mobileNumber, required: true, maxLength: 10, type: 'tel'},
+                                {key: appKeys.emergencyContactNo, label: appString.emergencyContactNo, required: true, maxLength: 10, type: 'tel'},
+                                {key: appKeys.emailAddress, label: appString.emailAddress, required: true, type: 'email'},
+                                {key: appKeys.pincode, label: appString.pincode, required: false, maxLength: 6, type: 'tel'}
+                            ].map(({key, label, required, type, maxLength}) => (
                                 <Col xs={24} sm={12} key={key}>
                                     <Form.Item name={key} label={label}
                                                rules={[{required, message: `${label} is required`}, {
@@ -205,8 +205,8 @@ const FormUi = ({form, isEditing, uploadButton, fileList, setFileList, customReq
                                                    message: `Enter a valid ${label.toLowerCase()}`
                                                }]}>
                                         <Input
-                                            maxLength={key.includes("Number") || key.includes("No") ? 10 : undefined}
-                                            type={type === "email" ? "email" : "text"}
+                                            maxLength={maxLength}
+                                            type={type || "text"}
                                             placeholder={`Enter ${label.toLowerCase()}`}
                                         />
                                     </Form.Item>
@@ -214,9 +214,9 @@ const FormUi = ({form, isEditing, uploadButton, fileList, setFileList, customReq
                             ))}
 
                             {[
-                                {key: appKey.bloodGroup, label: appString.bloodGroup, options: selectOptions(BloodGroup)},
+                                {key: appKeys.bloodGroup, label: appString.bloodGroup, options: selectOptions(BloodGroup)},
                                 {
-                                    key: appKey.technology,
+                                    key: appKeys.technology,
                                     label: appString.technology,
                                     options: selectOptions(Technology),
                                     isMulti: true
@@ -233,7 +233,7 @@ const FormUi = ({form, isEditing, uploadButton, fileList, setFileList, customReq
                                 </Col>
                             ))}
 
-                            {[appKey.address, appKey.skills].map((key) => (
+                            {[appKeys.address, appKeys.skills].map((key) => (
                                 <Col xs={24} sm={12} key={key}>
                                     <Form.Item name={key} label={appString[key]}>
                                         <TextArea
@@ -248,7 +248,7 @@ const FormUi = ({form, isEditing, uploadButton, fileList, setFileList, customReq
                                 <>
                                     <Col xs={24} sm={12}>
                                         <Form.Item
-                                            name={appKey.password}
+                                            name={appKeys.password}
                                             label={appString.password}
                                             rules={validationRules.password}
                                         >
@@ -258,7 +258,7 @@ const FormUi = ({form, isEditing, uploadButton, fileList, setFileList, customReq
                                     </Col>
                                     <Col xs={24} sm={12}>
                                         <Form.Item
-                                            name={appKey.confirmPassword}
+                                            name={appKeys.confirmPassword}
                                             label={appString.confirmPassword}
                                             dependencies={['password']}
                                             rules={validationRules.confirmPassword(form.getFieldValue)}
@@ -279,18 +279,18 @@ const FormUi = ({form, isEditing, uploadButton, fileList, setFileList, customReq
                             </div>
                         )} styles={{body: {padding: 15}}}>
                         <Row gutter={16}>
-                            {[appKey.aadharNumber, appKey.panNumber, appKey.bankAccountNumber, appKey.ifscCode].map(key => (
+                            {[appKeys.aadharNumber, appKeys.panNumber, appKeys.bankAccountNumber, appKeys.ifscCode].map(key => (
                                 <Col xs={24} sm={12} key={key}>
                                     <Form.Item name={key} label={appString[key]}>
                                         <Input
-                                            maxLength={key === appKey.aadharNumber ? 12 : key === appKey.panNumber ? 10 : undefined}
+                                            maxLength={key === appKeys.aadharNumber ? 12 : key === appKeys.panNumber ? 10 : undefined}
                                             placeholder={`Enter ${appString[key].toLowerCase()}`}
                                         />
                                     </Form.Item>
                                 </Col>
                             ))}
 
-                            {[appKey.dateOfJoining, isAdmin() && appKey.dateOfLeaving].filter(Boolean).map(key => (
+                            {[appKeys.dateOfJoining, isAdmin() && appKeys.dateOfLeaving].filter(Boolean).map(key => (
                                 <Col xs={24} sm={12} key={key}>
                                     <Form.Item name={key} label={appString[key]}>
                                         <DatePicker
@@ -326,8 +326,7 @@ const FormUi = ({form, isEditing, uploadButton, fileList, setFileList, customReq
 export default function EmpAddUpdateModel({
                                               isModelOpen,
                                               setIsModelOpen,
-                                              employeeData,
-                                              isEditing = false,
+                                              selectedRecord,
                                               onSuccessCallback,
                                           }) {
     const [isLoading, setIsLoading] = useState(false);
@@ -335,28 +334,30 @@ export default function EmpAddUpdateModel({
     const [fileList, setFileList] = useState([]);
     const [imageUploadLoading, setImageUploadLoading] = useState(false);
     const containerRef = useRef(null);
+    const isEditing = !!selectedRecord;
+    const modelTitle = isEditing ? appString.updateEmployee : appString.addEmployee;
 
     useEffect(() => {
         if (isModelOpen) {
             form.resetFields();
 
-            if (isEditing && employeeData) {
-                if (employeeData.profilePhoto) {
+            if (isEditing && selectedRecord) {
+                if (selectedRecord.profilePhoto) {
                     setFileList([
                         {
                             uid: "1",
                             name: "image.png",
-                            url: profilePhotoManager({url: employeeData.profilePhoto, gender: employeeData.gender}),
+                            url: profilePhotoManager({url: selectedRecord.profilePhoto, gender: selectedRecord.gender}),
                         },
                     ]);
                 }
 
                 const formData = {
-                    ...employeeData,
-                    dateOfBirth: employeeData.dateOfBirth ? dayjs(employeeData.dateOfBirth) : null,
-                    dateOfJoining: employeeData.dateOfJoining ? dayjs(employeeData.dateOfJoining) : null,
-                    dateOfLeaving: employeeData.dateOfLeaving ? dayjs(employeeData.dateOfLeaving) : null,
-                    technology: employeeData.technology ? employeeData.technology.filter(entry => entry !== '') : [],
+                    ...selectedRecord,
+                    dateOfBirth: selectedRecord.dateOfBirth ? dayjs(selectedRecord.dateOfBirth) : null,
+                    dateOfJoining: selectedRecord.dateOfJoining ? dayjs(selectedRecord.dateOfJoining) : null,
+                    dateOfLeaving: selectedRecord.dateOfLeaving ? dayjs(selectedRecord.dateOfLeaving) : null,
+                    technology: selectedRecord.technology ? selectedRecord.technology.filter(entry => entry !== '') : [],
                 };
                 form.setFieldsValue(formData);
 
@@ -370,7 +371,7 @@ export default function EmpAddUpdateModel({
                 setFileList([]);
             }
         }
-    }, [isModelOpen, isEditing, employeeData, form]);
+    }, [isModelOpen, isEditing, selectedRecord, form]);
 
     const handleCancel = () => {
         setIsModelOpen(false);
@@ -408,10 +409,10 @@ export default function EmpAddUpdateModel({
             }
 
             if (formValues.profilePhoto && formValues.profilePhoto.originFileObj) {
-                formData.append(appKey.profilePhoto, formValues.profilePhoto.originFileObj);
+                formData.append(appKeys.profilePhoto, formValues.profilePhoto.originFileObj);
             }
 
-            const url = isEditing ? `${endpoints.addUpdateUser}${employeeData._id}` : endpoints.addUpdateUser;
+            const url = isEditing ? `${endpoints.addUpdateUser}${selectedRecord._id}` : endpoints.addUpdateUser;
 
             await apiCall({
                 method: HttpMethod.POST,
@@ -453,9 +454,9 @@ export default function EmpAddUpdateModel({
             title={
                 <div className="flex items-center gap-1">
                     <div
-                        className="font-medium text-base">{isEditing ? appString.updateEmployee : appString.addEmployee}</div>
-                    {employeeData?.employeeCode &&
-                        <div className="font-medium text-cyan-800">{`( ${employeeData?.employeeCode} )`}</div>}
+                        className="font-medium text-base">{modelTitle}</div>
+                    {selectedRecord?.employeeCode &&
+                        <div className="font-medium text-cyan-800">{`( ${selectedRecord?.employeeCode} )`}</div>}
                 </div>
             }
             maskClosable={false}
@@ -465,7 +466,7 @@ export default function EmpAddUpdateModel({
             onOk={handleAddUpdateUserApi}
             onCancel={handleCancel}
             confirmLoading={isLoading}
-            okText={isEditing ? appString.updateEmployee : appString.addEmployee}
+            okText={modelTitle}
             cancelText="Cancel"
         >
             <div

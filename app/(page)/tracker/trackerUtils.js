@@ -1,6 +1,6 @@
 import apiCall, {HttpMethod} from "../../api/apiServiceProvider";
 import {endpoints} from "../../api/apiEndpoints";
-import appKey from "../../utils/appKey";
+import appKeys from "../../utils/appKeys";
 import {useEffect} from "react";
 import {getLocalData} from "../../dataStorage/DataPref";
 
@@ -50,13 +50,13 @@ const takeScreenshot = async (showScreenShot) => {
     const imageData = await window.electronAPI.captureScreen();
     const { imageUrl, mouseEventCount, keyboardKeyPressCount } = imageData;
 
-    const userId = getLocalData(appKey._id);
+    const userId = getLocalData(appKeys._id);
 
     const formData = new FormData();
-    formData.append(appKey.userId, userId);
-    formData.append(appKey.screenshot, imageUrl);
-    formData.append(appKey.keyPressCount, mouseEventCount);
-    formData.append(appKey.mouseEventCount, keyboardKeyPressCount);
+    formData.append(appKeys.userId, userId);
+    formData.append(appKeys.screenshot, imageUrl);
+    formData.append(appKeys.keyPressCount, mouseEventCount);
+    formData.append(appKeys.mouseEventCount, keyboardKeyPressCount);
 
     await handleScreenShotUpload(userId, imageUrl, mouseEventCount, keyboardKeyPressCount);
 
@@ -148,11 +148,11 @@ export const handlePunchBreak = async (userId, data, setIsLoading, successCallba
 export const handleScreenShotUpload = async (userId, imageUrl, mouseEventCount, keyboardKeyPressCount) => {
     const formData = new FormData();
 
-    formData.append(appKey.userId, userId);
+    formData.append(appKeys.userId, userId);
     const blob = base64ToBlob(imageUrl);
-    formData.append(appKey.screenshot, blob, 'screenshot.png');
-    formData.append(appKey.keyPressCount, mouseEventCount);
-    formData.append(appKey.mouseEventCount, keyboardKeyPressCount);
+    formData.append(appKeys.screenshot, blob, 'screenshot.png');
+    formData.append(appKeys.keyPressCount, mouseEventCount);
+    formData.append(appKeys.mouseEventCount, keyboardKeyPressCount);
 
     try {
         await apiCall({

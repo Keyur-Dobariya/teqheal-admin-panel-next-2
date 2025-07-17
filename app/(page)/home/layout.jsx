@@ -29,7 +29,7 @@ import pageRoutes from "../../utils/pageRoutes";
 import {router} from "next/client";
 import {usePathname, useRouter} from "next/navigation";
 import appColor from "../../utils/appColor";
-import appKey from "../../utils/appKey";
+import appKeys from "../../utils/appKeys";
 import {getLocalData, storeLoginData} from "../../dataStorage/DataPref";
 import {LoadingComponent} from "../../components/LoadingComponent";
 import Link from "next/link";
@@ -105,17 +105,17 @@ export default function HomePage({children}) {
                 items={items.map(item => ({
                     ...item,
                     label: <div className="font-medium" style={{
-                        color: item.key === appKey.logout ? appColor.danger : undefined,
+                        color: item.key === appKeys.logout ? appColor.danger : undefined,
                     }}>{item.label}</div>,
                     // label: <div className="flex items-center gap-2 font-medium" style={{
-                    //     color: item.key === appKey.logout ? appColor.danger : undefined,
+                    //     color: item.key === appKeys.logout ? appColor.danger : undefined,
                     // }}><div>{item.label}</div><LoadingOutlined hidden={!isRouterLoading} /></div>,
                 }))}
                 onClick={({ key }) => {
-                    if (key !== appKey.logout) {
+                    if (key !== appKeys.logout) {
                         setTimeout(() => {
                             if (pageRoutes.myProfile.includes(key)) {
-                                router.push(`${pageRoutes.myProfile}?user=${getLocalData(appKey.employeeCode)}`);
+                                router.push(`${pageRoutes.myProfile}?user=${getLocalData(appKeys.employeeCode)}`);
                             } else {
                                 router.push(key);
                             }
@@ -264,9 +264,9 @@ export default function HomePage({children}) {
             position: 'bottom',
         },
         {
-            key: appKey.logout,
+            key: appKeys.logout,
             icon: <PoweroffOutlined style={{ color: appColor.danger }} />,
-            label: capitalizeLastPathSegment(appKey.logout),
+            label: capitalizeLastPathSegment(appKeys.logout),
             position: 'bottom',
         },
     ];
