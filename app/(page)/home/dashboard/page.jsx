@@ -9,7 +9,6 @@ import CardGreeting from "./CardGreeting";
 import CardEarlyOutReminder from "./CardEarlyOutReminder";
 import CardNoticeBoard from "./CardNoticeBoard";
 import CardEmpAttendanceReport from "./CardEmpAttendanceReport";
-import CardEmpLeaveReport from "./CardEmpLeaveReport";
 
 export default function Page() {
     return (

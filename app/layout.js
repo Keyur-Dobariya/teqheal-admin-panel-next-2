@@ -36,7 +36,8 @@ export default function RootLayout({children}) {
             Card: {bodyPadding: 0, headerPadding: 15},
             Timeline: {itemPaddingBottom: 0},
             Dropdown: {fontSize: 14},
-            Table: { /*headerBorderRadius: 0, */cellFontSize: 15},
+            Tabs: {/*margin: 0, */fontSize: 14},
+            Table: { cellFontSize: 15},
         },
         token: {
             colorPrimary: appColor.secondPrimary,
