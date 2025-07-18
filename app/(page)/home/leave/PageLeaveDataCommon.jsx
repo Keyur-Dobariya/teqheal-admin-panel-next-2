@@ -18,7 +18,7 @@ import {getLocalData, isAdmin} from "../../../dataStorage/DataPref";
 import {Button, Card, Input, Popconfirm, Switch, Table, Tooltip} from "antd";
 import {Edit, Search, ToggleRight, Trash2, UserPlus} from "../../../utils/icons";
 import {useAppData} from "../../../masterData/AppDataContext";
-import {useState} from "react";
+import {useEffect, useState} from "react";
 import apiCall, {HttpMethod} from "../../../api/apiServiceProvider";
 import {endpoints} from "../../../api/apiEndpoints";
 import {LoadingOutlined} from "@ant-design/icons";
@@ -63,7 +63,7 @@ export default function PageLeaveDataCommon({isReportPage}) {
         return params.toString();
     };
 
-    React.useEffect(() => {
+    useEffect(() => {
         const query = getQueryParams();
         // if (isReportPage) {
         getLeaveReportData(query);
