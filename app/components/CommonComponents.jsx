@@ -1,6 +1,8 @@
-import {message, Tag} from "antd";
-import {formatMilliseconds} from "../utils/utils";
+import {Avatar, message, Select, Tag} from "antd";
+import {formatMilliseconds, profilePhotoManager} from "../utils/utils";
 import appColor from "../utils/appColor";
+import appString from "../utils/appString";
+const { Option } = Select;
 
 let messageApi = null;
 
@@ -39,3 +41,56 @@ export const antTag = (value, color) => {
 export const timeTag = (value, color) => {
     return <Tag bordered={false} color={color} style={{width: 80, height: 22, display: "flex", alignItems: "center", justifyContent: "center", fontWeight: "500", fontSize: 13, textAlign: "center"}}>{value}</Tag>;
 }
+
+export const UserSelect = ({
+                        users = [],
+                        value,
+                        onChange,
+                        allowClear = true,
+                        showSearch = true,
+                        style = {},
+                        disabled = false,
+                        className = "",
+                        size = "large",
+                        ...restProps
+                    }) => {
+    return (
+        <Select
+            value={value}
+            onChange={onChange}
+            placeholder={appString.selectUser}
+            allowClear={allowClear}
+            showSearch={showSearch}
+            size={size}
+            disabled={disabled}
+            className={className}
+            style={{ width: "100%", ...style }}
+            filterOption={(input, option) =>
+                (option?.label ?? "")
+                    .toString()
+                    .toLowerCase()
+                    .includes(input.toLowerCase())
+            }
+            {...restProps}
+        >
+            {users && users.map((user) => (
+                <Option
+                    key={user._id}
+                    value={user._id}
+                    label={user.fullName}
+                >
+                    <div className="flex items-center gap-3 text-[14px]">
+                        <Avatar
+                            size="small"
+                            src={profilePhotoManager({
+                                url: user.profilePhoto,
+                                gender: user.gender,
+                            })}
+                        />
+                        {user.fullName}
+                    </div>
+                </Option>
+            ))}
+        </Select>
+    );
+};

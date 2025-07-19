@@ -1,44 +1,84 @@
 'use client';
 
-import {capitalizeLastPathSegment, convertCamelCase} from "../../../utils/utils";
+import {capitalizeLastPathSegment, convertCamelCase, profilePhotoManager} from "../../../utils/utils";
 import pageRoutes from "../../../utils/pageRoutes";
 import appString from "../../../utils/appString";
 import {
+    ApprovalStatus,
     dayTypeLabel,
     getLabelByKey,
-    leaveCategoryLabel,
+    leaveCategoryLabel, leaveCategoryNewLabel,
     leaveHalfDayTypeLabel,
     leaveLabelKeys,
     leaveTypeLabel
 } from "../../../utils/enum";
 import dayjs from "dayjs";
 import appKeys from "../../../utils/appKeys";
-import {antTag} from "../../../components/CommonComponents";
+import {antTag, UserSelect} from "../../../components/CommonComponents";
 import {getLocalData, isAdmin} from "../../../dataStorage/DataPref";
-import {Button, Card, Input, Popconfirm, Switch, Table, Tooltip} from "antd";
-import {Edit, Search, ToggleRight, Trash2, UserPlus} from "../../../utils/icons";
-import {useAppData} from "../../../masterData/AppDataContext";
-import {useEffect, useState} from "react";
+import {
+    Avatar,
+    Button,
+    Card,
+    Col,
+    DatePicker,
+    Grid,
+    Input,
+    Popconfirm,
+    Row,
+    Select,
+    Switch,
+    Table,
+    Tooltip
+} from "antd";
+import {
+    Box, Clock,
+    Edit,
+    FileMinus,
+    FilePlus,
+    PenTool,
+    PieChart,
+    Search,
+    ToggleRight,
+    Trash2,
+    Map
+} from "../../../utils/icons";
+import {AppDataFields, useAppData} from "../../../masterData/AppDataContext";
+import React, {useEffect, useMemo, useState} from "react";
 import apiCall, {HttpMethod} from "../../../api/apiServiceProvider";
 import {endpoints} from "../../../api/apiEndpoints";
-import {LoadingOutlined} from "@ant-design/icons";
-import appColor from "../../../utils/appColor";
+import {
+    GithubOutlined,
+    LoadingOutlined,
+    SmileOutlined,
+    UserAddOutlined,
+    UserDeleteOutlined,
+    UserOutlined
+} from "@ant-design/icons";
+import appColor, {getDarkColor, getTransColor} from "../../../utils/appColor";
+import imagePaths from "../../../utils/imagesPath";
+import LeaveAddUpdateModel from "../../../models/LeaveAddUpdateModel";
+
+const {Option} = Select;
+
+const {useBreakpoint} = Grid;
 
 export default function PageLeaveDataCommon({isReportPage}) {
 
     const {activeUsersData} = useAppData();
+    const screens = useBreakpoint();
+    const isMobile = !screens.md;
 
+    const [allData, setAllData] = useState([]);
     const [isModelOpen, setIsModelOpen] = useState(false);
-    const [isLeaveEditing, setIsLeaveEditing] = useState(false);
-    const [isLeaveStatusChange, setIsLeaveStatusChange] = useState(false);
+    const [searchText, setSearchText] = useState('');
+    const [selectedRecord, setSelectedRecord] = useState(null);
     const [isLoading, setIsLoading] = useState(false);
-    const [loadingLeaveId, setLoadingLeaveId] = useState(null);
-    const [leaveRecord, setLeaveRecord] = useState([]);
-    const [leaveRecordCount, setLeaveRecordCount] = useState([]);
-    const [unexpectedLeaveRecord, setUnexpectedLeaveRecord] = useState([]);
-    const [leaveFullRecord, setLeaveFullRecord] = useState([]);
-    const [selectedRecord, setSelectedRecord] = useState({});
     const [actionLoading, setActionLoading] = useState(null);
+
+    const [isLeaveStatusChange, setIsLeaveStatusChange] = useState(false);
+    const [loadingLeaveId, setLoadingLeaveId] = useState(null);
+    const [leaveRecordCount, setLeaveRecordCount] = useState([]);
 
     const now = new Date();
     const prevMonth = now.getMonth();
@@ -76,22 +116,35 @@ export default function PageLeaveDataCommon({isReportPage}) {
             url: endpoints.allLeaveLength + query,
             setIsLoading,
             showSuccessMessage: false,
-            successCallback: (data) => {
-                setLeaveRecordCount(data.count);
-                handleDataConditionWise(data.data, false);
-            },
+            successCallback: handleUpdatedData,
         });
     };
 
-    const handleDataConditionWise = (data, isSearchField) => {
-        const filteredLeave = isAdmin() ? data : data.filter((leave) => leave.user._id === getLocalData(loginDataKeys._id));
-        const filterLeaveRecord = filteredLeave.filter((leave) => leave.isUnexpected !== true);
-        const filterUnexpectedLeaveRecord = filteredLeave.filter((leave) => leave.isUnexpected === true);
-        setLeaveRecord(filterLeaveRecord);
-        setUnexpectedLeaveRecord(filterUnexpectedLeaveRecord);
-        if (!isSearchField) {
-            setLeaveFullRecord(data);
-        }
+    const filteredData = useMemo(() => {
+        if (!allData) return [];
+        const roleWiseData = isAdmin() ? allData : allData.filter((leave) => leave.user._id === getLocalData(appKeys._id));
+        const query = searchText.toLowerCase();
+        return roleWiseData.filter(
+            data =>
+                (
+                    data?.user?.fullName.toLowerCase().includes(query) ||
+                    data?.leaveType?.toLowerCase().includes(query) ||
+                    data?.leaveCategory?.toLowerCase().includes(query) ||
+                    data?.reason?.toLowerCase().includes(query) ||
+                    data?.rejectedReason?.toLowerCase().includes(query)
+                )
+        );
+    }, [allData, searchText]);
+
+    const handleUpdatedData = (data) => {
+        setLeaveRecordCount(data.count);
+        setAllData(data.data);
+    };
+
+    const conditionWiseData = (isUnexpected) => {
+        const leaveRecord = filteredData.filter((leave) => leave.isUnexpected !== true);
+        const unexpectedRecord = filteredData.filter((leave) => leave.isUnexpected === true);
+        return isUnexpected ? unexpectedRecord : leaveRecord;
     };
 
     const handleAddUpdateLeaveApi = async (_id, data) => {
@@ -102,7 +155,7 @@ export default function PageLeaveDataCommon({isReportPage}) {
                 data: data,
                 setIsLoading: false,
                 successCallback: (data) => {
-                    handleDataConditionWise(data.data, false);
+                    setAllData(data.data, false);
                 },
             });
         } catch (error) {
@@ -148,9 +201,7 @@ export default function PageLeaveDataCommon({isReportPage}) {
             method: HttpMethod.DELETE,
             url: `${endpoints.deleteLeave}${record._id}`,
             setIsLoading,
-            successCallback: (data) => {
-                handleDataConditionWise(data.data, false);
-            },
+            successCallback: handleUpdatedData,
         });
     };
 
@@ -160,7 +211,13 @@ export default function PageLeaveDataCommon({isReportPage}) {
             title: appString.fullName,
             dataIndex: appKeys.user,
             key: 'user.fullName',
-            render: (text, record) => record.user ? record.user.fullName : '',
+            render: (text, record) => (
+                <div className="flex items-center gap-2">
+                    <Avatar src={profilePhotoManager({url: record?.user?.profilePhoto, gender: record?.user?.gender})}
+                            size="default"/>
+                    <div className="flex-1 font-medium">{record?.user?.fullName}</div>
+                </div>
+            ),
         },
         {
             title: appString.leaveType,
@@ -266,83 +323,34 @@ export default function PageLeaveDataCommon({isReportPage}) {
                         <div className="flex justify-center items-center gap-5">
                             {
                                 isAdmin() ? <div className="cursor-pointer"
-                                    onClick={() => {
-                                        setIsLeaveStatusChange(true);
-                                        handleEditClick(record)
-                                    }}
+                                                 onClick={() => {
+                                                     setIsLeaveStatusChange(true);
+                                                     handleEditClick(record)
+                                                 }}
                                 >
                                     <Tooltip title={appString.changeStatus}>
-                                        <ToggleRight className="successIconStyle"/>
+                                        <ToggleRight color={appColor.success} size={20}/>
                                     </Tooltip>
                                 </div> : null
                             }
                             {
                                 isAdmin() || record.status === leaveLabelKeys.pending ? <Tooltip title={appString.edit}>
                                     {actionLoading === record._id ? (
-                                        <LoadingOutlined />
+                                        <LoadingOutlined/>
                                     ) : (
-                                        <div className="cursor-pointer" onClick={() => handleEditClick(record)} style={{cursor: 'pointer'}}>
-                                            <Edit color={appColor.secondPrimary} />
+                                        <div className="cursor-pointer" onClick={() => handleEditClick(record)}
+                                             style={{cursor: 'pointer'}}>
+                                            <Edit color={appColor.secondPrimary}/>
                                         </div>
                                     )}
                                 </Tooltip> : null
                             }
                             {
-                                isAdmin() ? <Popconfirm title={appString.deleteConfirmation} onConfirm={() => deleteRecord(record)}>
+                                isAdmin() ? <Popconfirm title={appString.deleteConfirmation}
+                                                        onConfirm={() => deleteRecord(record)}>
                                     <Tooltip title={appString.delete}>
                                         <Trash2 color={appColor.danger} style={{cursor: 'pointer'}}/>
                                     </Tooltip>
-                                </Popconfirm> : null
-                            }
-                        </div>
-                        <div
-                            style={{
-                                display: "flex",
-                                justifyContent: "center",
-                                alignItems: "center",
-                            }}
-                        >
-                            {
-                                isAdmin() ? <div
-                                    style={{marginRight: 25, cursor: "pointer"}}
-                                    onClick={() => {
-                                        setIsLeaveStatusChange(true);
-                                        handleEditClick(record)
-                                    }}
-                                >
-                                    <Tooltip title={appString.changeStatus}>
-                                        <ToggleRight className="successIconStyle"/>
-                                    </Tooltip>
-                                </div> : null
-                            }
-                            {
-                                isAdmin() ? <div
-                                    style={{marginRight: 25, cursor: "pointer"}}
-                                    onClick={() => handleEditClick(record)}
-                                >
-                                    <Tooltip title={appString.edit}>
-                                        <Edit className="commonIconStyle"/>
-                                    </Tooltip>
-                                </div> : record.status === leaveLabelKeys.pending ? <div
-                                    style={{marginRight: 25, cursor: "pointer"}}
-                                    onClick={() => handleEditClick(record)}
-                                >
-                                    <Tooltip title={appString.edit}>
-                                        <Edit className="commonIconStyle"/>
-                                    </Tooltip>
-                                </div> : null
-                            }
-                            {
-                                isAdmin() ? <Popconfirm
-                                    title={appString.deleteConfirmation}
-                                    onConfirm={() => deleteRecord(record)}
-                                    style={{margin: "0"}}
-                                >
-                                    <div style={{marginRight: 25, cursor: "pointer"}}>
-                                        <Tooltip title={appString.delete} placement="bottom">
-                                            <Trash2 className="deleteIconStyle"/>
-                                        </Tooltip>
-                                    </div>
                                 </Popconfirm> : null
                             }
                         </div>
@@ -353,9 +361,9 @@ export default function PageLeaveDataCommon({isReportPage}) {
     ];
 
     const extraFieldCommon = (title, value) => {
-        return value && true ? <div className="extraFieldRow">
-            <div className="extraFieldRowTitle">{title}:</div>
-            <div className="extraFieldRowValue">{value}</div>
+        return value && true ? <div className="flex items-center text-[14px] gap-2 my-1">
+            <div className="text-gray-600 text-[13px]">{title}:</div>
+            <div className="text-gray-950">{value}</div>
         </div> : null;
     }
 
@@ -373,35 +381,185 @@ export default function PageLeaveDataCommon({isReportPage}) {
             </div>
         );
     }
+
+    const TableFilterHeader = () => {
+        return (
+            <Row gutter={[16, 16]} align="middle" justify="end" wrap>
+                {isAdmin() && (
+                    <Col xs={24} sm={8} md={8} lg={8} xl={7} xxl={5}>
+                        <UserSelect users={activeUsersData} value={filters.user} onChange={(key) =>
+                            setFilters((prev) => ({...prev, user: key}))
+                        }/>
+                    </Col>
+                )}
+                <Col xs={24} sm={6} md={6} lg={6} xl={5} xxl={4}>
+                    <Select
+                        allowClear
+                        placeholder={appString.leaveCategory}
+                        value={filters.leaveCategory}
+                        style={{width: "100%", height: "40px", borderRadius: 10}}
+                        onChange={(value) =>
+                            setFilters((prev) => ({...prev, leaveCategory: value}))
+                        }
+                    >
+                        {leaveCategoryNewLabel.map((item) => (
+                            <Option key={item.value} value={item.value}>
+                                {item.label}
+                            </Option>
+                        ))}
+                    </Select>
+                </Col>
+                <Col xs={12} sm={5} md={5} lg={5} xl={4} xxl={3}>
+                    <DatePicker
+                        allowClear={false}
+                        picker="year"
+                        value={dayjs().year(filters.year)}
+                        onChange={(date) =>
+                            setFilters((prev) => ({...prev, year: date ? date.year() : null}))
+                        }
+                        style={{width: "100%", height: "40px"}}
+                    />
+                </Col>
+                <Col xs={12} sm={5} md={5} lg={5} xl={4} xxl={3}>
+                    <DatePicker
+                        allowClear={false}
+                        picker="month"
+                        format="MMMM"
+                        value={dayjs(`${filters.year}-${String(filters.month).padStart(2, '0')}`, 'YYYY-MM')}
+                        onChange={(date) =>
+                            setFilters((prev) => ({
+                                ...prev,
+                                month: date ? date.month() + 1 : null,
+                            }))
+                        }
+                        style={{width: "100%", height: "40px"}}
+                    />
+                </Col>
+            </Row>
+        );
+    };
+
+    const CommonGridBox = ({title, value, color, icon}) => {
+        return (
+            <Col xs={24} sm={12} md={12} lg={8} xl={4}>
+                <Card>
+                    <div className="flex items-center gap-3 p-4">
+                        <div className="w-9 h-9 min-w-9 min-h-9 rounded-full flex justify-center items-center"
+                             style={{backgroundColor: getTransColor(color)}}>
+                            {icon}
+                        </div>
+                        <div className="flex-1 min-w-0">
+                            <div className="text-[17px] font-medium" style={{color: appColor.primary}}>{value}</div>
+                            <div className="text-[13px] text-gray-500 truncate" title={title}>{title}</div>
+                        </div>
+                    </div>
+                </Card>
+            </Col>
+        );
+    }
+
     return (
         <>
             <Card>
-                {/*<Table*/}
-                {/*    rowKey={(record) => record._id}*/}
-                {/*    loading={isLoading}*/}
-                {/*    columns={columns}*/}
-                {/*    dataSource={filteredData}*/}
-                {/*    title={() => (*/}
-                {/*        <div className="flex justify-between items-center gap-2 flex-wrap">*/}
-                {/*            <Input*/}
-                {/*                placeholder={appString.searchHint}*/}
-                {/*                prefix={<Search/>}*/}
-                {/*                value={searchText}*/}
-                {/*                onChange={e => setSearchText(e.target.value)}*/}
-                {/*                className="w-full flex-1 max-w-90"*/}
-                {/*            />*/}
-                {/*            <Button*/}
-                {/*                type="primary"*/}
-                {/*                icon={<UserPlus/>}*/}
-                {/*                onClick={handleAddClick}*/}
-                {/*                loading={actionLoading === 'add'}*/}
-                {/*            >*/}
-                {/*                {!isMobile && appString.addClient}*/}
-                {/*            </Button>*/}
-                {/*        </div>*/}
-                {/*    )}*/}
-                {/*/>*/}
+                <div className="flex justify-between items-center gap-2 flex-wrap p-3">
+                    <Input
+                        placeholder={appString.searchHint}
+                        prefix={<Search/>}
+                        value={searchText}
+                        onChange={e => setSearchText(e.target.value)}
+                        className="w-full flex-1 max-w-90"
+                    />
+                    <Button
+                        type="primary"
+                        icon={<FilePlus/>}
+                        onClick={handleAddClick}
+                        loading={actionLoading === 'add'}
+                    >
+                        {!isMobile && appString.addLeave}
+                    </Button>
+                </div>
             </Card>
+            <div className="m-4"/>
+            {isReportPage && (<>
+                <Row gutter={[16, 16]}>
+                    <CommonGridBox
+                        title="Leave Time"
+                        value={`${leaveRecordCount?.totalLeaveHours || 0} h`}
+                        color="A"
+                        icon={<Clock style={{color: getDarkColor("A"), fontSize: 18}}/>}/>
+                    <CommonGridBox
+                        title="Total Leave"
+                        value={leaveRecordCount?.totalLeave || 0}
+                        color="V"
+                        icon={<FileMinus style={{color: getDarkColor("V"), fontSize: 18}}/>}/>
+                    <CommonGridBox
+                        title="Unexpected"
+                        value={leaveRecordCount?.unexpectedLeave || 0}
+                        color="C"
+                        icon={<PieChart style={{color: getDarkColor("C"), fontSize: 18}}/>}/>
+                    <CommonGridBox
+                        title="Total Unexpected"
+                        value={0}
+                        color="D"
+                        icon={<PenTool style={{color: getDarkColor("D"), fontSize: 18}}/>}/>
+                    <CommonGridBox
+                        title="Paid Leave"
+                        value={leaveRecordCount?.totalPaidLeave || 0}
+                        color="E"
+                        icon={<Box style={{color: getDarkColor("E"), fontSize: 18}}/>}/>
+                    <CommonGridBox
+                        title="Sandwich"
+                        value={leaveRecordCount?.sandwichLeaves || 0}
+                        color="F"
+                        icon={<Map style={{color: getDarkColor("F"), fontSize: 18}}/>}/>
+                </Row>
+                <div className="m-4"/>
+            </>)}
+            <Card>
+                <Table
+                    rowKey={(record) => record._id}
+                    columns={columns}
+                    expandable={{
+                        expandedRowRender: record => (
+                            tableExpandRows(record)
+                        ),
+                    }}
+                    title={() => (
+                        <TableFilterHeader/>
+                    )}
+                    scroll={{x: "max-content"}}
+                    dataSource={conditionWiseData(false)}
+                    loading={isLoading}
+                />
+            </Card>
+            <div className="m-4"/>
+            <Card>
+                <Table
+                    rowKey={(record) => record._id}
+                    columns={columns}
+                    expandable={{
+                        expandedRowRender: record => (
+                            tableExpandRows(record)
+                        ),
+                    }}
+                    title={() => (
+                        <div className="text-base font-medium">{appString.unexpectedLeaves}</div>
+                    )}
+                    scroll={{x: "max-content"}}
+                    dataSource={conditionWiseData(true)}
+                    loading={isLoading}
+                />
+            </Card>
+            <LeaveAddUpdateModel
+                setIsModelOpen={setIsModelOpen}
+                isModelOpen={isModelOpen}
+                selectedRecord={selectedRecord}
+                setIsLeaveStatusChange={setIsLeaveStatusChange}
+                isLeaveStatusChange={isLeaveStatusChange}
+                activeUsersData={activeUsersData}
+                onSuccessCallback={(data) => {
+                    handleUpdatedData(data);
+                }}/>
         </>
     );
 }

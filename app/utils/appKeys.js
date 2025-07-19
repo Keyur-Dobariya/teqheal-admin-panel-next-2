@@ -102,6 +102,10 @@ const appKeys = {
     breakAllow: "breakAllow",
     isLeaveOnDay: "isLeaveOnDay",
     totalHour: "totalHour",
+    rejectedReason: "rejectedReason",
+    dayType: "dayType",
+    leaveHalfDayType: "leaveHalfDayType",
+    reason: "reason",
 };
 
 export default appKeys;

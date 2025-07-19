@@ -112,6 +112,8 @@ const appString = {
     updateBasicSalary: 'Update Basic Salary',
     addEvent: "Add Event",
     updateEvent: "Update Event",
+    addLeave: "Add Leave",
+    updateLeave: "Update Leave",
     addClient: 'Add Client',
     updateClient: 'Update Client',
     addProject: 'Add Project',
@@ -181,11 +183,15 @@ const appString = {
     leaveHours: "Leave Hours",
     dayType: "Day Type",
     leaveCategory: "Leave Category",
+    leaveStatus: "Leave Status",
     reason: "Reason",
     rejectedReason: "Rejected Reason",
     isUnexpected: "Is Unexpected",
     sandwichLeave: "Sandwich Leave",
     changeStatus: "Change Status",
+    selectUser: "Select User",
+    unexpectedLeaves: "Unexpected Leaves",
+    selectOne: "Select One",
 };
 
 export default appString;

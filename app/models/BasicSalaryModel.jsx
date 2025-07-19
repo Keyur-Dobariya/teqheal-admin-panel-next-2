@@ -16,6 +16,7 @@ import apiCall, {HttpMethod} from "../api/apiServiceProvider";
 import appKeys from "../utils/appKeys";
 import {profilePhotoManager} from "../utils/utils";
 import dayjs from "dayjs";
+import {UserSelect} from "../components/CommonComponents";
 
 export default function BasicSalaryModel({
                                              isModelOpen,
@@ -99,26 +100,7 @@ export default function BasicSalaryModel({
                     <div className="flex flex-col mt-3">
                         <Form.Item name={appKeys.user} label={appString.user}
                                    rules={[{required: true, message: 'Please select User!'}]} span={24}>
-                            <Select
-                                placeholder="Select User"
-                                allowClear
-                                showSearch
-                                // value={selectedRecord[appKeys.user]}
-                                filterOption={(input, option) =>
-                                    option?.label?.toLowerCase().includes(input.toLowerCase())
-                                }
-                            >
-                                {activeUsersData.map(employee => (
-                                    <Option key={employee._id} value={employee._id}
-                                            label={employee.fullName}>
-                                        <div className="flex items-center gap-3 text-[14px]">
-                                            <Avatar
-                                                src={profilePhotoManager({url: employee.profilePhoto, gender: employee.gender})}
-                                                size="small"/>
-                                            {employee.fullName}
-                                        </div>
-                                    </Option>))}
-                            </Select>
+                            <UserSelect users={activeUsersData} />
                         </Form.Item>
                         <Row gutter={16}>
                             <Col xs={12}>
