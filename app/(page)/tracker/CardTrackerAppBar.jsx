@@ -5,28 +5,32 @@ import {appColor} from "../../utils/appColor";
 import appKeys from "../../utils/appKeys";
 import imagePaths from "../../utils/imagesPath";
 import appString from "../../utils/appString";
-import {AlertCircle, Grid, MoreVertical, Power, RefreshCw, RotateCw} from "../../utils/icons";
+import {AlertCircle, FilePlus, Grid, MoreVertical, Power, RefreshCw, RotateCw} from "../../utils/icons";
 import {profilePhotoManager} from "../../utils/utils";
 import {useRouter} from "next/navigation";
 import pageRoutes from "../../utils/pageRoutes";
 import {useEffect, useState} from "react";
 import {environment} from "../../api/apiEndpoints";
 
-export default function CardTrackerAppBar({userData}) {
+export default function CardTrackerAppBar({userData, isUpdateModalOpen, setIsUpdateModalOpen}) {
 
     const router = useRouter();
     const [isLogoutModalOpen, setIsLogoutModalOpen] = useState(false);
 
     const handleMenuClick = async ({key}) => {
-        if (key === '0') {
+        if (key === 'refresh') {
             window.location.reload();
-        } else if (key === '1') {
+        } else if (key === 'taskBoard') {
             await window.electronAPI.openExternalLink("https://whogetsa.web.app/tasks");
-        } else if (key === '2') {
+        } else if (key === 'addDailyUpdate') {
+            if(!isUpdateModalOpen) {
+                setIsUpdateModalOpen(true);
+            }
+        } else if (key === 'checkForUpdate') {
             if (window.electronAPI) {
                 await window.electronAPI.sendCheckUpdate();
             }
-        } else if (key === '3') {
+        } else if (key === 'logout') {
             setIsLogoutModalOpen(true);
         }
     };
@@ -34,17 +38,22 @@ export default function CardTrackerAppBar({userData}) {
     const items = [
         {
             label: "Refresh",
-            key: '0',
+            key: 'refresh',
             icon: <RotateCw size={15} />
         },
         {
             label: "Task Board",
-            key: '1',
+            key: 'taskBoard',
             icon: <Grid size={15} />
         },
         {
+            label: "Add Daily Update",
+            key: 'addDailyUpdate',
+            icon: <FilePlus size={15} />
+        },
+        {
             label: "Check For Update",
-            key: '2',
+            key: 'checkForUpdate',
             icon: <RefreshCw size={15} />,
         },
         { type: 'divider' },
@@ -55,7 +64,7 @@ export default function CardTrackerAppBar({userData}) {
                     <div>LogOut</div>
                 </div>
             ),
-            key: '3',
+            key: 'logout',
         },
     ];
 

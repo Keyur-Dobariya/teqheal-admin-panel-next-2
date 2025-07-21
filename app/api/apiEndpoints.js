@@ -99,6 +99,7 @@ const endpoints = {
   addDailyUpdate: `${environment.apiBaseUrl}/api/addDailyUpdate`,
   editDailyUpdate: `${environment.apiBaseUrl}/api/editDailyUpdate/`,
   getDailyUpdate: `${environment.apiBaseUrl}/api/getDailyUpdate/`,
+  getTodayUpdate: `${environment.apiBaseUrl}/api/getTodayUpdate`,
   getAllDailyUpdate: `${environment.apiBaseUrl}/api/getAllDailyUpdate`,
   addOfficeUpdate: `${environment.apiBaseUrl}/api/addOfficeUpdate`,
   editOfficeUpdate: `${environment.apiBaseUrl}/api/editOfficeUpdate/`,

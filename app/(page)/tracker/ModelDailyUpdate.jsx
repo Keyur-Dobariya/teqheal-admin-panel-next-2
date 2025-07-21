@@ -4,12 +4,11 @@ import {useEffect, useState} from 'react';
 import {Form, Input, Modal} from 'antd';
 import apiCall, {HttpMethod} from "../../api/apiServiceProvider";
 import {endpoints} from "../../api/apiEndpoints";
-import {getOfficeUpdateData, liveOfficeUpdateDataStream} from "./trackerUtils";
+import {getOfficeUpdateData, getTodayUpdateApi, liveOfficeUpdateDataStream} from "./trackerUtils";
 
 const {TextArea} = Input;
 
-export default function ModelDailyUpdate({attendanceData}) {
-    const [isModelOpen, setIsModelOpen] = useState(false);
+export default function ModelDailyUpdate({attendanceData, isUpdateModalOpen, setIsUpdateModalOpen}) {
     const [officeUpdates, setOfficeUpdates] = useState([]);
     const [loading, setLoading] = useState(false);
     const [form] = Form.useForm();
@@ -17,6 +16,11 @@ export default function ModelDailyUpdate({attendanceData}) {
     const scheduledWindows = new Map();
 
     useEffect(() => {
+        getTodayUpdateApi(setLoading, async (data) => {
+            if(data?.data) {
+                form.setFieldsValue(data?.data)
+            }
+        });
         getOfficeUpdateData(async (data) => {
             setOfficeUpdates(data?.data);
         });
@@ -112,7 +116,7 @@ export default function ModelDailyUpdate({attendanceData}) {
                 if (window.electronAPI) {
                     await window.electronAPI.focusMainWindow();
                 }
-                setIsModelOpen(true);
+                setIsUpdateModalOpen(true);
             } else {
                 if (window.electronAPI) {
                     await window.electronAPI.openOfficeUpdateWindow(item);
@@ -132,7 +136,7 @@ export default function ModelDailyUpdate({attendanceData}) {
                 },
                 setIsLoading: setLoading,
                 successCallback: async () => {
-                    setIsModelOpen(false)
+                    setIsUpdateModalOpen(false)
                 }
             });
         } catch (error) {
@@ -147,11 +151,11 @@ export default function ModelDailyUpdate({attendanceData}) {
             centered
             closeIcon={false}
             // cancelButtonProps={{hidden: true}}
-            open={isModelOpen}
+            open={isUpdateModalOpen}
             confirmLoading={loading}
             onOk={() => form.submit()}
-            onCancel={() => setIsModelOpen(false)}
-            onClose={() => setIsModelOpen(false)}
+            onCancel={() => setIsUpdateModalOpen(false)}
+            onClose={() => setIsUpdateModalOpen(false)}
             okText="Submit"
         >
             <div className="flex flex-col gap-2 mt-2">

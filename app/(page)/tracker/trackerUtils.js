@@ -126,6 +126,20 @@ export const getAttendanceData = async (userId, setIsLoading, successCallback) =
     }
 };
 
+export const getTodayUpdateApi = async (setIsLoading, successCallback) => {
+    try {
+        await apiCall({
+            method: HttpMethod.GET,
+            url: endpoints.getTodayUpdate,
+            showSuccessMessage: false,
+            successCallback,
+            setIsLoading,
+        });
+    } catch (error) {
+        console.error('Failed to fetch attendance:', error);
+    }
+};
+
 export const handlePunchBreak = async (userId, data, setIsLoading, successCallback) => {
     const requestData = {
         userId: userId,

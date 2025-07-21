@@ -26,7 +26,7 @@ import {
 import ModelDailyUpdate from "./ModelDailyUpdate";
 import CardTimeLineDrawer from "./CardTimeLineDrawer";
 
-export default function CardTrackerClockInOut() {
+export default function CardTrackerClockInOut({isUpdateModalOpen, setIsUpdateModalOpen}) {
     const [status, setStatus] = useState(STATUS.CLOCKED_OUT);
     const [attendanceData, setAttendanceData] = useState({
         punchTime: [],
@@ -226,7 +226,7 @@ export default function CardTrackerClockInOut() {
                     </Row>
                 </div>
             </Card>
-            {attendanceData && <ModelDailyUpdate attendanceData={attendanceData} />}
+            {attendanceData && <ModelDailyUpdate attendanceData={attendanceData} isUpdateModalOpen={isUpdateModalOpen} setIsUpdateModalOpen={setIsUpdateModalOpen} />}
             <CardTimeLineDrawer isDrawerOpen={isDrawerOpen} setIsDrawerOpen={setIsDrawerOpen} attendanceData={attendanceData} />
         </>
     );
