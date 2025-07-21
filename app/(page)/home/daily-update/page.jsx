@@ -1,6 +1,6 @@
 'use client';
 
-import React, {useEffect, useState} from 'react';
+import React, {useEffect, useMemo, useState} from 'react';
 import {
     Card, Row, Col, Avatar, Input, Spin, Empty, DatePicker, Button
 } from 'antd';
@@ -13,19 +13,33 @@ import {UserSelect} from "../../../components/CommonComponents";
 import Masonry from "react-masonry-css";
 import appString from "../../../utils/appString";
 import {PenTool} from "../../../utils/icons";
+import {getLocalData, isAdmin} from "../../../dataStorage/DataPref";
+import appKeys from "../../../utils/appKeys";
 
 export default function DailyUpdatePage() {
     const {activeUsersData} = useAppData();
-    const [updates, setUpdates] = useState([]);
-    const [filtered, setFiltered] = useState([]);
-    const [loading, setLoading] = useState(true);
+    const [allData, setAllData] = useState([]);
+    const [isLoading, setIsLoading] = useState(false);
+    const [searchText, setSearchText] = useState('');
     const [filters, setFilters] = useState({
         userId: null,
         date: null,
         startDate: null,
         endDate: null,
     });
-    const [search, setSearch] = useState('');
+
+    const filteredData = useMemo(() => {
+        if (!allData) return [];
+        const query = searchText.toLowerCase();
+        return allData.filter(
+            data =>
+                (
+                    data?.user?.fullName?.toLowerCase().includes(query) ||
+                    data?.todayWorkUpdate?.toLowerCase().includes(query) ||
+                    data?.tomorrowPlanning?.toLowerCase().includes(query)
+                )
+        );
+    }, [allData, searchText]);
 
     const breakpointColumnsObj = {
         default: 3,
@@ -57,28 +71,15 @@ export default function DailyUpdatePage() {
             url: apiUrl,
             showSuccessMessage: false,
             successCallback: (data) => {
-                setUpdates(data?.data || []);
-                setFiltered(data?.data || []);
+                setAllData(data?.data || []);
             },
-            setIsLoading: setLoading,
+            setIsLoading: setIsLoading,
         });
     };
 
     useEffect(() => {
         fetchUpdates(true);
     }, []);
-
-    const handleSearch = (val) => {
-        setSearch(val);
-        const query = val.toLowerCase();
-        const filteredData = updates.filter(
-            (item) =>
-                item?.user?.fullName?.toLowerCase().includes(query) ||
-                item?.todayWorkUpdate?.toLowerCase().includes(query) ||
-                item?.tomorrowPlanning?.toLowerCase().includes(query)
-        );
-        setFiltered(filteredData);
-    };
 
     const handleFilterChange = async () => {
         await fetchUpdates(false);
@@ -104,8 +105,7 @@ export default function DailyUpdatePage() {
                                 <Input
                                     prefix={<SearchOutlined/>}
                                     placeholder={appString.searchHint}
-                                    value={search}
-                                    onChange={(e) => handleSearch(e.target.value)}
+                                    onChange={(e) => setSearchText(e.target.value)}
                                     style={{width: "100%"}}
                                 />
                             </Col>
@@ -154,19 +154,19 @@ export default function DailyUpdatePage() {
                     </div>
                 </Card>
                 <div>
-                    {loading ? (
+                    {isLoading ? (
                         <div className="text-center py-20">
                             <Spin size="large"/>
                         </div>
-                    ) : filtered.length === 0 ? (
-                        <Empty description="No daily updates found"/>
+                    ) : filteredData.length === 0 ? (
+                        <Empty/>
                     ) : (
                         <Masonry
                             breakpointCols={breakpointColumnsObj}
                             className="my-masonry-grid flex gap-4"
                             columnClassName="my-masonry-grid_column"
                         >
-                            {filtered.map((item) => (
+                            {filteredData.map((item) => (
                                 <Card
                                     key={item._id}
                                     hoverable

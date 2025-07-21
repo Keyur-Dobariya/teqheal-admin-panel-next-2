@@ -106,6 +106,12 @@ const appKeys = {
     dayType: "dayType",
     leaveHalfDayType: "leaveHalfDayType",
     reason: "reason",
+    projectDescription: "projectDescription",
+    teamMembers: "teamMembers",
+    attachFiles: "attachFiles",
+    teamLeader: "teamLeader",
+    teamManager: "teamManager",
+    tags: "tags",
 };
 
 export default appKeys;

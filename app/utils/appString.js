@@ -137,6 +137,8 @@ const appString = {
     code: 'Code',
     startDate: 'Start Date',
     endDate: 'End Date',
+    month: 'Month',
+    year: 'Year',
     showAmount: 'Show Amount',
     hideAmount: 'Hide Amount',
     clientName: 'Client Name',
@@ -196,6 +198,16 @@ const appString = {
     confirmation: "Confirmation!",
     logoutConfirmation: "Are you sure you want to log out?",
     logOut: "LogOut",
+    projectDescription: "Project Description",
+    teamMembers: "Team Members",
+    attachFiles: "Attach Files",
+    teamLeader: "Team Leader",
+    teamManager: "Team Manager",
+    basicInfo: "Basic Information",
+    projectInfo: "Project Information",
+    assigneeInfo: "Assignee Details",
+    uploadSheet: "Upload Sheet",
+    addTime: "Add Time",
 };
 
 export default appString;

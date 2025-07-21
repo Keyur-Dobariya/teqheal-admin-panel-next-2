@@ -2,7 +2,8 @@ import {Avatar, message, Select, Tag} from "antd";
 import {formatMilliseconds, profilePhotoManager} from "../utils/utils";
 import appColor from "../utils/appColor";
 import appString from "../utils/appString";
-const { Option } = Select;
+
+const {Option} = Select;
 
 let messageApi = null;
 
@@ -26,7 +27,8 @@ export const showToast = (type = "info", content = "") => {
 
 export const colorTag = (value, color) => {
     return (
-        <div className="mx-auto w-24 font-medium text-center rounded-md text-[12px] text-white" style={{backgroundColor: color || appColor.secondPrimary}}>
+        <div className="mx-auto w-24 font-medium text-center rounded-md text-[12px] text-white"
+             style={{backgroundColor: color || appColor.secondPrimary}}>
             {value ? formatMilliseconds(value) : "00:00:00"}
         </div>
     );
@@ -39,32 +41,44 @@ export const antTag = (value, color) => {
 }
 
 export const timeTag = (value, color) => {
-    return <Tag bordered={false} color={color} style={{width: 80, height: 22, display: "flex", alignItems: "center", justifyContent: "center", fontWeight: "500", fontSize: 13, textAlign: "center"}}>{value}</Tag>;
+    return <Tag bordered={false} color={color} style={{
+        width: 80,
+        height: 22,
+        display: "flex",
+        alignItems: "center",
+        justifyContent: "center",
+        fontWeight: "500",
+        fontSize: 13,
+        textAlign: "center"
+    }}>{value}</Tag>;
 }
 
 export const UserSelect = ({
-                        users = [],
-                        value,
-                        onChange,
-                        allowClear = true,
-                        showSearch = true,
-                        style = {},
-                        disabled = false,
-                        className = "",
-                        size = "large",
-                        ...restProps
-                    }) => {
+                               users = [],
+                               value,
+                               onChange,
+                               placeholder = appString.selectUser,
+                               allowClear = true,
+                               showSearch = true,
+                               isMultiple = false,
+                               style = {},
+                               disabled = false,
+                               className = "",
+                               size = "large",
+                               ...restProps
+                           }) => {
     return (
         <Select
             value={value}
             onChange={onChange}
-            placeholder={appString.selectUser}
+            placeholder={placeholder}
             allowClear={allowClear}
             showSearch={showSearch}
             size={size}
             disabled={disabled}
             className={className}
-            style={{ width: "100%", ...style }}
+            mode={isMultiple ? "multiple" : undefined}
+            style={{width: "100%", ...style}}
             filterOption={(input, option) =>
                 (option?.label ?? "")
                     .toString()

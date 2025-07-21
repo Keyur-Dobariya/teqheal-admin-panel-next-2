@@ -51,6 +51,7 @@ import apiCall, {HttpMethod} from "../../api/apiServiceProvider";
 import {endpoints} from "../../api/apiEndpoints";
 import appString from "../../utils/appString";
 import {AlertCircle, ChevronDown, ChevronRight, FileText, LogOut, Power, Settings, User} from "../../utils/icons";
+import Image from "next/image";
 
 const { Header, Sider, Content } = Layout;
 const { useBreakpoint } = Grid;
@@ -434,10 +435,11 @@ export default function HomePage({children}) {
                                     }
                                 }}
                             />
-                            <div className="text-lg font-medium" >
+                            {!isMobile && <div className="text-lg font-medium">
                                 {capitalizeLastPathSegment(pathname)}
-                            </div>
+                            </div>}
                         </div>
+                        {isMobile && <img src={imagePaths.icon_big_dark} alt="icon" width={150} height={45}/>}
                         <div className="flex items-center gap-4">
                             <Badge dot status="error" offset={[-7, 5]}>
                                 <Button shape="circle" icon={<BellOutlined />} onClick={() => {

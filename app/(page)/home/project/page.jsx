@@ -238,6 +238,8 @@ export default function Page() {
                 <ProjectModel
                     isModelOpen={isModelOpen}
                     setIsModelOpen={setIsModelOpen}
+                    activeUsersData={activeUsersData}
+                    clientData={activeClientData}
                     selectedRecord={selectedRecord}
                     onSuccessCallback={handleUpdatedData}
                 />

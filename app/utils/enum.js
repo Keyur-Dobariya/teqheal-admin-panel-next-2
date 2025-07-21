@@ -265,48 +265,48 @@ export const getKeyByLabel = (label, list) => {
 };
 
 export const taskColumnStatusLabel = [
-    {label: taskColumnLabel.ToDo, key: "toDo"},
-    {label: taskColumnLabel.InProgress, key: "inProgress"},
-    {label: taskColumnLabel.Testing, key: "testing"},
-    {label: taskColumnLabel.OnHold, key: "onHold"},
-    {label: taskColumnLabel.Completed, key: "completed"},
-    {label: taskColumnLabel.Reopened, key: "reopened"},
+    {label: taskColumnLabel.ToDo, value: "toDo"},
+    {label: taskColumnLabel.InProgress, value: "inProgress"},
+    {label: taskColumnLabel.Testing, value: "testing"},
+    {label: taskColumnLabel.OnHold, value: "onHold"},
+    {label: taskColumnLabel.Completed, value: "completed"},
+    {label: taskColumnLabel.Reopened, value: "reopened"},
 ];
 
 export const taskPriorityLabel = [
     {
         label: "No Priority",
-        key: "noPriority",
+        value: "noPriority",
         color: appColor.secondary,
         icon: <img src={imagePaths.priority_clear} style={{width: 18, height: 18, marginRight: 8}}/>,
     },
     {
         label: "Urgent",
-        key: "urgent",
+        value: "urgent",
         color: appColor.danger,
         icon: <img src={imagePaths.priority_urjent} style={{width: 18, height: 18, marginRight: 8}}/>,
     },
     {
         label: "High Priority",
-        key: "highPriority",
+        value: "highPriority",
         color: appColor.warning,
         icon: <img src={imagePaths.priority_high} style={{width: 18, height: 18, marginRight: 8}}/>,
     },
     {
         label: "Medium Priority",
-        key: "mediumPriority",
+        value: "mediumPriority",
         color: appColor.success,
         icon: <img src={imagePaths.priority_normal} style={{width: 18, height: 18, marginRight: 8}}/>,
     },
     {
         label: "Low Priority",
-        key: "lowPriority",
+        value: "lowPriority",
         color: appColor.info,
         icon: <img src={imagePaths.priority_low} style={{width: 18, height: 18, marginRight: 8}}/>,
     },
     {
         label: "On Hold",
-        key: "onHold",
+        value: "onHold",
         color: appColor.secondary,
         icon: <img src={imagePaths.priority_on_hold} style={{width: 18, height: 18, marginRight: 8}}/>,
     },
@@ -1190,94 +1190,94 @@ export const taskCategoryLabel = [
 export const projectTypeLabel = [
     {
         label: "💻 Frontend Development",
-        key: "frontendDevelopment",
+        value: "frontendDevelopment",
         details: "UI/UX Design, HTML, CSS, JavaScript, React, Angular, Vue.js, etc."
     },
     {
         label: "🔙 Backend Development",
-        key: "backendDevelopment",
+        value: "backendDevelopment",
         details: "Server-side logic, APIs, Databases (SQL/NoSQL), Node.js, Python, Ruby, Java, etc."
     },
     {
         label: "🌐 Full-stack Development",
-        key: "fullstackDevelopment",
+        value: "fullstackDevelopment",
         details: "Combining both Frontend and Backend (e.g., MERN Stack, LAMP Stack)."
     },
     {
         label: "📱 Mobile Application Development",
-        key: "mobileAppDevelopment",
+        value: "mobileAppDevelopment",
         details: "Native Apps (iOS, Android), Cross-Platform Apps (React Native, Flutter), Progressive Web Apps (PWAs)."
     },
-    {label: "🏢 Enterprise Software Development", key: "enterpriseSoftwareDevelopment", details: "ERP, CRM, SCM, etc."},
+    {label: "🏢 Enterprise Software Development", value: "enterpriseSoftwareDevelopment", details: "ERP, CRM, SCM, etc."},
     {
         label: "☁️ Cloud Computing",
-        key: "cloudComputing",
+        value: "cloudComputing",
         details: "Cloud Infrastructure, Cloud-Native Apps, Serverless Computing, AWS, Azure, GCP."
     },
     {
         label: "📊 Data-Driven Projects",
-        key: "dataDrivenProjects",
+        value: "dataDrivenProjects",
         details: "Big Data, Data Analytics, Machine Learning (ML), AI, Data Warehousing."
     },
     {
         label: "🎮 Game Development",
-        key: "gameDevelopment",
+        value: "gameDevelopment",
         details: "2D/3D Games, Mobile Games, VR/AR Games, Unity, Unreal Engine."
     },
-    {label: "🖥️ Embedded Systems", key: "embeddedSystems", details: "IoT, Firmware Development, Sensors, Wearables."},
+    {label: "🖥️ Embedded Systems", value: "embeddedSystems", details: "IoT, Firmware Development, Sensors, Wearables."},
     {
         label: "⛓️ Blockchain Development",
-        key: "blockchainDevelopment",
+        value: "blockchainDevelopment",
         details: "Cryptocurrency (Bitcoin, Ethereum), Smart Contracts, DApps (Decentralized Apps)."
     },
     {
         label: "🌐 SaaS (Software as a Service)",
-        key: "saas",
+        value: "saas",
         details: "Cloud-based Solutions (Google Workspace, Slack, Dropbox), Subscription-Based Services."
     },
     {
         label: "🔒 Security & Privacy",
-        key: "securityPrivacy",
+        value: "securityPrivacy",
         details: "Cybersecurity, Encryption, Penetration Testing, Firewalls, VPNs."
     },
     {
         label: "🤖 AI & Robotics",
-        key: "aiRobotics",
+        value: "aiRobotics",
         details: "Artificial Intelligence, Robotics Software, NLP (Natural Language Processing), Machine Learning."
     },
     {
         label: "🚀 DevOps",
-        key: "devOps",
+        value: "devOps",
         details: "Automation Tools, CI/CD (Continuous Integration/Continuous Deployment), Containerization (Docker, Kubernetes)."
     },
     {
         label: "🔧 Software Maintenance",
-        key: "softwareMaintenance",
+        value: "softwareMaintenance",
         details: "Legacy System Upgrades, Bug Fixes, Patches, System Optimization."
     },
     {
         label: "🕶️ AR/VR Projects",
-        key: "arVrProjects",
+        value: "arVrProjects",
         details: "Augmented Reality (AR), Virtual Reality (VR), Mixed Reality."
     },
     {
         label: "🔗 API Development",
-        key: "apiDevelopment",
+        value: "apiDevelopment",
         details: "RESTful APIs, GraphQL, WebSocket APIs, Microservices."
     },
     {
         label: "🧪 Test Automation",
-        key: "testAutomation",
+        value: "testAutomation",
         details: "Automated Testing, Performance Testing, Unit Testing, UI Testing (e.g., Selenium, Cypress)."
     },
     {
         label: "🖥️ Desktop Application Development",
-        key: "desktopAppDevelopment",
+        value: "desktopAppDevelopment",
         details: "Cross-Platform Desktop Apps (Electron), Native Desktop Apps (Windows, macOS)."
     },
     {
         label: "🗣️ AI Chatbots",
-        key: "aiChatbots",
+        value: "aiChatbots",
         details: "Customer Support Bots, Personal Assistants, Chatbot Development Frameworks (Dialogflow, Rasa)."
     }
 ];
