@@ -1,4 +1,4 @@
-export const isDevMode = false;
+export const isDevMode = true;
 
 // firebase target:apply hosting default whogetsa
 // firebase deploy --only hosting:devtracker
@@ -100,6 +100,7 @@ const endpoints = {
   editDailyUpdate: `${environment.apiBaseUrl}/api/editDailyUpdate/`,
   getDailyUpdate: `${environment.apiBaseUrl}/api/getDailyUpdate/`,
   getTodayUpdate: `${environment.apiBaseUrl}/api/getTodayUpdate`,
+  getFilteredDailyUpdates: `${environment.apiBaseUrl}/api/getFilteredDailyUpdates`,
   getAllDailyUpdate: `${environment.apiBaseUrl}/api/getAllDailyUpdate`,
   addOfficeUpdate: `${environment.apiBaseUrl}/api/addOfficeUpdate`,
   editOfficeUpdate: `${environment.apiBaseUrl}/api/editOfficeUpdate/`,

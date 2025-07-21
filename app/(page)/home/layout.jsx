@@ -36,6 +36,8 @@ import Link from "next/link";
 import {useAppData} from "../../masterData/AppDataContext";
 import apiCall, {HttpMethod} from "../../api/apiServiceProvider";
 import {endpoints} from "../../api/apiEndpoints";
+import appString from "../../utils/appString";
+import {FileText} from "../../utils/icons";
 
 const { Header, Sider, Content } = Layout;
 const { useBreakpoint } = Grid;
@@ -211,6 +213,12 @@ export default function HomePage({children}) {
             position: 'top',
         },
         {
+            key: pageRoutes.dailyUpdate,
+            icon: <FileText />,
+            label: capitalizeLastPathSegment(pageRoutes.dailyUpdate),
+            position: 'top',
+        },
+        {
             key: pageRoutes.leave,
             icon: <CarryOutOutlined />,
             label: capitalizeLastPathSegment(pageRoutes.leave),
@@ -219,7 +227,7 @@ export default function HomePage({children}) {
         {
             key: 'rep',
             icon: <AuditOutlined />,
-            label: capitalizeLastPathSegment(pageRoutes.leaveReport),
+            label: capitalizeLastPathSegment(appString.report),
             position: 'top',
             children: [
                 {

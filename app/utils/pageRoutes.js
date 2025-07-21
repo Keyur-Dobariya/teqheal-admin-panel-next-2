@@ -11,6 +11,7 @@ const pageRoutes = {
     client: '/home/client',
     project: '/home/project',
     tasks: '/home/tasks',
+    dailyUpdate: '/home/daily-update',
     leave: '/home/leave',
     leaveReport: '/home/leave-report',
     salaryReport: '/home/salary-report',

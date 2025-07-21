@@ -469,14 +469,14 @@ export default function PageLeaveDataCommon({isReportPage}) {
                         onChange={e => setSearchText(e.target.value)}
                         className="w-full flex-1 max-w-90"
                     />
-                    <Button
+                    {!isReportPage && <Button
                         type="primary"
                         icon={<FilePlus/>}
                         onClick={handleAddClick}
                         loading={actionLoading === 'add'}
                     >
                         {!isMobile && appString.addLeave}
-                    </Button>
+                    </Button>}
                 </div>
             </Card>
             <div className="m-4"/>

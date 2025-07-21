@@ -192,6 +192,7 @@ const appString = {
     selectUser: "Select User",
     unexpectedLeaves: "Unexpected Leaves",
     selectOne: "Select One",
+    report: "Report",
 };
 
 export default appString;
