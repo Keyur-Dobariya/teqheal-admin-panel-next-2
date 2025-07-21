@@ -193,6 +193,9 @@ const appString = {
     unexpectedLeaves: "Unexpected Leaves",
     selectOne: "Select One",
     report: "Report",
+    confirmation: "Confirmation!",
+    logoutConfirmation: "Are you sure you want to log out?",
+    logOut: "LogOut",
 };
 
 export default appString;

@@ -21,10 +21,23 @@ import {
     TeamOutlined,
     CommentOutlined, LoadingOutlined,
 } from '@ant-design/icons';
-import {Button, Drawer, Layout, Menu, Grid, ConfigProvider, Breadcrumb, Badge} from 'antd';
+import {
+    Button,
+    Drawer,
+    Layout,
+    Menu,
+    Grid,
+    ConfigProvider,
+    Breadcrumb,
+    Badge,
+    Modal,
+    Avatar,
+    Tooltip,
+    Dropdown
+} from 'antd';
 import {useEffect, useRef, useState} from "react";
 import AnimatedDiv, { Direction } from "../../components/AnimatedDiv";
-import {capitalizeLastPathSegment, detectPlatform} from "../../utils/utils";
+import {capitalizeLastPathSegment, detectPlatform, profilePhotoManager} from "../../utils/utils";
 import pageRoutes from "../../utils/pageRoutes";
 import {router} from "next/client";
 import {usePathname, useRouter} from "next/navigation";
@@ -37,7 +50,7 @@ import {useAppData} from "../../masterData/AppDataContext";
 import apiCall, {HttpMethod} from "../../api/apiServiceProvider";
 import {endpoints} from "../../api/apiEndpoints";
 import appString from "../../utils/appString";
-import {FileText} from "../../utils/icons";
+import {AlertCircle, ChevronDown, ChevronRight, FileText, LogOut, Power, Settings, User} from "../../utils/icons";
 
 const { Header, Sider, Content } = Layout;
 const { useBreakpoint } = Grid;
@@ -48,6 +61,7 @@ export default function HomePage({children}) {
     const screens = useBreakpoint();
     const isMobile = !screens.lg;
 
+    const [isLogoutModalOpen, setIsLogoutModalOpen] = useState(false);
     const [collapsed, setCollapsed] = useState(false);
     const [drawerVisible, setDrawerVisible] = useState(false);
 
@@ -113,23 +127,26 @@ export default function HomePage({children}) {
                     //     color: item.key === appKeys.logout ? appColor.danger : undefined,
                     // }}><div>{item.label}</div><LoadingOutlined hidden={!isRouterLoading} /></div>,
                 }))}
-                onClick={({ key }) => {
-                    if (key !== appKeys.logout) {
-                        setTimeout(() => {
-                            if (pageRoutes.myProfile.includes(key)) {
-                                router.push(`${pageRoutes.myProfile}?user=${getLocalData(appKeys.employeeCode)}`);
-                            } else {
-                                router.push(key);
-                            }
-                        }, 100);
-                    }
-                    if(isMobile) {
-                        setDrawerVisible(false);
-                    }
-                }}
+                onClick={menuClick}
             />
         </ConfigProvider>
     );
+
+    const menuClick = ({key}) => {
+        if (key !== appKeys.logout) {
+            if (pageRoutes.myProfile.includes(key)) {
+                router.push(`${pageRoutes.myProfile}?user=${getLocalData(appKeys.employeeCode)}`);
+            } else {
+                router.push(key);
+            }
+        }
+        if (key === appKeys.logout) {
+            setIsLogoutModalOpen(true);
+        }
+        if(isMobile) {
+            setDrawerVisible(false);
+        }
+    }
 
     const findMenuItemByKey = (key, items = menuItems, parents = []) => {
         for (const item of items) {
@@ -282,6 +299,42 @@ export default function HomePage({children}) {
     const topItems = menuItems.filter(item => item.position !== 'bottom');
     const bottomItems = menuItems.filter(item => item.position === 'bottom');
 
+    const profileMenuItems = [
+        {
+            key: pageRoutes.myProfile,
+            label: (
+                <div className="flex items-center">
+                    <div className="flex-1">
+                        <div className="text-gray-900 text-[15px]">{getLocalData(appKeys.fullName)}</div>
+                        <div className="text-gray-600 text-[13px]">{getLocalData(appKeys.emailAddress)}</div>
+                    </div>
+                    <ChevronRight />
+                </div>
+            ),
+        },
+        { type: 'divider' },
+        {
+            label: "Settings",
+            key: pageRoutes.settings,
+            icon: <Settings/>,
+        },
+        { type: 'divider' },
+        {
+            label: (
+                <div className="flex items-center gap-2 text-red-600 text-[15px]">
+                    <Power size={15} />
+                    <div>LogOut</div>
+                </div>
+            ),
+            key: 'logout',
+        },
+    ];
+
+    const menuProps = {
+        items: profileMenuItems,
+        onClick: menuClick,
+    };
+
     const renderSidebarContent = (
         <div className="flex flex-col h-full">
             <div className="m-4 flex justify-center shrink-0">
@@ -333,83 +386,126 @@ export default function HomePage({children}) {
     }
 
     return (
-        <div className="w-screen h-screen flex flex-row overflow-hidden" style={{backgroundColor: appColor.mainBg}}>
-            {!isMobile && (
-                <Sider
-                    className="border-r-1 border-gray-200"
-                    style={{borderRight: `1px ${appColor.borderClr} solid`}}
-                    collapsed={collapsed}
-                    theme="light"
-                    width={270}
-                >
-                    {renderSidebarContent}
-                </Sider>
-            )}
+        <>
+            <div className="w-screen h-screen flex flex-row overflow-hidden" style={{backgroundColor: appColor.mainBg}}>
+                {!isMobile && (
+                    <Sider
+                        className="border-r-1 border-gray-200"
+                        style={{borderRight: `1px ${appColor.borderClr} solid`}}
+                        collapsed={collapsed}
+                        theme="light"
+                        width={270}
+                    >
+                        {renderSidebarContent}
+                    </Sider>
+                )}
 
-            {isMobile && (
-                <Drawer
-                    title={null}
-                    placement="left"
-                    closable={false}
-                    width={270}
-                    onClose={() => setDrawerVisible(false)}
-                    open={drawerVisible}
-                    styles={{ body: { padding: 0 } }}
-                >
-                    {renderSidebarContent}
-                </Drawer>
-            )}
+                {isMobile && (
+                    <Drawer
+                        title={null}
+                        placement="left"
+                        closable={false}
+                        width={270}
+                        onClose={() => setDrawerVisible(false)}
+                        open={drawerVisible}
+                        styles={{ body: { padding: 0 } }}
+                    >
+                        {renderSidebarContent}
+                    </Drawer>
+                )}
 
-            <div className=" flex flex-col flex-1 overflow-hidden">
-                <div className="flex justify-between items-center bg-white border-b-1 border-gray-200 py-3 px-5"
-                     style={{borderBottom: `1px ${appColor.borderClr} solid`}}>
-                    <div className="flex items-center gap-3">
-                        <Button
-                            shape="circle"
-                            type="text"
-                            icon={
-                                isMobile
-                                    ? <MenuUnfoldOutlined />
-                                    : (collapsed ? <MenuUnfoldOutlined /> : <MenuFoldOutlined />)
-                            }
-                            onClick={() => {
-                                if (isMobile) {
-                                    setDrawerVisible(true);
-                                } else {
-                                    setCollapsed(!collapsed);
+                <div className=" flex flex-col flex-1 overflow-hidden">
+                    <div className="flex justify-between items-center bg-white border-b-1 border-gray-200 py-3 px-5"
+                         style={{borderBottom: `1px ${appColor.borderClr} solid`}}>
+                        <div className="flex items-center gap-3">
+                            <Button
+                                shape="circle"
+                                type="text"
+                                icon={
+                                    isMobile
+                                        ? <MenuUnfoldOutlined />
+                                        : (collapsed ? <MenuUnfoldOutlined /> : <MenuFoldOutlined />)
                                 }
-                            }}
-                        />
-                        <div className="text-lg font-medium" >
-                            {capitalizeLastPathSegment(pathname)}
+                                onClick={() => {
+                                    if (isMobile) {
+                                        setDrawerVisible(true);
+                                    } else {
+                                        setCollapsed(!collapsed);
+                                    }
+                                }}
+                            />
+                            <div className="text-lg font-medium" >
+                                {capitalizeLastPathSegment(pathname)}
+                            </div>
+                        </div>
+                        <div className="flex items-center gap-4">
+                            <Badge dot status="error" offset={[-7, 5]}>
+                                <Button shape="circle" icon={<BellOutlined />} onClick={() => {
+                                }} />
+                            </Badge>
+                            <Dropdown overlayStyle={{ minWidth: 200 }} menu={menuProps} trigger={["click"]}>
+                                <div className="flex items-center gap-2 cursor-pointer">
+                                    <Tooltip title={getLocalData(appKeys.fullName)}>
+                                        <Avatar src={profilePhotoManager({url: getLocalData(appKeys.profilePhoto), gender: getLocalData(appKeys.gender)})}/>
+                                    </Tooltip>
+                                    {!isMobile && <div className="text-[15px] font-medium">{getLocalData(appKeys.fullName)}</div>}
+                                    {!isMobile && <ChevronDown/>}
+                                </div>
+                            </Dropdown>
                         </div>
                     </div>
-                    <Badge dot status="error" offset={[-7, 5]}>
-                        <Button shape="circle" icon={<BellOutlined />} onClick={() => {
-                            localStorage.clear();
-                            router.push(pageRoutes.loginPage);
-                        }} />
-                    </Badge>
-                </div>
-                {!pageRoutes.dashboard.includes(pathname) && <Breadcrumb
-                    separator=">"
-                    style={{margin: "12px 12px 5px 25px"}}
-                    items={breadcrumbItems.map(item => ({
-                        key: item.key,
-                        title: (
-                            item.key === pageRoutes.dashboard ? <HomeOutlined
-                                className="flex items-center gap-1 cursor-pointer hover:text-blue-700"
-                                onClick={() => router.push(item.key)}
-                            /> : <span
-                                className="flex items-center gap-1 cursor-default"
-                            >{item.icon}{item.label}</span>
-                        ),
-                    }))}
-                />}
-                <div className="p-3 md:px-6 md:py-3 overflow-y-auto" ref={containerRef} style={{scrollbarWidth: "thin"}}>
-                    {children}
+                    {!pageRoutes.dashboard.includes(pathname) && <Breadcrumb
+                        separator=">"
+                        style={{margin: "12px 12px 5px 25px"}}
+                        items={breadcrumbItems.map(item => ({
+                            key: item.key,
+                            title: (
+                                item.key === pageRoutes.dashboard ? <HomeOutlined
+                                    className="flex items-center gap-1 cursor-pointer hover:text-blue-700"
+                                    onClick={() => router.push(item.key)}
+                                /> : <span
+                                    className="flex items-center gap-1 cursor-default"
+                                >{item.icon}{item.label}</span>
+                            ),
+                        }))}
+                    />}
+                    <div className="p-3 md:px-6 md:py-3 overflow-y-auto" ref={containerRef} style={{scrollbarWidth: "thin"}}>
+                        {children}
+                    </div>
                 </div>
             </div>
-        </div>
+            <Modal
+                title={<div className="text-[16px] font-medium flex items-center gap-2"><AlertCircle color={appColor.danger} />{appString.confirmation}</div>}
+                width={400}
+                maskClosable={true}
+                centered
+                closeIcon={false}
+                open={isLogoutModalOpen}
+                footer={null}
+                onCancel={() => setIsLogoutModalOpen(false)}
+                onClose={() => setIsLogoutModalOpen(false)}
+            >
+                <div className="text-[15px] font-medium mb-6">
+                    {appString.logoutConfirmation}
+                </div>
+                <div className="flex justify-end gap-2">
+                    <Button
+                        onClick={() => setIsLogoutModalOpen(false)}
+                    >
+                        Cancel
+                    </Button>
+                    <Button
+                        type="primary"
+                        danger
+                        onClick={() => {
+                            localStorage.clear();
+                            router.push(pageRoutes.loginPage);
+                        }}
+                    >
+                        {appString.logOut}
+                    </Button>
+                </div>
+            </Modal>
+        </>
     );
 }

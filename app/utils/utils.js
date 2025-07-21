@@ -40,6 +40,11 @@ export const convertCamelCase = (text) => {
         .replace(/^./, str => str.toUpperCase());
 };
 
+export function getFirstName(fullName) {
+    if (!fullName) return '';
+    return fullName.trim().split(' ')[0];
+}
+
 function formatReadable(text) {
     return text
         .replace(/([a-z])([A-Z])/g, '$1 $2')
