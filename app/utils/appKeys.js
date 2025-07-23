@@ -19,6 +19,7 @@ const appKeys = {
     aadharCardNo: "aadharCardNo",
     address: "address",
     employeeCode: "employeeCode",
+    empCode: "empCode",
     approvalStatus: "approvalStatus",
     createdAt: "createdAt",
     lastLogin: "lastLogin",
@@ -63,6 +64,7 @@ const appKeys = {
     userData: 'userData',
     totalHours: 'totalHours',
     workingHours: 'workingHours',
+    missingHours: 'missingHours',
     breakHours: 'breakHours',
     lateArrival: 'lateArrival',
     overtime: 'overtime',
@@ -112,6 +114,12 @@ const appKeys = {
     teamLeader: "teamLeader",
     teamManager: "teamManager",
     tags: "tags",
+    deductionAmount: "deductionAmount",
+    bonus: "bonus",
+    netSalary: "netSalary",
+    reportType: "reportType",
+    totalMissingMinutes: "totalMissingMinutes",
+    totalDeductMinutes: "totalDeductMinutes",
 };
 
 export default appKeys;

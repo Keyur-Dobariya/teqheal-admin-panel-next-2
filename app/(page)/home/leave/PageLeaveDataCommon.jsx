@@ -397,7 +397,7 @@ export default function PageLeaveDataCommon({isReportPage}) {
                         allowClear
                         placeholder={appString.leaveCategory}
                         value={filters.leaveCategory}
-                        style={{width: "100%", height: "40px", borderRadius: 10}}
+                        style={{width: "100%"}}
                         onChange={(value) =>
                             setFilters((prev) => ({...prev, leaveCategory: value}))
                         }
@@ -417,7 +417,7 @@ export default function PageLeaveDataCommon({isReportPage}) {
                         onChange={(date) =>
                             setFilters((prev) => ({...prev, year: date ? date.year() : null}))
                         }
-                        style={{width: "100%", height: "40px"}}
+                        style={{width: "100%"}}
                     />
                 </Col>
                 <Col xs={12} sm={5} md={5} lg={5} xl={4} xxl={3}>
@@ -432,7 +432,7 @@ export default function PageLeaveDataCommon({isReportPage}) {
                                 month: date ? date.month() + 1 : null,
                             }))
                         }
-                        style={{width: "100%", height: "40px"}}
+                        style={{width: "100%"}}
                     />
                 </Col>
             </Row>
@@ -442,7 +442,7 @@ export default function PageLeaveDataCommon({isReportPage}) {
     const CommonGridBox = ({title, value, color, icon}) => {
         return (
             <Col xs={24} sm={12} md={12} lg={8} xl={4}>
-                <Card>
+                <Card hoverable>
                     <div className="flex items-center gap-3 p-4">
                         <div className="w-9 h-9 min-w-9 min-h-9 rounded-full flex justify-center items-center"
                              style={{backgroundColor: getTransColor(color)}}>

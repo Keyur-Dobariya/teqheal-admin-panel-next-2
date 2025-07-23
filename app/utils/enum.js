@@ -264,6 +264,11 @@ export const getKeyByLabel = (label, list) => {
     return match ? match.key : label;
 };
 
+export const getValueByLabel = (label, list) => {
+    const match = list.find((item) => item.label === label);
+    return match ? match.value : label;
+};
+
 export const taskColumnStatusLabel = [
     {label: taskColumnLabel.ToDo, value: "toDo"},
     {label: taskColumnLabel.InProgress, value: "inProgress"},
@@ -328,9 +333,9 @@ export const reportTypeKey = {
 };
 
 export const reportTypeLabels = [
-    {label: "Leave Wise", key: reportTypeKey.leaveWise},
-    {label: "Punch Wise", key: reportTypeKey.punchWise},
-    {label: "Tracking Wise", key: reportTypeKey.trackingWise},
+    {label: "Leave Wise", value: reportTypeKey.leaveWise},
+    {label: "Punch Wise", value: reportTypeKey.punchWise},
+    {label: "Tracking Wise", value: reportTypeKey.trackingWise},
 ];
 
 export const festivalList = [

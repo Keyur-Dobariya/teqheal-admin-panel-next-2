@@ -15,6 +15,7 @@ import appString from "../../../utils/appString";
 import {PenTool} from "../../../utils/icons";
 import {getLocalData, isAdmin} from "../../../dataStorage/DataPref";
 import appKeys from "../../../utils/appKeys";
+import {profilePhotoManager} from "../../../utils/utils";
 
 export default function DailyUpdatePage() {
     const {activeUsersData} = useAppData();
@@ -174,7 +175,7 @@ export default function DailyUpdatePage() {
                                     title={
                                         <div className="flex items-center gap-3">
                                             <Avatar
-                                                src={item.user?.profilePhoto}
+                                                src={profilePhotoManager({url: item.user?.profilePhoto, gender: item.user?.gender})}
                                                 icon={<UserOutlined />}
                                                 size="default"
                                             />
@@ -190,11 +191,11 @@ export default function DailyUpdatePage() {
                                 >
                                     <div className="mb-3">
                                         <strong>Today:</strong>
-                                        <div className="text-gray-700">{item.todayWorkUpdate}</div>
+                                        <div className="whitespace-pre-line text-gray-700">{item.todayWorkUpdate}</div>
                                     </div>
                                     <div className="mb-3">
                                         <strong>Tomorrow:</strong>
-                                        <div className="text-gray-700">{item.tomorrowPlanning}</div>
+                                        <div className="whitespace-pre-line text-gray-700">{item.tomorrowPlanning}</div>
                                     </div>
                                     {item.similarTasks && item.similarTasks.length > 0 && (
                                         <div className="mt-4">

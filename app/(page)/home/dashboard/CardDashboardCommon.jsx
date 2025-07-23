@@ -23,7 +23,7 @@ export default function CardDashboardCommon() {
     const CommonGridBox = ({title, value, color, icon}) => {
         return (
             <Col xs={24} sm={12} md={12} lg={8} xl={4}>
-                <Card>
+                <Card hoverable>
                     <div className="flex items-center gap-3 p-4">
                         <div className="w-9 h-9 min-w-9 min-h-9 rounded-full flex justify-center items-center"
                              style={{backgroundColor: getTransColor(color)}}>

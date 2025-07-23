@@ -1,4 +1,4 @@
-export const isDevMode = false;
+export const isDevMode = true;
 
 // firebase target:apply hosting default whogetsa
 // firebase deploy --only hosting:devtracker
@@ -91,7 +91,7 @@ const endpoints = {
   uploadFile: `${environment.apiBaseUrl}/api/uploadFile`,
   uploadMultiFiles: `${environment.apiBaseUrl}/api/uploadMultiFiles`,
   deleteFile: `${environment.apiBaseUrl}/api/deleteFile`,
-  // tasksChange: `${environment.apiBaseUrl}/tasksChange?userId=${localStorage.getItem(appKeys._id)}&role=${localStorage.getItem(appKeys.role)}`,
+  tasksChange: `${environment.apiBaseUrl}/tasksChange?`,
   // employeesChange: `${environment.apiBaseUrl}/employeesChange?userId=${localStorage.getItem(appKeys._id)}&role=${localStorage.getItem(appKeys.role)}`,
   // chatUpdates: `${environment.apiBaseUrl}/chatUpdates?userId=${localStorage.getItem(appKeys._id)}`,
   officeUpdatesStream: `${environment.apiBaseUrl}/officeUpdate`,

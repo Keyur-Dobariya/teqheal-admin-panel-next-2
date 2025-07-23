@@ -6,7 +6,7 @@ import {
     Calendar,
     Check,
     ChevronsUp,
-    Copy, Eye, EyeOff, FilePlus,
+    Copy,
     Filter,
     Plus,
     Search,
@@ -14,25 +14,10 @@ import {
     Tag as TagIcon,
     User
 } from "../../../utils/icons";
-import {
-    Avatar,
-    Badge,
-    Button,
-    Card,
-    Col,
-    DatePicker,
-    Divider,
-    Empty,
-    Input,
-    Popover,
-    Row,
-    Select,
-    Spin,
-    Tooltip
-} from "antd";
+import {Avatar, Button, Col, DatePicker, Divider, Empty, Popover, Row, Select, Spin, Tooltip} from "antd";
 import {
     getIconByKey,
-    getValueByLabel,
+    getKeyByLabel,
     getLabelByKey,
     taskCategoryLabel,
     taskColumnLabel,
@@ -46,14 +31,13 @@ import utc from 'dayjs/plugin/utc';
 import timezone from 'dayjs/plugin/timezone';
 import isSameOrAfter from "dayjs/plugin/isSameOrAfter";
 import isSameOrBefore from "dayjs/plugin/isSameOrBefore";
-import appColor, {getDarkColor} from "../../../utils/appColor";
+import appColor from "../../../utils/appColor";
 import apiCall, {HttpMethod} from "../../../api/apiServiceProvider";
 import {endpoints} from "../../../api/apiEndpoints";
 import {AppDataFields, useAppData} from "../../../masterData/AppDataContext";
 import {getDataById, getTwoCharacterFromName} from "../../../utils/utils";
 import appKeys from "../../../utils/appKeys";
 import {showToast} from "../../../components/CommonComponents";
-import appString from "../../../utils/appString";
 
 dayjs.extend(utc);
 dayjs.extend(timezone);
@@ -139,11 +123,11 @@ export default function Page() {
         const evtSource = new EventSource(`${endpoints.tasksChange}userId=${localStorage.getItem(appKeys._id)}&role=${localStorage.getItem(appKeys.role)}`);
 
         evtSource.onmessage = (event) => {
-            if (event.data) {
+            if(event.data) {
                 // console.log('Notification:', JSON.parse(event.data));
                 updateAppDataField(AppDataFields.taskBoardData, JSON.parse(event.data) || taskBoardData);
                 const taskRecord = getTaskById(taskId);
-                setSelectedTastRecord({...taskRecord});
+                setSelectedTastRecord({ ...taskRecord });
             }
         };
 
@@ -206,11 +190,11 @@ export default function Page() {
 
     const organizeTasksByStatus = (tasks) => {
         return {
-            columns: taskColumnStatusLabel.reduce((acc, {value, label}) => {
-                const taskList = (tasks[value] || []).sort((a, b) => a.placementIndex - b.placementIndex);
+            columns: taskColumnStatusLabel.reduce((acc, {key, label}) => {
+                const taskList = (tasks[key] || []).sort((a, b) => a.placementIndex - b.placementIndex);
 
-                acc[value] = {
-                    id: value,
+                acc[key] = {
+                    id: key,
                     title: label,
                     tasksList: taskList,
                 };
@@ -335,12 +319,12 @@ export default function Page() {
             const reorderedTasks = destTasks.map((task, index) => ({
                 _id: task._id,
                 placementIndex: index,
-                taskStatus: getValueByLabel(destStage, taskColumnStatusLabel),
+                taskStatus: getKeyByLabel(destStage, taskColumnStatusLabel),
             }));
 
             // handleAddUpdateTaskApi(
             //     result.draggableId,
-            //     getValueByLabel(destStage, taskColumnStatusLabel),
+            //     getKeyByLabel(destStage, taskColumnStatusLabel),
             //     destination.index
             // );
 
@@ -403,14 +387,8 @@ export default function Page() {
 
     if (loading) {
         return (
-            <div style={{
-                display: "flex",
-                justifyContent: "center",
-                alignItems: "center",
-                marginTop: "200px",
-                overflow: "hidden"
-            }}>
-                <Spin/>
+            <div style={{display: "flex", justifyContent: "center", alignItems: "center", marginTop: "200px", overflow: "hidden"}}>
+                <Spin />
             </div>
         );
     }
@@ -418,119 +396,110 @@ export default function Page() {
     return (
         <>
             <div ref={taskBoardContainerRef}>
-                <Card>
-                    <div className="p-4">
-                        <Row gutter={[16, 16]} align="middle">
-                            <Col xs={24} sm={12} md={12} lg={6} xl={6}>
-                                <Input
-                                    placeholder={appString.searchHint}
-                                    prefix={<Search/>}
-                                    // value={searchText}
-                                    onChange={(e) => {
-                                        const searchText = e.target.value.toLowerCase();
-                                        const filteredTasks = {};
-                                        Object.entries(originalTasksByStatus.columns).forEach(([statusKey, column]) => {
-                                            filteredTasks[statusKey] = column.tasksList.filter((task) => {
-                                                return (task.taskTitle?.toLowerCase().includes(searchText) || task.taskDescription?.toLowerCase().includes(searchText) || task.taskId?.toLowerCase().includes(searchText));
-                                            });
+                <Row gutter={[16, 16]} style={{margin: "15px 0px"}}>
+                    <Col xs={24} sm={12} md={12} lg={6} xl={6}>
+                        <SearchTextFieldNew
+                            field={{
+                                name: "search",
+                                placeholder: "Search Data",
+                                prefix: <Search/>,
+                                onChange: (e) => {
+                                    const searchText = e.target.value.toLowerCase();
+                                    const filteredTasks = {};
+                                    Object.entries(originalTasksByStatus.columns).forEach(([statusKey, column]) => {
+                                        filteredTasks[statusKey] = column.tasksList.filter((task) => {
+                                            return (
+                                                task.taskTitle?.toLowerCase().includes(searchText) ||
+                                                task.taskDescription?.toLowerCase().includes(searchText) ||
+                                                task.taskId?.toLowerCase().includes(searchText)
+                                            );
                                         });
-                                        setTasksByStatus(organizeTasksByStatus(filteredTasks));
-                                    }
-                                    }
-                                    className="w-full flex-1 max-w-90"
-                                />
-                            </Col>
-                            <Col xs={24} sm={12} md={12} lg={6} xl={6}>
-                                <Select
-                                    placeholder="Select Client"
-                                    allowClear
-                                    style={{width: "100%", height: "38px"}}
-                                    showSearch
-                                    value={filters.client}
-                                    onChange={(value) => {
-                                        handleFilterChange('client', value);
-                                        if (!value) {
-                                            handleDataConditionWise(taskBoardData);
-                                        }
-                                    }}
-                                    filterOption={(input, option) =>
-                                        option.children.toLowerCase().includes(input.toLowerCase())
-                                    }
-                                >
-                                    {activeClientData.map((client) => (
-                                        <Option key={client._id} value={client._id}>
-                                            {client.clientName}
-                                        </Option>
-                                    ))}
-                                </Select>
-                            </Col>
-                            <Col xs={24} sm={12} md={12} lg={6} xl={6}>
-                                <Select
-                                    allowClear
-                                    placeholder="Select Project"
-                                    disabled={!filters.client}
-                                    value={filters.project}
-                                    onChange={(value) => {
-                                        handleFilterChange('project', value);
-                                        if (!value) {
-                                            handleDataConditionWise(taskBoardData);
-                                        }
-                                    }}
-                                    style={{width: "100%", height: "40px"}}
-                                    showSearch
-                                    filterOption={(input, option) =>
-                                        option.children.toLowerCase().includes(input.toLowerCase())
-                                    }
-                                >
-                                    {filteredProjects.map((project) => (
-                                        <Option key={project._id} value={project._id}>
-                                            {project.projectName}
-                                        </Option>
-                                    ))}
-                                </Select>
-                            </Col>
-                            <Col xs={12} sm={6} md={6} lg={3} xl={3}>
-                                <FilterPopover
-                                    employeeRecord={activeUsersData}
-                                    activeClientData={activeClientData}
-                                    isShowFilterPopup={isShowFilterPopup}
-                                    setIsShowFilterPopup={setIsShowFilterPopup}
-                                    activeFilterCount={activeFilterCount}
-                                    setActiveFilterCount={setActiveFilterCount}
-                                    filteredProjects={filteredProjects}
-                                    filters={filters}
-                                    handleFilterChange={handleFilterChange}
-                                    handleClearClick={() => {
-                                        setFilters(initialFilters);
-                                        // setIsShowFilterPopup(false);
-                                        handleDataConditionWise(taskBoardData);
-                                    }}
-                                    filterTasks={() => {
-                                        filterTasks();
-                                    }}
-                                />
-                            </Col>
-                            <Col xs={12} sm={6} md={6} lg={3} xl={3}>
-                                <Button
-                                    type="primary"
-                                    icon={<FilePlus/>}
-                                    onClick={handleTaskAddClick}
-                                    style={{width: "100%"}}
-                                    // loading={actionLoading === 'add'}
-                                >
-                                    Add Task
-                                </Button>
-                                {/*<div*/}
-                                {/*    className="addUpdateCommonBtn"*/}
-                                {/*    onClick={handleTaskAddClick}*/}
-                                {/*>*/}
-                                {/*    <Plus/>*/}
-                                {/*    <div>Add Task</div>*/}
-                                {/*</div>*/}
-                            </Col>
-                        </Row>
-                    </div>
-                </Card>
+                                    });
+                                    setTasksByStatus(organizeTasksByStatus(filteredTasks));
+                                },
+                            }}
+                        />
+                    </Col>
+                    <Col xs={24} sm={12} md={12} lg={6} xl={6}>
+                        <Select
+                            placeholder="Select Client"
+                            allowClear
+                            style={{width: "100%", height: "38px"}}
+                            showSearch
+                            value={filters.client}
+                            onChange={(value) => {
+                                handleFilterChange('client', value);
+                                if (!value) {
+                                    handleDataConditionWise(taskBoardData);
+                                }
+                            }}
+                            filterOption={(input, option) =>
+                                option.children.toLowerCase().includes(input.toLowerCase())
+                            }
+                        >
+                            {activeClientData.map((client) => (
+                                <Option key={client._id} value={client._id}>
+                                    {client.clientName}
+                                </Option>
+                            ))}
+                        </Select>
+                    </Col>
+                    <Col xs={24} sm={12} md={12} lg={6} xl={6}>
+                        <Select
+                            allowClear
+                            placeholder="Select Project"
+                            disabled={!filters.client}
+                            value={filters.project}
+                            onChange={(value) => {
+                                handleFilterChange('project', value);
+                                if (!value) {
+                                    handleDataConditionWise(taskBoardData);
+                                }
+                            }}
+                            style={{width: "100%", height: "40px"}}
+                            showSearch
+                            filterOption={(input, option) =>
+                                option.children.toLowerCase().includes(input.toLowerCase())
+                            }
+                        >
+                            {filteredProjects.map((project) => (
+                                <Option key={project._id} value={project._id}>
+                                    {project.projectName}
+                                </Option>
+                            ))}
+                        </Select>
+                    </Col>
+                    <Col xs={12} sm={6} md={6} lg={3} xl={3}>
+                        <FilterPopover
+                            employeeRecord={activeUsersData}
+                            activeClientData={activeClientData}
+                            isShowFilterPopup={isShowFilterPopup}
+                            setIsShowFilterPopup={setIsShowFilterPopup}
+                            activeFilterCount={activeFilterCount}
+                            setActiveFilterCount={setActiveFilterCount}
+                            filteredProjects={filteredProjects}
+                            filters={filters}
+                            handleFilterChange={handleFilterChange}
+                            handleClearClick={() => {
+                                setFilters(initialFilters);
+                                // setIsShowFilterPopup(false);
+                                handleDataConditionWise(taskBoardData);
+                            }}
+                            filterTasks={() => {
+                                filterTasks();
+                            }}
+                        />
+                    </Col>
+                    <Col xs={12} sm={6} md={6} lg={3} xl={3}>
+                        <div
+                            className="addUpdateCommonBtn"
+                            onClick={handleTaskAddClick}
+                        >
+                            <Plus/>
+                            <div>Add Task</div>
+                        </div>
+                    </Col>
+                </Row>
                 <div className="h-screen overflow-x-auto">
                     <DragDropContext onDragEnd={onDragEnd}>
                         <div style={{display: 'flex', overflowX: 'auto', paddingRight: isAddTaskModelOpen ? 685 : 0}}>
@@ -558,7 +527,7 @@ export default function Page() {
                                                     maxHeight: listHeight - 100,
                                                 }}>
                                                     {column.tasksList.length === 0 ? (
-                                                        <Empty/>
+                                                        <Empty />
                                                     ) : (
                                                         column.tasksList.map((task, index) => (
                                                             <Draggable key={task._id} draggableId={String(task._id)}
@@ -658,12 +627,7 @@ const TaskCard = ({task, employeeRecord, projectData, handleTaskOpenClick}) => {
                     <div>
                         <Avatar.Group max={{
                             count: 3,
-                            style: {
-                                color: appColor.white,
-                                backgroundColor: appColor.primary,
-                                fontSize: "12px",
-                                fontWeight: "550"
-                            },
+                            style: { color: appColor.white, backgroundColor: appColor.primary, fontSize: "12px", fontWeight: "550" },
                         }} size={27}>
                             {assignees.map(user => (
                                 <Tooltip key={user._id} title={user.fullName}>
@@ -793,7 +757,7 @@ const FilterPopover = ({
                             allowClear
                         >
                             {taskColumnStatusLabel.map((item) => (
-                                <Option key={item.value} value={item.value}>
+                                <Option key={item.key} value={item.key}>
                                     {item.label}
                                 </Option>
                             ))}
@@ -981,38 +945,28 @@ const FilterPopover = ({
                 </div>
             }
         >
-            <Badge count={activeFilterCount}>
-                <Button
-                    variant="outlined"
-                    icon={<Filter />}
+            <div
+                className="filterButtonWrapper"
+            >
+                <div
+                    className="filterTaskButton"
                     onClick={() => setIsShowFilterPopup(!isShowFilterPopup)}
-                    style={{width: "100%"}}
+                    style={{cursor: "pointer"}}
                 >
-                    Filters
-                </Button>
-            </Badge>
-            {/*<div*/}
-            {/*    className="filterButtonWrapper"*/}
-            {/*>*/}
-            {/*    <div*/}
-            {/*        className="filterTaskButton"*/}
-            {/*        onClick={() => setIsShowFilterPopup(!isShowFilterPopup)}*/}
-            {/*        style={{cursor: "pointer"}}*/}
-            {/*    >*/}
-            {/*        <Filter className="commonIconStyle"/>*/}
-            {/*        <div>Filters</div>*/}
-            {/*    </div>*/}
-            {/*    {activeFilterCount > 0 && (*/}
-            {/*        <div className="filterBadge">*/}
-            {/*            <div className="filterBadgeCount" onClick={() => {*/}
-            {/*                setActiveFilterCount(0);*/}
-            {/*                handleClearClick();*/}
-            {/*            }}>*/}
-            {/*                {activeFilterCount}*/}
-            {/*            </div>*/}
-            {/*        </div>*/}
-            {/*    )}*/}
-            {/*</div>*/}
+                    <Filter className="commonIconStyle"/>
+                    <div>Filters</div>
+                </div>
+                {activeFilterCount > 0 && (
+                    <div className="filterBadge">
+                        <div className="filterBadgeCount" onClick={() => {
+                            setActiveFilterCount(0);
+                            handleClearClick();
+                        }}>
+                            {activeFilterCount}
+                        </div>
+                    </div>
+                )}
+            </div>
         </Popover>
     );
 };
@@ -1030,242 +984,3 @@ const LabelContentRow = ({label, icon, children}) => {
         </div>
     );
 };
-
-
-// 'use client';
-//
-// import React, {useEffect, useState} from "react";
-// import {DragDropContext, Draggable, Droppable} from "@hello-pangea/dnd";
-// import {Card, Col, DatePicker, Row, Select} from "antd";
-// import dayjs from "dayjs";
-//
-// import utc from 'dayjs/plugin/utc';
-// import timezone from 'dayjs/plugin/timezone';
-// import isSameOrAfter from "dayjs/plugin/isSameOrAfter";
-// import isSameOrBefore from "dayjs/plugin/isSameOrBefore";
-// import {useAppData} from "../../../masterData/AppDataContext";
-// import {taskColumnStatusLabel} from "../../../utils/enum";
-//
-// dayjs.extend(utc);
-// dayjs.extend(timezone);
-// dayjs.extend(isSameOrAfter);
-// dayjs.extend(isSameOrBefore);
-//
-// export default function Page() {
-//     const {
-//         taskBoardData,
-//     } = useAppData();
-//
-//     const [columns, setColumns] = useState([]); // original response
-//
-//     useEffect(() => {
-//         setColumns(organizeTasksByStatus(taskBoardData));
-//     }, []);
-//
-//     const organizeTasksByStatus = (tasks) => {
-//         return {
-//             columns: taskColumnStatusLabel.reduce((acc, {key, label}) => {
-//                 const taskList = (tasks[key] || []).sort((a, b) => a.placementIndex - b.placementIndex);
-//
-//                 acc[key] = {
-//                     id: key,
-//                     title: label,
-//                     tasksList: taskList,
-//                 };
-//                 return acc;
-//             }, {}),
-//             items: {},
-//         };
-//     };
-//
-//     // ✅ Handle task moving
-//     const onDragEnd = (result) => {
-//         const { source, destination } = result;
-//
-//         if (!destination) return;
-//
-//         const srcCol = source.droppableId;
-//         const destCol = destination.droppableId;
-//
-//         const srcTasks = Array.from(columns[srcCol]);
-//         const destTasks = Array.from(columns[destCol]);
-//
-//         const [movedTask] = srcTasks.splice(source.index, 1);
-//
-//         if (srcCol === destCol) {
-//             // move within same column
-//             srcTasks.splice(destination.index, 0, movedTask);
-//             setColumns({ ...columns, [srcCol]: srcTasks });
-//         } else {
-//             // move to different column
-//             destTasks.splice(destination.index, 0, movedTask);
-//             setColumns({
-//                 ...columns,
-//                 [srcCol]: srcTasks,
-//                 [destCol]: destTasks,
-//             });
-//         }
-//     };
-//
-//     return (
-//         <>
-//             <div style={{overflowX: "auto", height: "100vh"}}>
-//                 <DragDropContext onDragEnd={onDragEnd}>
-//                     <div style={{display: 'flex', overflowX: 'auto'}}>
-//                         {tasksByStatus.columns && Object.values(tasksByStatus.columns).map((column) => (
-//                             <Droppable droppableId={column.id} key={column.id}>
-//                                 {(provided) => (
-//                                     <div
-//                                         {...provided.droppableProps}
-//                                         ref={provided.innerRef}
-//                                         style={{
-//                                             borderTop: `5px solid ${stageWiseColor(column.title)}`,
-//                                             height: "100%",
-//                                         }}
-//                                         className="task-column">
-//                                         <div
-//                                             className="taskColumnTitle">{`${column.title}(${column.tasksList.length})`}</div>
-//                                         <div
-//                                             style={{
-//                                                 overflowY: "auto",
-//                                             }}
-//                                         >
-//                                             <div style={{
-//                                                 // overflowY: "auto",
-//                                                 // height: "100%",
-//                                                 maxHeight: listHeight - 100,
-//                                             }}>
-//                                                 {column.tasksList.length === 0 ? (
-//                                                     <div className="noTaskContent">
-//                                                         <img src={imagePaths.noTaskFoundImage}/>
-//                                                     </div>
-//                                                 ) : (
-//                                                     column.tasksList.map((task, index) => (
-//                                                         <Draggable key={task._id} draggableId={String(task._id)}
-//                                                                    index={index}>
-//                                                             {(provided, snapshot) => {
-//                                                                 const draggingClass = snapshot.isDragging ? 'dragging' : '';
-//                                                                 return (
-//                                                                     <div
-//                                                                         ref={provided.innerRef}
-//                                                                         {...provided.draggableProps}
-//                                                                         {...provided.dragHandleProps}
-//                                                                         className={`task-card ${draggingClass}`}
-//                                                                         // onClick={() => handleTaskOpenClick(task)}
-//                                                                     >
-//                                                                         <TaskCard task={task}
-//                                                                                   employeeRecord={activeUsersData}
-//                                                                                   projectData={activeProjectData}
-//                                                                                   handleTaskOpenClick={() => handleTaskOpenClick(task)}
-//                                                                         />
-//                                                                     </div>
-//                                                                 );
-//                                                             }}
-//                                                         </Draggable>
-//                                                     ))
-//                                                 )}
-//                                             </div>
-//                                             {provided.placeholder}
-//                                         </div>
-//                                     </div>
-//                                 )}
-//                             </Droppable>
-//                         ))}
-//                     </div>
-//                 </DragDropContext>
-//             </div>
-//             <div style={{ padding: 24 }}>
-//                 <DragDropContext onDragEnd={onDragEnd}>
-//
-//                     {/* ✅ outer scrollable drag zone */}
-//                     <Droppable
-//                         droppableId="board-columns"
-//                         direction="horizontal"
-//                         type="column"
-//                         isDropDisabled={true} // prevent drag over column itself
-//                     >
-//                         {(provided) => (
-//                             <div
-//                                 ref={provided.innerRef}
-//                                 {...provided.droppableProps}
-//                                 style={{
-//                                     display: 'flex',
-//                                     overflowX: 'auto',
-//                                     paddingBottom: 20,
-//                                     gap: '16px',
-//                                 }}
-//                             >
-//                                 {Object.entries(columns).map(([status, tasks], i) => (
-//                                     <div
-//                                         key={status}
-//                                         style={{
-//                                             flex: '0 0 300px',
-//                                             overflowY: 'auto',
-//                                             maxHeight: 'calc(100vh - 200px)',
-//                                         }}
-//                                     >
-//                                         <Card
-//                                             title={status.toUpperCase()}
-//                                             bordered
-//                                             bodyStyle={{ padding: 8 }}
-//                                         >
-//                                             <Droppable droppableId={status}>
-//                                                 {(provided, snapshot) => (
-//                                                     <div
-//                                                         {...provided.droppableProps}
-//                                                         ref={provided.innerRef}
-//                                                         style={{
-//                                                             minHeight: 300,
-//                                                             padding: 8,
-//                                                             backgroundColor: snapshot.isDraggingOver
-//                                                                 ? "#f0f0f0"
-//                                                                 : "#fff",
-//                                                             borderRadius: 4,
-//                                                         }}
-//                                                     >
-//                                                         {tasks.map((task, index) => (
-//                                                             <Draggable
-//                                                                 draggableId={task._id}
-//                                                                 index={index}
-//                                                                 key={task._id}
-//                                                             >
-//                                                                 {(provided, snapshot) => (
-//                                                                     <Card
-//                                                                         ref={provided.innerRef}
-//                                                                         {...provided.draggableProps}
-//                                                                         {...provided.dragHandleProps}
-//                                                                         style={{
-//                                                                             marginBottom: 8,
-//                                                                             backgroundColor: snapshot.isDragging
-//                                                                                 ? "#e6f7ff"
-//                                                                                 : "#fff",
-//                                                                             ...provided.draggableProps.style,
-//                                                                         }}
-//                                                                     >
-//                                                                         <strong>{task.taskTitle}</strong>
-//                                                                         <div
-//                                                                             style={{ fontSize: 12, color: "#888" }}
-//                                                                         >
-//                                                                             {task.taskDescription}
-//                                                                         </div>
-//                                                                     </Card>
-//                                                                 )}
-//                                                             </Draggable>
-//                                                         ))}
-//                                                         {provided.placeholder}
-//                                                     </div>
-//                                                 )}
-//                                             </Droppable>
-//                                         </Card>
-//                                     </div>
-//                                 ))}
-//                                 {provided.placeholder}
-//                             </div>
-//                         )}
-//                     </Droppable>
-//
-//                 </DragDropContext>
-//             </div>
-//         </>
-//     );
-// };

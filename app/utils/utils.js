@@ -45,6 +45,17 @@ export function getFirstName(fullName) {
     return fullName.trim().split(' ')[0];
 }
 
+export const getTwoCharacterFromName = (str) => {
+    if (str) {
+        const words = str.trim().split(" ");
+        const firstInitial = words[0].charAt(0).toUpperCase();
+        const secondInitial =
+            words.length > 1 ? words[1].charAt(0).toUpperCase() : "";
+        return firstInitial + secondInitial;
+    }
+    return "N/A";
+};
+
 function formatReadable(text) {
     return text
         .replace(/([a-z])([A-Z])/g, '$1 $2')

@@ -10,6 +10,7 @@
   },
   "dependencies": {
     "@ant-design/nextjs-registry": "^1.0.2",
+    "@hello-pangea/dnd": "^18.0.1",
     "antd": "^5.26.2",
     "axios": "^1.10.0",
     "crypto-js": "^4.2.0",
@@ -26,6 +27,7 @@
   "devDependencies": {
     "@tailwindcss/postcss": "^4",
     "@types/react": "19.1.8",
+    "autoprefixer": "^10.4.21",
     "tailwindcss": "^4",
     "typescript": "5.8.3"
   }

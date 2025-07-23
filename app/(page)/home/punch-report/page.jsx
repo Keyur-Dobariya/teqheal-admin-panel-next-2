@@ -2,9 +2,9 @@
 
 import React, {useEffect, useMemo, useState} from 'react';
 import {
-    Card, Row, Col, Avatar, Input, Spin, Empty, DatePicker, Button, Table, Tag
+    Card, Row, Col, Avatar, Input, Spin, Empty, DatePicker, Button, Table, Tag, Tooltip
 } from 'antd';
-import {SearchOutlined, UserOutlined, ReloadOutlined} from '@ant-design/icons';
+import {SearchOutlined, UserOutlined, ReloadOutlined, LoadingOutlined} from '@ant-design/icons';
 import dayjs from 'dayjs';
 import apiCall, {HttpMethod} from '../../../api/apiServiceProvider';
 import {endpoints} from '../../../api/apiEndpoints';
@@ -17,12 +17,20 @@ import {getLocalData, isAdmin} from "../../../dataStorage/DataPref";
 import appKeys from "../../../utils/appKeys";
 import {convertCamelCase, decryptValue} from "../../../utils/utils";
 import appColor from "../../../utils/appColor";
+import PunchReportEditModel from "../../../models/PunchReportEditModel";
+import UploadPunchSheetModel from "../../../models/UploadPunchSheetModel";
+import SheetDayTimeChangeModel from "../../../models/SheetDayTimeChangeModel";
 
 export default function Page() {
     const {activeUsersData} = useAppData();
     const [allData, setAllData] = useState([]);
     const [isLoading, setIsLoading] = useState(false);
     const [searchText, setSearchText] = useState('');
+    const [selectedRecord, setSelectedRecord] = useState(null);
+    const [actionLoading, setActionLoading] = useState(null);
+    const [isPunchUpdateOpen, setIsPunchUpdateOpen] = useState(false);
+    const [isSheetUploadOpen, setIsSheetUploadOpen] = useState(false);
+    const [isUpdateTimeOpen, setIsUpdateTimeOpen] = useState(false);
     const [filters, setFilters] = useState({
         user: isAdmin() ? null : getLocalData(appKeys._id),
         year: null,
@@ -73,15 +81,12 @@ export default function Page() {
             url: endpoints.getPunchReportsList + filterQuery,
             setIsLoading: setIsLoading,
             showSuccessMessage: false,
-            successCallback: (data) => {
-                console.log("data=>", data)
-                handleDataConditionWise(data?.data);
-            },
+            successCallback: handleDataConditionWise,
         });
     };
 
     const handleDataConditionWise = (data) => {
-        const filteredPunchReport = isAdmin() ? data : data.filter((data) => data.user._id === getLocalData(appKeys._id));
+        const filteredPunchReport = isAdmin() ? data?.data : data?.data.filter((data) => data.user._id === getLocalData(appKeys._id));
         setAllData(filteredPunchReport);
     };
 
@@ -100,10 +105,48 @@ export default function Page() {
         return antTag(status, colorMap[status] || 'default');
     };
 
+    const openModalWithLoading = (isEditMode, record = null) => {
+        const loadingId = isEditMode ? record._id : 'add';
+        setActionLoading(loadingId);
+
+        dataAggregate(record);
+
+        setTimeout(() => {
+            setIsPunchUpdateOpen(true);
+            setActionLoading(null);
+        }, 100);
+    };
+
+    const handleReportEditClick = (record) => {
+        openModalWithLoading(true, record);
+    };
+
+    const dataAggregate = (record) => {
+        const updated = {...record};
+
+        for (let i = 0; i < 6; i++) {
+            updated[`punchIn${i + 1}`] = record[`col${i * 2 + 1}`] || '';
+            updated[`punchOut${i + 1}`] = record[`col${i * 2 + 2}`] || '';
+        }
+
+        if (record.extraPunches?.length) {
+            for (let i = 0; i < record.extraPunches.length; i++) {
+                const punch = record.extraPunches[i];
+                const punchIndex = Math.floor(i / 2) + 7;
+                if (punch.type === 'IN') {
+                    updated[`punchIn${punchIndex}`] = punch.time || '';
+                } else {
+                    updated[`punchOut${punchIndex}`] = punch.time || '';
+                }
+            }
+        }
+        setSelectedRecord(updated);
+    };
+
     const columns = [
         {
-            title: 'Date',
-            dataIndex: 'date',
+            title: appString.date,
+            dataIndex: appKeys.date,
             render: (date) => {
                 return date ? date : '-';
             },
@@ -151,20 +194,20 @@ export default function Page() {
             },
         },
         {
-            title: 'Status',
-            dataIndex: 'status',
+            title: appString.status,
+            dataIndex: appKeys.status,
             render: getStatusTag,
         },
         {
-            title: 'Working Hours',
-            dataIndex: 'workingHours',
+            title: appString.workingHours,
+            dataIndex: appKeys.workingHours,
             render: (workingHours) => {
                 return workingHours ? workingHours : '-';
             },
         },
         {
-            title: 'Missing Hours',
-            dataIndex: 'missingHours',
+            title: appString.missingHours,
+            dataIndex: appKeys.missingHours,
             render: (missingHours) => {
                 return missingHours ? missingHours : '-';
             },
@@ -177,9 +220,13 @@ export default function Page() {
             },
         },
         {
-            title: 'Actions', render: (_, record) => <Edit color={appColor.secondPrimary} onClick={() => {
-                // handleEditClick(record)
-            }}/>
+            title: appString.action, render: (_, record) => (
+                <Tooltip title={appString.edit}>
+                    <div className="cursor-pointer" onClick={() => handleReportEditClick(record)}>
+                        <Edit color={appColor.secondPrimary} />
+                    </div>
+                </Tooltip>
+            )
         },
     ];
 
@@ -278,18 +325,14 @@ export default function Page() {
                                 />
                             </Col>
                             <Col xs={12} sm={6} md={6} lg={6} xl={3} xxl={3}>
-                                <Button type="primary" onClick={() => {
-
-                                }}
+                                <Button type="primary" onClick={() => setIsUpdateTimeOpen(true)}
                                         icon={<Clock/>}
                                         style={{width: "100%"}}>
                                     {appString.addTime}
                                 </Button>
                             </Col>
                             <Col xs={12} sm={6} md={6} lg={6} xl={4} xxl={3}>
-                                <Button type="primary" onClick={() => {
-
-                                }}
+                                <Button type="primary" onClick={() => setIsSheetUploadOpen(true)}
                                         icon={<UploadCloud/>}
                                         style={{width: "100%"}}>
                                     {appString.uploadSheet}
@@ -329,26 +372,49 @@ export default function Page() {
                             });
 
                             return (
-                                <Card key={user._id}>
-                                    <Table
-                                        columns={columns}
-                                        dataSource={dataSource}
-                                        title={() => (
-                                            <div className="flex justify-between text-[16px] font-medium">
-                                                <span>User Name: <span>{user.user?.fullName}</span></span>
-                                                <span>Employee Code: <span>{user.empCode}</span></span>
-                                            </div>
-                                        )}
-                                        expandable={{expandedRowRender}}
-                                        pagination={false}
-                                        scroll={{x: "max-content"}}
-                                    />
-                                </Card>
+                                <>
+                                    <Card key={user._id}>
+                                        <Table
+                                            columns={columns}
+                                            dataSource={dataSource}
+                                            title={() => (
+                                                <div className="flex justify-between text-[16px] font-medium">
+                                                    <span>User Name: <span>{user.user?.fullName}</span></span>
+                                                    <span>Employee Code: <span>{user.empCode}</span></span>
+                                                </div>
+                                            )}
+                                            expandable={{expandedRowRender}}
+                                            pagination={false}
+                                            scroll={{x: "max-content"}}
+                                        />
+                                    </Card>
+                                    <div className="m-4"/>
+                                </>
                             );
                         })
                     )}
                 </div>
             </div>
+            {isPunchUpdateOpen && <PunchReportEditModel
+                isModelOpen={isPunchUpdateOpen}
+                setIsModelOpen={setIsPunchUpdateOpen}
+                selectedRecord={selectedRecord}
+                onSuccessCallback={handleDataConditionWise}
+            />}
+            {isSheetUploadOpen && <UploadPunchSheetModel
+                isModelOpen={isSheetUploadOpen}
+                setIsModelOpen={setIsSheetUploadOpen}
+                activeUsersData={activeUsersData}
+                onSuccessCallback={handleDataConditionWise}
+            />}
+            {isUpdateTimeOpen && <SheetDayTimeChangeModel
+                isModelOpen={isUpdateTimeOpen}
+                setIsModelOpen={setIsUpdateTimeOpen}
+                onSuccessCallback={() => {
+                    const filterQuery = getQueryParams();
+                    getPunchReportData(filterQuery);
+                }}
+            />}
         </>
     );
 }
