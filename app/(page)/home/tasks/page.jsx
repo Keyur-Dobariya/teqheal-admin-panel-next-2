@@ -56,7 +56,7 @@ import {contentCopy, getDataById, getTwoCharacterFromName} from "../../../utils/
 import appKeys from "../../../utils/appKeys";
 import {showToast} from "../../../components/CommonComponents";
 import appString from "../../../utils/appString";
-import {useRouter, useSearchParams} from "next/navigation";
+// import {useRouter, useSearchParams} from "next/navigation";
 import TaskAddUpdateSidebar from "../../../models/TaskAddUpdateSidebar";
 import {reorderTasksOnServer} from "../../../api/apiUtils";
 import {organizeTasksByStatus, stageWiseColor} from "./taskPageUtils";
@@ -83,9 +83,10 @@ export default function Page() {
         updateAppDataField
     } = useAppData();
 
-    const router = useRouter();
-    const searchParams = useSearchParams();
-    const taskId = searchParams.get('task');
+    // const router = useRouter();
+    // const searchParams = useSearchParams();
+    // const taskId = searchParams.get('task');
+    const taskId = null;
 
     const [originalTasksByStatus, setOriginalTasksByStatus] = useState([]);
     const [tasksByStatus, setTasksByStatus] = useState([]);
@@ -300,9 +301,9 @@ export default function Page() {
         setAddTaskModelOpen(true);
         setIsShowFilterPopup(false);
         setIsTaskEditing(true);
-        const params = new URLSearchParams(searchParams);
-        params.set('task', taskDetail.taskId);
-        router.push(`?${params.toString()}`);
+        // const params = new URLSearchParams(searchParams);
+        // params.set('task', taskDetail.taskId);
+        // router.push(`?${params.toString()}`);
         // navigate(`/tasks/${taskDetail.taskId}`);
         setSelectedTastRecord(taskDetail);
     };
