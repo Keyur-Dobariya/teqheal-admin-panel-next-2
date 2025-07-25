@@ -1,6 +1,7 @@
 import {Gender} from "./enum";
 import imagePaths from "./imagesPath";
 import CryptoJS from 'crypto-js';
+import {showToast} from "../components/CommonComponents";
 
 export const getDataById = (dataList, dataId) => {
     return dataList.find((data) => data._id === dataId);
@@ -54,6 +55,83 @@ export const getTwoCharacterFromName = (str) => {
         return firstInitial + secondInitial;
     }
     return "N/A";
+};
+
+export const contentCopy = (content, message) => {
+    if (typeof navigator !== 'undefined' && navigator.clipboard?.writeText) {
+        navigator.clipboard.writeText(content)
+            .then(() => {
+                showToast('success', message);
+            })
+            .catch((err) => {
+                showToast('error', 'Failed to copy');
+            });
+    } else {
+        const textArea = document.createElement('textarea');
+        textArea.value = content;
+        document.body.appendChild(textArea);
+        textArea.focus();
+        textArea.select();
+        try {
+            const successful = document.execCommand('copy');
+            document.body.removeChild(textArea);
+            if (successful) {
+                showToast('success', message);
+            } else {
+                showToast('error', 'Failed to copy');
+            }
+        } catch (err) {
+            document.body.removeChild(textArea);
+            showToast('error', 'Clipboard not supported');
+        }
+    }
+};
+
+export const formatMessageTimeReal = (dateString) => {
+    const date = new Date(dateString);
+    const now = new Date();
+
+    const diffMs = now - date;
+
+    const diffMinutes = Math.floor(diffMs / 60000);
+    const diffHours = Math.floor(diffMs / 3600000);
+    const diffDays = Math.floor(diffMs / 86400000);
+
+    if (diffMinutes < 1) return 'Just now';
+
+    if (diffMinutes < 60) {
+        return `${diffMinutes} minute${diffMinutes > 1 ? 's' : ''} ago`;
+    }
+
+    if (diffHours < 24) {
+        return `${diffHours} hour${diffHours > 1 ? 's' : ''} ago`;
+    }
+
+    const time = date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+    return `${date.toLocaleDateString('en-GB')} ${time}`;
+};
+
+export const formatMessageTime = (dateString) => {
+    const date = new Date(dateString);
+    const now = new Date();
+
+    const diffMs = now - date;
+    const diffMinutes = Math.floor(diffMs / 60000);
+
+    if (diffMinutes === 0) return 'Just now';
+
+    const isToday = date.toDateString() === now.toDateString();
+
+    const yesterday = new Date();
+    yesterday.setDate(yesterday.getDate() - 1);
+    const isYesterday = date.toDateString() === yesterday.toDateString();
+
+    const time = date.toLocaleTimeString([], {hour: '2-digit', minute: '2-digit'});
+
+    if (isToday) return time;
+    if (isYesterday) return `Yesterday ${time}`;
+
+    return `${date.toLocaleDateString('en-GB')} ${time}`;
 };
 
 function formatReadable(text) {

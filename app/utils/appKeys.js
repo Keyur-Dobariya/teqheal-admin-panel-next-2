@@ -120,6 +120,19 @@ const appKeys = {
     reportType: "reportType",
     totalMissingMinutes: "totalMissingMinutes",
     totalDeductMinutes: "totalDeductMinutes",
+    taskStartDate: "taskStartDate",
+    taskEndDate: "taskEndDate",
+    taskTitle: "taskTitle",
+    taskDescription: "taskDescription",
+    taskStatus: "taskStatus",
+    taskPriority: "taskPriority",
+    taskCategory: "taskCategory",
+    taskAssignee: "taskAssignee",
+    taskLabels: "taskLabels",
+    taskEstimatedTime: "taskEstimatedTime",
+    taskAttachments: "taskAttachments",
+    taskAddedBy: "taskAddedBy",
+    comments: "comments",
 };
 
 export default appKeys;

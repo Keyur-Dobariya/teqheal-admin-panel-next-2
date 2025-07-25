@@ -149,7 +149,7 @@ export default function Page() {
             render: (projectPriority) => {
                 if (!projectPriority) return "";
                 return (
-                    <div style={{display: "flex", alignItems: "center"}}>
+                    <div className="flex items-center gap-2">
                         {getIconByKey(projectPriority, taskPriorityLabel)}
                         {getLabelByKey(projectPriority, taskPriorityLabel)}
                     </div>

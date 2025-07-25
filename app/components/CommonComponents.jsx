@@ -93,7 +93,7 @@ export const UserSelect = ({
                     value={user._id}
                     label={user.fullName}
                 >
-                    <div className="flex items-center gap-3 text-[14px]">
+                    <div className="flex items-center gap-2 text-[14px]">
                         <Avatar
                             size="small"
                             src={profilePhotoManager({

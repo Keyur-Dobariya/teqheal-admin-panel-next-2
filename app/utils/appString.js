@@ -222,6 +222,16 @@ const appString = {
     reportType: "Report Type",
     totalMissingMinutes: "Missing Hours",
     totalDeductMinutes: "Deduct Hours",
+    taskTitle: "Task Title",
+    taskDescription: "Task Description",
+    taskStartDate: "Task Start Date",
+    taskEndDate: "Task End Date",
+    comments: "Comments",
+    taskInfo: "Task Details",
+    taskStatus: "Task Status",
+    taskPriority: "Task Priority",
+    taskAssignee: "Task Assignee",
+    taskCategory: "Task Category",
 };
 
 export default appString;

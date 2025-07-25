@@ -72,3 +72,77 @@ html, body {
   0% {  transform: rotate(0)}
   100% { transform: rotate(360deg)}
 }
+
+/*============ Loader ============*/
+
+.messageContainer {
+  /*background-color: #f7f6ff;*/
+  border-radius: 10px;
+  padding: 5px 10px;
+  max-width: 100%;
+  word-break: break-word;
+  position: relative;
+  transition: background-color 0.2s ease-in-out;
+}
+
+.messageContainer:hover {
+  /*background-color: #eeedff;*/
+  background-color: #f1f1f1;
+  transition: background-color 0.2s ease-in-out;
+}
+
+.replayButtonUi {
+  font-size: 14px;
+  color: black;
+  font-weight: 550;
+  padding: 5px 10px;
+  transition: background-color 0.2s ease-in-out;
+}
+
+.replayButtonUi:hover {
+  background-color: #efefef;
+  border-radius: 10px;
+  transition: background-color 0.2s ease-in-out;
+}
+
+.chatShowHideButton {
+  width: 100%;
+  height: 40px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  font-size: 14px;
+  color: var(--primary-color);
+  font-weight: 550;
+  background-color: white;
+  margin-top: 10px;
+  cursor: pointer;
+  transition: background-color 0.2s ease;
+}
+
+.chatShowHideButton:hover {
+  background-color: #efefef;
+  transition: background-color 0.2s ease;
+}
+
+.commentManageRow {
+  display: flex;
+  align-items: center;
+  gap: 40px;
+  margin-top: 5px;
+}
+
+.commentLikeManageRow {
+  display: flex;
+  align-items: center;
+  gap: 15px;
+}
+
+.commentBtn {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  font-weight: 550;
+  cursor: pointer;
+  font-size: 12px;
+}

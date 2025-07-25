@@ -1,19 +1,21 @@
 'use client';
 
-import React, {useEffect, useRef, useState} from "react";
+import React, {useEffect, useMemo, useRef, useState} from "react";
 import {DragDropContext, Draggable, Droppable} from "@hello-pangea/dnd";
 import {
+    ArrowDown,
     Calendar,
     Check,
-    ChevronsUp,
+    ChevronsUp, Clock,
     Copy, Eye, EyeOff, FilePlus,
-    Filter,
+    Filter, List,
     Plus,
     Search,
     ShoppingCart,
     Tag as TagIcon,
     User
 } from "../../../utils/icons";
+import {AppstoreOutlined, BarsOutlined} from '@ant-design/icons';
 import {
     Avatar,
     Badge,
@@ -22,12 +24,12 @@ import {
     Col,
     DatePicker,
     Divider,
-    Empty,
+    Empty, Grid,
     Input,
     Popover,
-    Row,
+    Row, Segmented,
     Select,
-    Spin,
+    Spin, Table,
     Tooltip
 } from "antd";
 import {
@@ -50,10 +52,17 @@ import appColor, {getDarkColor} from "../../../utils/appColor";
 import apiCall, {HttpMethod} from "../../../api/apiServiceProvider";
 import {endpoints} from "../../../api/apiEndpoints";
 import {AppDataFields, useAppData} from "../../../masterData/AppDataContext";
-import {getDataById, getTwoCharacterFromName} from "../../../utils/utils";
+import {contentCopy, getDataById, getTwoCharacterFromName} from "../../../utils/utils";
 import appKeys from "../../../utils/appKeys";
 import {showToast} from "../../../components/CommonComponents";
 import appString from "../../../utils/appString";
+import {useRouter, useSearchParams} from "next/navigation";
+import TaskAddUpdateSidebar from "../../../models/TaskAddUpdateSidebar";
+import {reorderTasksOnServer} from "../../../api/apiUtils";
+import {organizeTasksByStatus, stageWiseColor} from "./taskPageUtils";
+import {TaskCard} from "./TaskCard";
+import {FilterPopover} from "./FilterPopover";
+import {TaskBoardUi} from "./TaskBoardUi";
 
 dayjs.extend(utc);
 dayjs.extend(timezone);
@@ -63,18 +72,20 @@ dayjs.extend(isSameOrBefore);
 const {Option} = Select;
 const {RangePicker} = DatePicker;
 
+const {useBreakpoint} = Grid;
+
 export default function Page() {
     const {
         activeUsersData,
         activeClientData,
         activeProjectData,
         taskBoardData,
-        loginUserData,
         updateAppDataField
     } = useAppData();
 
-    // const {taskId} = useParams();
-    const taskId = null;
+    const router = useRouter();
+    const searchParams = useSearchParams();
+    const taskId = searchParams.get('task');
 
     const [originalTasksByStatus, setOriginalTasksByStatus] = useState([]);
     const [tasksByStatus, setTasksByStatus] = useState([]);
@@ -82,6 +93,8 @@ export default function Page() {
     const [isShowFilterPopup, setIsShowFilterPopup] = useState(false);
     const [isTaskEditing, setIsTaskEditing] = useState(false);
     const [selectedTaskRecord, setSelectedTastRecord] = useState({});
+
+    const [viewMode, setViewMode] = useState('board');
 
     const [listHeight, setListHeight] = useState(0);
     const taskBoardContainerRef = useRef(null);
@@ -204,22 +217,6 @@ export default function Page() {
         }));
     };
 
-    const organizeTasksByStatus = (tasks) => {
-        return {
-            columns: taskColumnStatusLabel.reduce((acc, {value, label}) => {
-                const taskList = (tasks[value] || []).sort((a, b) => a.placementIndex - b.placementIndex);
-
-                acc[value] = {
-                    id: value,
-                    title: label,
-                    tasksList: taskList,
-                };
-                return acc;
-            }, {}),
-            items: {},
-        };
-    };
-
     useEffect(() => {
         handleDataConditionWise(taskBoardData);
         setOriginalTasksByStatus(organizeTasksByStatus(taskBoardData));
@@ -293,96 +290,6 @@ export default function Page() {
         setTasksByStatus(organizeTasksByStatus(filteredTasks));
     };
 
-    const onDragEnd = (result) => {
-        const {source, destination} = result;
-
-        if (!destination) return;
-
-        const sourceStage = source.droppableId;
-        const destStage = destination.droppableId;
-
-        // Clone current tasks object
-        const updatedTasks = {...tasksByStatus};
-
-        const sourceTasks = [...(updatedTasks.columns[sourceStage]?.tasksList || [])];
-        const destTasks = [...(updatedTasks.columns[destStage]?.tasksList || [])];
-
-        const [movedTask] = sourceTasks.splice(source.index, 1);
-
-        // Move the task into the correct index in the destination
-        if (sourceStage === destStage) {
-            // Drop within same column at a different position
-            sourceTasks.splice(destination.index, 0, movedTask);
-            updatedTasks.columns[sourceStage].tasksList = sourceTasks;
-            setTasksByStatus(updatedTasks);
-
-            // 🔄 Reorder all tasks in this column
-            const reorderedTasks = sourceTasks.map((task, index) => ({
-                _id: task._id,
-                placementIndex: index,
-            }));
-
-            // 🔥 Call backend to persist new order
-            reorderTasksOnServer(reorderedTasks);
-        } else {
-            // Moved to another column
-            destTasks.splice(destination.index, 0, movedTask);
-            updatedTasks.columns[sourceStage].tasksList = sourceTasks;
-            updatedTasks.columns[destStage].tasksList = destTasks;
-
-            setTasksByStatus(updatedTasks);
-
-            const reorderedTasks = destTasks.map((task, index) => ({
-                _id: task._id,
-                placementIndex: index,
-                taskStatus: getValueByLabel(destStage, taskColumnStatusLabel),
-            }));
-
-            // handleAddUpdateTaskApi(
-            //     result.draggableId,
-            //     getValueByLabel(destStage, taskColumnStatusLabel),
-            //     destination.index
-            // );
-
-            reorderTasksOnServer(reorderedTasks);
-        }
-    };
-
-    const reorderTasksOnServer = async (reorderedTasks) => {
-        try {
-            await apiCall({
-                method: HttpMethod.PATCH,
-                url: endpoints.taskReorder,
-                data: {updates: reorderedTasks},
-                setIsLoading: false,
-                showSuccessMessage: false,
-                successCallback: () => {
-                },
-            });
-        } catch (error) {
-            console.error("API Call Failed:", error);
-        }
-    };
-
-    const stageWiseColor = (stage) => {
-        switch (stage) {
-            case taskColumnLabel.ToDo:
-                return appColor.primary;
-            case taskColumnLabel.InProgress:
-                return appColor.info;
-            case taskColumnLabel.Testing:
-                return appColor.warning;
-            case taskColumnLabel.OnHold:
-                return appColor.secondary;
-            case taskColumnLabel.Completed:
-                return appColor.success;
-            case taskColumnLabel.Reopened:
-                return appColor.danger;
-            default:
-                return "#FFFFFF";
-        }
-    };
-
     const handleTaskAddClick = () => {
         setAddTaskModelOpen(true);
         setIsShowFilterPopup(false);
@@ -393,6 +300,9 @@ export default function Page() {
         setAddTaskModelOpen(true);
         setIsShowFilterPopup(false);
         setIsTaskEditing(true);
+        const params = new URLSearchParams(searchParams);
+        params.set('task', taskDetail.taskId);
+        router.push(`?${params.toString()}`);
         // navigate(`/tasks/${taskDetail.taskId}`);
         setSelectedTastRecord(taskDetail);
     };
@@ -415,36 +325,90 @@ export default function Page() {
         );
     }
 
+    const dataSource = taskColumnStatusLabel
+        .map(({label, value}) => ({
+            key: value,
+            statusLabel: label,
+            children: (tasksByStatus.columns?.[value]?.tasksList || []).map((task) => ({
+                key: task._id,
+                taskTitle: task.taskTitle,
+                taskDescription: task.taskDescription,
+                taskPriority: task.taskPriority,
+                clientName: task.clientName,
+            })),
+        }))
+        .filter(group => group.children.length > 0);
+
+
+    const columns = [
+        {
+            title: 'Task Title',
+            dataIndex: 'taskTitle',
+            key: 'taskTitle',
+        },
+        {
+            title: 'Description',
+            dataIndex: 'taskDescription',
+            key: 'taskDescription',
+        },
+        {
+            title: 'Priority',
+            dataIndex: 'taskPriority',
+            key: 'taskPriority',
+        },
+        {
+            title: 'Client',
+            dataIndex: 'clientName',
+            key: 'clientName',
+            render: (text) => text || '-',
+        },
+    ];
+
     return (
         <>
-            <div ref={taskBoardContainerRef}>
-                <Card>
-                    <div className="p-4">
-                        <Row gutter={[16, 16]} align="middle">
-                            <Col xs={24} sm={12} md={12} lg={6} xl={6}>
-                                <Input
-                                    placeholder={appString.searchHint}
-                                    prefix={<Search/>}
-                                    // value={searchText}
-                                    onChange={(e) => {
-                                        const searchText = e.target.value.toLowerCase();
-                                        const filteredTasks = {};
-                                        Object.entries(originalTasksByStatus.columns).forEach(([statusKey, column]) => {
-                                            filteredTasks[statusKey] = column.tasksList.filter((task) => {
-                                                return (task.taskTitle?.toLowerCase().includes(searchText) || task.taskDescription?.toLowerCase().includes(searchText) || task.taskId?.toLowerCase().includes(searchText));
+            <div ref={taskBoardContainerRef} style={{marginRight: isAddTaskModelOpen ? 685 : 0}}>
+                <Card title={(
+                    <div className="py-4">
+                        <Row gutter={[16, 16]} align="middle" wrap>
+                            <Col xs={24} sm={16} md={12} lg={24} xl={8} xxl={7}>
+                                <div className="flex justify-between items-center gap-3">
+                                    <Segmented
+                                        disabled
+                                        value={viewMode}
+                                        size="large"
+                                        options={[
+                                            {value: 'list', icon: <BarsOutlined/>},
+                                            {value: 'board', icon: <AppstoreOutlined/>},
+                                        ]}
+                                        onChange={setViewMode}
+                                    />
+                                    <Input
+                                        placeholder={appString.searchHint}
+                                        prefix={<Search/>}
+                                        onChange={(e) => {
+                                            const searchText = e.target.value.toLowerCase();
+                                            const filteredTasks = {};
+                                            Object.entries(originalTasksByStatus.columns).forEach(([statusKey, column]) => {
+                                                filteredTasks[statusKey] = column.tasksList.filter((task) => {
+                                                    return (
+                                                        task.taskTitle?.toLowerCase().includes(searchText) ||
+                                                        task.taskDescription?.toLowerCase().includes(searchText) ||
+                                                        task.taskId?.toLowerCase().includes(searchText)
+                                                    );
+                                                });
                                             });
-                                        });
-                                        setTasksByStatus(organizeTasksByStatus(filteredTasks));
-                                    }
-                                    }
-                                    className="w-full flex-1 max-w-90"
-                                />
+                                            setTasksByStatus(organizeTasksByStatus(filteredTasks));
+                                        }}
+                                        className="w-full flex-1 max-w-90"
+                                    />
+                                </div>
                             </Col>
-                            <Col xs={24} sm={12} md={12} lg={6} xl={6}>
+                            <Col xs={0} sm={0} md={0} lg={0} xl={0} xxl={1}/>
+                            <Col xs={24} sm={8} md={12} lg={7} xl={5} xxl={5}>
                                 <Select
                                     placeholder="Select Client"
                                     allowClear
-                                    style={{width: "100%", height: "38px"}}
+                                    style={{width: "100%"}}
                                     showSearch
                                     value={filters.client}
                                     onChange={(value) => {
@@ -453,18 +417,14 @@ export default function Page() {
                                             handleDataConditionWise(taskBoardData);
                                         }
                                     }}
-                                    filterOption={(input, option) =>
-                                        option.children.toLowerCase().includes(input.toLowerCase())
-                                    }
-                                >
-                                    {activeClientData.map((client) => (
-                                        <Option key={client._id} value={client._id}>
-                                            {client.clientName}
-                                        </Option>
-                                    ))}
-                                </Select>
+                                    filterOption={(input, option) => option.label.toLowerCase().includes(input.toLowerCase())}
+                                    options={activeClientData.map(client => ({
+                                        label: client.clientName,
+                                        value: client._id
+                                    }))}
+                                />
                             </Col>
-                            <Col xs={24} sm={12} md={12} lg={6} xl={6}>
+                            <Col xs={24} sm={12} md={12} lg={7} xl={5} xxl={5}>
                                 <Select
                                     allowClear
                                     placeholder="Select Project"
@@ -476,20 +436,16 @@ export default function Page() {
                                             handleDataConditionWise(taskBoardData);
                                         }
                                     }}
-                                    style={{width: "100%", height: "40px"}}
+                                    style={{width: "100%"}}
                                     showSearch
-                                    filterOption={(input, option) =>
-                                        option.children.toLowerCase().includes(input.toLowerCase())
-                                    }
-                                >
-                                    {filteredProjects.map((project) => (
-                                        <Option key={project._id} value={project._id}>
-                                            {project.projectName}
-                                        </Option>
-                                    ))}
-                                </Select>
+                                    filterOption={(input, option) => option.label.toLowerCase().includes(input.toLowerCase())}
+                                    options={filteredProjects.map(project => ({
+                                        label: project.projectName,
+                                        value: project._id
+                                    }))}
+                                />
                             </Col>
-                            <Col xs={12} sm={6} md={6} lg={3} xl={3}>
+                            <Col xs={12} sm={6} md={6} lg={5} xl={3} xxl={3}>
                                 <FilterPopover
                                     employeeRecord={activeUsersData}
                                     activeClientData={activeClientData}
@@ -502,770 +458,73 @@ export default function Page() {
                                     handleFilterChange={handleFilterChange}
                                     handleClearClick={() => {
                                         setFilters(initialFilters);
-                                        // setIsShowFilterPopup(false);
                                         handleDataConditionWise(taskBoardData);
                                     }}
-                                    filterTasks={() => {
-                                        filterTasks();
-                                    }}
+                                    filterTasks={filterTasks}
                                 />
                             </Col>
-                            <Col xs={12} sm={6} md={6} lg={3} xl={3}>
+                            <Col xs={12} sm={6} md={6} lg={5} xl={3} xxl={3}>
                                 <Button
                                     type="primary"
                                     icon={<FilePlus/>}
                                     onClick={handleTaskAddClick}
-                                    style={{width: "100%"}}
-                                    // loading={actionLoading === 'add'}
+                                    style={{ width: "100%" }}
                                 >
                                     Add Task
                                 </Button>
-                                {/*<div*/}
-                                {/*    className="addUpdateCommonBtn"*/}
-                                {/*    onClick={handleTaskAddClick}*/}
-                                {/*>*/}
-                                {/*    <Plus/>*/}
-                                {/*    <div>Add Task</div>*/}
-                                {/*</div>*/}
                             </Col>
                         </Row>
                     </div>
+                )}>
+                    {viewMode === 'board' ? (
+                        <TaskBoardUi tasksByStatus={tasksByStatus} setTasksByStatus={setTasksByStatus} activeUsersData={activeUsersData} activeProjectData={activeProjectData} handleTaskOpenClick={handleTaskOpenClick}/>
+                    ) : (
+                        <Table
+                            columns={columns}
+                            dataSource={dataSource}
+                            pagination={false}
+                            expandable={{
+                                defaultExpandAllRows: true,
+                                expandIcon: ({expanded, onExpand, record}) =>
+                                    record.children ? (
+                                        <span
+                                            onClick={e => onExpand(record, e)}
+                                            style={{cursor: 'pointer', marginRight: 8}}
+                                        >
+          {expanded ? '▼' : '▶'}
+        </span>
+                                    ) : null,
+                                rowExpandable: record => !!record.children,
+                            }}
+                            onRow={(record) => ({
+                                onClick: () => {
+                                    if (!record.children) {
+                                        // handle task click here
+                                        handleTaskOpenClick(record);
+                                    }
+                                }
+                            })}
+                        />
+                    )}
                 </Card>
-                <div className="h-screen overflow-x-auto">
-                    <DragDropContext onDragEnd={onDragEnd}>
-                        <div style={{display: 'flex', overflowX: 'auto', paddingRight: isAddTaskModelOpen ? 685 : 0}}>
-                            {tasksByStatus.columns && Object.values(tasksByStatus.columns).map((column) => (
-                                <Droppable droppableId={column.id} key={column.id}>
-                                    {(provided) => (
-                                        <div
-                                            {...provided.droppableProps}
-                                            ref={provided.innerRef}
-                                            style={{
-                                                borderTop: `5px solid ${stageWiseColor(column.title)}`,
-                                                height: "100%",
-                                            }}
-                                            className="min-w-[250px] flex-1 h-full bg-blue-100 p-2 m-3 flex flex-col">
-                                            <div
-                                                className="text-[15px] font-medium text-black my-5 text-center">{`${column.title}(${column.tasksList.length})`}</div>
-                                            <div
-                                                style={{
-                                                    overflowY: "auto",
-                                                }}
-                                            >
-                                                <div style={{
-                                                    // overflowY: "auto",
-                                                    // height: "100%",
-                                                    maxHeight: listHeight - 100,
-                                                }}>
-                                                    {column.tasksList.length === 0 ? (
-                                                        <Empty/>
-                                                    ) : (
-                                                        column.tasksList.map((task, index) => (
-                                                            <Draggable key={task._id} draggableId={String(task._id)}
-                                                                       index={index}>
-                                                                {(provided, snapshot) => {
-                                                                    const draggingClass = snapshot.isDragging ? 'dragging' : '';
-                                                                    return (
-                                                                        <div
-                                                                            ref={provided.innerRef}
-                                                                            {...provided.draggableProps}
-                                                                            {...provided.dragHandleProps}
-                                                                            className={`task-card ${draggingClass} bg-white p-3 mt-5 cursor-grab`}
-                                                                            // onClick={() => handleTaskOpenClick(task)}
-                                                                        >
-                                                                            <TaskCard task={task}
-                                                                                      employeeRecord={activeUsersData}
-                                                                                      projectData={activeProjectData}
-                                                                                      handleTaskOpenClick={() => handleTaskOpenClick(task)}
-                                                                            />
-                                                                        </div>
-                                                                    );
-                                                                }}
-                                                            </Draggable>
-                                                        ))
-                                                    )}
-                                                </div>
-                                                {provided.placeholder}
-                                            </div>
-                                        </div>
-                                    )}
-                                </Droppable>
-                            ))}
-                        </div>
-                    </DragDropContext>
-                </div>
             </div>
-            {/*{*/}
-            {/*    isAddTaskModelOpen ?*/}
-            {/*        <TaskAddUpdateSidebar*/}
-            {/*            isModelOpen={isAddTaskModelOpen}*/}
-            {/*            setIsModelOpen={setAddTaskModelOpen}*/}
-            {/*            employeeList={activeUsersData}*/}
-            {/*            taskData={selectedTaskRecord}*/}
-            {/*            projectData={activeProjectData}*/}
-            {/*            clientRecord={activeClientData}*/}
-            {/*            isEditing={isTaskEditing}*/}
-            {/*            setIsEditing={setIsTaskEditing}*/}
-            {/*            onSuccessCallback={(data) => {*/}
-            {/*                handleDataConditionWise(data.data);*/}
-            {/*            }}*/}
-            {/*        /> : null*/}
-            {/*}*/}
 
+            {
+                isAddTaskModelOpen ?
+                    <TaskAddUpdateSidebar
+                        isModelOpen={isAddTaskModelOpen}
+                        setIsModelOpen={setAddTaskModelOpen}
+                        employeeList={activeUsersData}
+                        taskData={selectedTaskRecord}
+                        projectData={activeProjectData}
+                        clientRecord={activeClientData}
+                        isEditing={isTaskEditing}
+                        setIsEditing={setIsTaskEditing}
+                        onSuccessCallback={(data) => {
+                            handleDataConditionWise(data.data);
+                        }}
+                    /> : null
+            }
         </>
     );
 };
-
-const TaskCard = ({task, employeeRecord, projectData, handleTaskOpenClick}) => {
-
-    const addedByUser = employeeRecord.find(emp => emp._id === task.taskAddedBy);
-
-    let assignees = Array.isArray(task.taskAssignee) && task.taskAssignee.length > 0
-        ? task.taskAssignee
-            .filter(assignee => assignee && assignee.userId)
-            .map(assignee =>
-                employeeRecord.find(emp => emp._id === assignee.userId)
-            )
-            .filter(Boolean)
-        : [];
-
-    if (addedByUser && !assignees.some(emp => emp._id === addedByUser._id)) {
-        assignees.push(addedByUser);
-    }
-
-    return (
-        <div onClick={handleTaskOpenClick}>
-            <div className="categoryAssigneeRow">
-                <div className="taskCardId" onClick={(e) => {
-                    e.stopPropagation();
-                    const fullUrl = window.location.href;
-                    navigator.clipboard.writeText(`${fullUrl}/${task.taskId}`);
-                    showToast('success', 'Task URL Copied!')
-                }}>{`#${task.taskId}`}<Copy className="taskCopyIconStyle"/></div>
-                <Tooltip title={getLabelByKey(task.taskPriority, taskPriorityLabel)}>
-                    <div className="taskCardStatus"
-                         style={{cursor: "pointer"}}>{getIconByKey(task.taskPriority, taskPriorityLabel)}</div>
-                </Tooltip>
-            </div>
-            <div>
-                <div className="taskCardTitle">{task.taskTitle}</div>
-                <div
-                    className="taskCardProject">{task.projectName ? getDataById(projectData, task.projectName)?.projectName : ""}</div>
-                <div className="categoryAssigneeRow">
-                    <div className="taskCardCategory">
-                        <span>{getLabelByKey(task.taskCategory, taskCategoryLabel)}</span>
-                    </div>
-                    <div>
-                        <Avatar.Group max={{
-                            count: 3,
-                            style: {
-                                color: appColor.white,
-                                backgroundColor: appColor.primary,
-                                fontSize: "12px",
-                                fontWeight: "550"
-                            },
-                        }} size={27}>
-                            {assignees.map(user => (
-                                <Tooltip key={user._id} title={user.fullName}>
-                                    <Avatar
-                                        src={user.profilePhoto || null}
-                                        style={{
-                                            backgroundColor: !user.profilePhoto ? getDarkColor(user.fullName) : undefined,
-                                            color: appColor.white,
-                                            cursor: 'pointer',
-                                            fontSize: "12px"
-                                        }}
-                                    >
-                                        {!user.profilePhoto && getTwoCharacterFromName(user.fullName)}
-                                    </Avatar>
-                                </Tooltip>
-                            ))}
-                        </Avatar.Group>
-                    </div>
-                </div>
-                {
-                    task.taskClosedTime && task.taskClosedTime.length > 0 ? (
-                        <div className="startEndDate">
-                            <strong>Last Closed
-                                Time: </strong>{dayjs(task.taskClosedTime[task.taskClosedTime.length - 1].closedAt).format("DD-MM-YYYY HH:mm:ss A")}
-                        </div>
-                    ) : null
-                }
-            </div>
-        </div>
-    );
-};
-
-const FilterPopover = ({
-                           employeeRecord,
-                           activeClientData,
-                           isShowFilterPopup,
-                           setIsShowFilterPopup,
-                           activeFilterCount,
-                           setActiveFilterCount,
-                           filteredProjects,
-                           filters,
-                           handleFilterChange,
-                           handleClearClick,
-                           filterTasks
-                       }) => {
-
-    // const [activeFilterCount, setActiveFilterCount] = useState(0);
-
-    return (
-        <Popover
-            trigger="click"
-            open={isShowFilterPopup}
-            placement="bottom"
-            onOpenChange={(newVisible) => {
-                setIsShowFilterPopup(newVisible);
-            }}
-            content={
-                <div>
-                    <div style={{fontWeight: "500", marginBottom: "10px"}}>Filters</div>
-
-                    <LabelContentRow label="Client:" icon={<Calendar size={18}/>}>
-                        <Select
-                            showSearch
-                            value={filters.client}
-                            placeholder="Select Client"
-                            onChange={(value) => {
-                                handleFilterChange('client', value);
-                            }}
-                            filterOption={(input, option) =>
-                                option.children.toLowerCase().includes(input.toLowerCase())
-                            }
-                            allowClear
-                            style={{width: "100%", height: "37px"}}
-                        >
-                            {activeClientData.map(client => (
-                                <Option key={client._id} value={client._id}>{client.clientName}</Option>
-                            ))}
-                        </Select>
-                    </LabelContentRow>
-
-                    <Divider style={{margin: "8px 0"}}/>
-
-                    <LabelContentRow label="Project:" icon={<Calendar size={18}/>}>
-                        <Select
-                            showSearch
-                            disabled={!filters.client}
-                            value={filters.project}
-                            placeholder="Select Project"
-                            onChange={(value) => {
-                                handleFilterChange('project', value);
-                            }}
-                            filterOption={(input, option) =>
-                                option.children.toLowerCase().includes(input.toLowerCase())
-                            }
-                            allowClear
-                            style={{width: "100%", height: "37px"}}
-                        >
-                            {filteredProjects.map(project => (
-                                <Option key={project._id} value={project._id}>
-                                    {project.projectName}
-                                </Option>
-                            ))}
-                        </Select>
-                    </LabelContentRow>
-
-                    <Divider style={{margin: "8px 0"}}/>
-
-                    <LabelContentRow label="Date:" icon={<Calendar size={18}/>}>
-                        <RangePicker value={filters.dateRange}
-                                     onChange={(dates) => {
-                                         handleFilterChange('dateRange', dates);
-                                     }} size="small"
-                                     style={{width: "100%", height: "37px"}}/>
-                    </LabelContentRow>
-
-                    <Divider style={{margin: "8px 0"}}/>
-
-                    <LabelContentRow label="Status:" icon={<Check size={18}/>}>
-                        <Select
-                            size="small"
-                            placeholder="Select status"
-                            style={{width: "100%", height: 37}}
-                            value={filters.status}
-                            onChange={(value) => {
-                                handleFilterChange('status', value);
-                            }}
-                            allowClear
-                        >
-                            {taskColumnStatusLabel.map((item) => (
-                                <Option key={item.value} value={item.value}>
-                                    {item.label}
-                                </Option>
-                            ))}
-                        </Select>
-                    </LabelContentRow>
-
-                    <Divider style={{margin: "8px 0"}}/>
-
-                    <LabelContentRow label="Priority:" icon={<ChevronsUp/>}>
-                        <Select
-                            size="small"
-                            placeholder="Select Priority"
-                            style={{width: "100%", height: 37, borderRadius: 10}}
-                            value={filters.priority}
-                            onChange={(value) => {
-                                handleFilterChange('priority', value);
-                            }}
-                            allowClear
-                        >
-                            {taskPriorityLabel.map((item) => (
-                                <Option key={item.key} value={item.key}>
-                                    <div>{getIconByKey(item.key, taskPriorityLabel)}{getLabelByKey(item.key, taskPriorityLabel)}</div>
-                                </Option>
-                            ))}
-                        </Select>
-                    </LabelContentRow>
-
-                    <Divider style={{margin: "8px 0"}}/>
-
-                    <LabelContentRow label="To:" icon={<User size={18}/>}>
-                        <Select
-                            size="small"
-                            placeholder="Select Employee"
-                            value={filters.employee}
-                            onChange={(value) => {
-                                handleFilterChange('employee', value);
-                            }}
-                            style={{width: "100%", height: "37px"}}
-                            optionLabelProp="label"
-                            allowClear
-                        >
-                            {employeeRecord.map((emp, index) => {
-                                return (
-                                    <Option
-                                        key={emp._id}
-                                        value={emp._id}
-                                        label={
-                                            <span>
-                      <Avatar
-                          size="small"
-                          src={emp.profilePhoto || null}
-                          style={{marginRight: 8}}
-                      >
-                        {emp.fullName?.charAt(0)}
-                      </Avatar>
-                                                {emp.fullName}
-                    </span>
-                                        }
-                                    >
-                  <span style={{display: "flex", alignItems: "center"}}>
-                    <Avatar
-                        size="small"
-                        src={emp.profilePhoto || null}
-                        style={{marginRight: 8}}
-                    >
-                      {emp.fullName?.charAt(0)}
-                    </Avatar>
-                      {emp.fullName}
-                  </span>
-                                    </Option>
-                                );
-                            })}
-                        </Select>
-                    </LabelContentRow>
-
-                    <Divider style={{margin: "8px 0"}}/>
-
-                    <LabelContentRow label="Category:" icon={<ShoppingCart size={18}/>}>
-                        <Select
-                            size="small"
-                            placeholder="Select Category"
-                            style={{width: "100%", height: 37, borderRadius: 10}}
-                            value={filters.category}
-                            onChange={(value) => {
-                                handleFilterChange('category', value);
-                            }}
-                            allowClear
-                        >
-                            {taskCategoryLabel.map((item) => (
-                                <Option key={item.key} value={item.key}>
-                                    <div>{getIconByKey(item.key, taskCategoryLabel)}{getLabelByKey(item.key, taskCategoryLabel)}</div>
-                                </Option>
-                            ))}
-                        </Select>
-                    </LabelContentRow>
-
-                    <Divider style={{margin: "8px 0"}}/>
-
-                    <LabelContentRow label="Label:" icon={<TagIcon size={18}/>}>
-                        <Select
-                            size="small"
-                            placeholder="Select Label"
-                            style={{width: "100%", height: 37, borderRadius: 10}}
-                            value={filters.label}
-                            onChange={(value) => {
-                                handleFilterChange('label', value);
-                            }}
-                            allowClear
-                        >
-                            {taskStatusLabel.map((item) => (
-                                <Option key={item.key} value={item.key}>
-                                    <div>{getIconByKey(item.key, taskStatusLabel)}{getLabelByKey(item.key, taskStatusLabel)}</div>
-                                </Option>
-                            ))}
-                        </Select>
-                    </LabelContentRow>
-
-                    <Divider style={{margin: "8px 0"}}/>
-
-                    <LabelContentRow label="Created At:" icon={<Calendar size={18}/>}>
-                        <DatePicker value={filters.createdAt}
-                                    disabledDate={(current) => {
-                                        return current && current > dayjs().endOf('day');
-                                    }}
-                                    onChange={(dates) => {
-                                        handleFilterChange('createdAt', dates);
-                                    }} size="small"
-                                    style={{width: "100%", height: "37px"}}/>
-                    </LabelContentRow>
-
-                    <Divider style={{margin: "8px 0"}}/>
-
-                    <div style={{display: "flex", gap: 8}}>
-                        <Button
-                            block
-                            style={{fontWeight: 500, flex: 1, height: 37}}
-                            onClick={() => {
-                                setIsShowFilterPopup(false);
-                            }}
-                        >
-                            Cancel
-                        </Button>
-                        <Button
-                            block
-                            style={{fontWeight: 500, flex: 1, height: 37}}
-                            disabled={Object.values(filters).filter(val => val !== null && val !== undefined).length <= 0}
-                            onClick={() => {
-                                setActiveFilterCount(0);
-                                handleClearClick();
-                            }}
-                            type="primary"
-                        >
-                            Reset
-                        </Button>
-                        {/*<Button*/}
-                        {/*    block*/}
-                        {/*    style={{fontWeight: 500, flex: 1, height: 37}}*/}
-                        {/*    // disabled={Object.values(filters).filter(val => val !== null && val !== undefined).length <= 0}*/}
-                        {/*    onClick={() => {*/}
-                        {/*        if (Object.values(filters).filter(val => val !== null && val !== undefined).length <= 0) {*/}
-                        {/*            setIsShowFilterPopup(false);*/}
-                        {/*        } else {*/}
-                        {/*            setActiveFilterCount(0);*/}
-                        {/*            handleClearClick();*/}
-                        {/*        }*/}
-                        {/*    }}*/}
-                        {/*>*/}
-                        {/*    {Object.values(filters).filter(val => val !== null && val !== undefined).length <= 0 ? "Cancel" : "Reset"}*/}
-                        {/*</Button>*/}
-                        {/*<Button*/}
-                        {/*    block*/}
-                        {/*    style={{fontWeight: 500, flex: 1, height: 37}}*/}
-                        {/*    onClick={() => {*/}
-                        {/*        setIsShowFilterPopup(false);*/}
-                        {/*        const count = Object.values(filters).filter(val => val !== null && val !== undefined).length;*/}
-                        {/*        setActiveFilterCount(count);*/}
-                        {/*        filterTasks();*/}
-                        {/*    }}*/}
-                        {/*    type="primary"*/}
-                        {/*>*/}
-                        {/*    Filter*/}
-                        {/*</Button>*/}
-                    </div>
-
-                </div>
-            }
-        >
-            <Badge count={activeFilterCount}>
-                <Button
-                    variant="outlined"
-                    icon={<Filter />}
-                    onClick={() => setIsShowFilterPopup(!isShowFilterPopup)}
-                    style={{width: "100%"}}
-                >
-                    Filters
-                </Button>
-            </Badge>
-            {/*<div*/}
-            {/*    className="filterButtonWrapper"*/}
-            {/*>*/}
-            {/*    <div*/}
-            {/*        className="filterTaskButton"*/}
-            {/*        onClick={() => setIsShowFilterPopup(!isShowFilterPopup)}*/}
-            {/*        style={{cursor: "pointer"}}*/}
-            {/*    >*/}
-            {/*        <Filter className="commonIconStyle"/>*/}
-            {/*        <div>Filters</div>*/}
-            {/*    </div>*/}
-            {/*    {activeFilterCount > 0 && (*/}
-            {/*        <div className="filterBadge">*/}
-            {/*            <div className="filterBadgeCount" onClick={() => {*/}
-            {/*                setActiveFilterCount(0);*/}
-            {/*                handleClearClick();*/}
-            {/*            }}>*/}
-            {/*                {activeFilterCount}*/}
-            {/*            </div>*/}
-            {/*        </div>*/}
-            {/*    )}*/}
-            {/*</div>*/}
-        </Popover>
-    );
-};
-
-const LabelContentRow = ({label, icon, children}) => {
-    return (
-        <div style={{marginBottom: 10, display: "flex", alignItems: "center"}}>
-            <div style={{width: "35%", display: "flex", alignItems: "center"}}>
-                {icon && <span style={{marginRight: 4}}>{icon}</span>}
-                {label}
-            </div>
-            <div style={{width: "65%"}}>
-                {children}
-            </div>
-        </div>
-    );
-};
-
-
-// 'use client';
-//
-// import React, {useEffect, useState} from "react";
-// import {DragDropContext, Draggable, Droppable} from "@hello-pangea/dnd";
-// import {Card, Col, DatePicker, Row, Select} from "antd";
-// import dayjs from "dayjs";
-//
-// import utc from 'dayjs/plugin/utc';
-// import timezone from 'dayjs/plugin/timezone';
-// import isSameOrAfter from "dayjs/plugin/isSameOrAfter";
-// import isSameOrBefore from "dayjs/plugin/isSameOrBefore";
-// import {useAppData} from "../../../masterData/AppDataContext";
-// import {taskColumnStatusLabel} from "../../../utils/enum";
-//
-// dayjs.extend(utc);
-// dayjs.extend(timezone);
-// dayjs.extend(isSameOrAfter);
-// dayjs.extend(isSameOrBefore);
-//
-// export default function Page() {
-//     const {
-//         taskBoardData,
-//     } = useAppData();
-//
-//     const [columns, setColumns] = useState([]); // original response
-//
-//     useEffect(() => {
-//         setColumns(organizeTasksByStatus(taskBoardData));
-//     }, []);
-//
-//     const organizeTasksByStatus = (tasks) => {
-//         return {
-//             columns: taskColumnStatusLabel.reduce((acc, {key, label}) => {
-//                 const taskList = (tasks[key] || []).sort((a, b) => a.placementIndex - b.placementIndex);
-//
-//                 acc[key] = {
-//                     id: key,
-//                     title: label,
-//                     tasksList: taskList,
-//                 };
-//                 return acc;
-//             }, {}),
-//             items: {},
-//         };
-//     };
-//
-//     // ✅ Handle task moving
-//     const onDragEnd = (result) => {
-//         const { source, destination } = result;
-//
-//         if (!destination) return;
-//
-//         const srcCol = source.droppableId;
-//         const destCol = destination.droppableId;
-//
-//         const srcTasks = Array.from(columns[srcCol]);
-//         const destTasks = Array.from(columns[destCol]);
-//
-//         const [movedTask] = srcTasks.splice(source.index, 1);
-//
-//         if (srcCol === destCol) {
-//             // move within same column
-//             srcTasks.splice(destination.index, 0, movedTask);
-//             setColumns({ ...columns, [srcCol]: srcTasks });
-//         } else {
-//             // move to different column
-//             destTasks.splice(destination.index, 0, movedTask);
-//             setColumns({
-//                 ...columns,
-//                 [srcCol]: srcTasks,
-//                 [destCol]: destTasks,
-//             });
-//         }
-//     };
-//
-//     return (
-//         <>
-//             <div style={{overflowX: "auto", height: "100vh"}}>
-//                 <DragDropContext onDragEnd={onDragEnd}>
-//                     <div style={{display: 'flex', overflowX: 'auto'}}>
-//                         {tasksByStatus.columns && Object.values(tasksByStatus.columns).map((column) => (
-//                             <Droppable droppableId={column.id} key={column.id}>
-//                                 {(provided) => (
-//                                     <div
-//                                         {...provided.droppableProps}
-//                                         ref={provided.innerRef}
-//                                         style={{
-//                                             borderTop: `5px solid ${stageWiseColor(column.title)}`,
-//                                             height: "100%",
-//                                         }}
-//                                         className="task-column">
-//                                         <div
-//                                             className="taskColumnTitle">{`${column.title}(${column.tasksList.length})`}</div>
-//                                         <div
-//                                             style={{
-//                                                 overflowY: "auto",
-//                                             }}
-//                                         >
-//                                             <div style={{
-//                                                 // overflowY: "auto",
-//                                                 // height: "100%",
-//                                                 maxHeight: listHeight - 100,
-//                                             }}>
-//                                                 {column.tasksList.length === 0 ? (
-//                                                     <div className="noTaskContent">
-//                                                         <img src={imagePaths.noTaskFoundImage}/>
-//                                                     </div>
-//                                                 ) : (
-//                                                     column.tasksList.map((task, index) => (
-//                                                         <Draggable key={task._id} draggableId={String(task._id)}
-//                                                                    index={index}>
-//                                                             {(provided, snapshot) => {
-//                                                                 const draggingClass = snapshot.isDragging ? 'dragging' : '';
-//                                                                 return (
-//                                                                     <div
-//                                                                         ref={provided.innerRef}
-//                                                                         {...provided.draggableProps}
-//                                                                         {...provided.dragHandleProps}
-//                                                                         className={`task-card ${draggingClass}`}
-//                                                                         // onClick={() => handleTaskOpenClick(task)}
-//                                                                     >
-//                                                                         <TaskCard task={task}
-//                                                                                   employeeRecord={activeUsersData}
-//                                                                                   projectData={activeProjectData}
-//                                                                                   handleTaskOpenClick={() => handleTaskOpenClick(task)}
-//                                                                         />
-//                                                                     </div>
-//                                                                 );
-//                                                             }}
-//                                                         </Draggable>
-//                                                     ))
-//                                                 )}
-//                                             </div>
-//                                             {provided.placeholder}
-//                                         </div>
-//                                     </div>
-//                                 )}
-//                             </Droppable>
-//                         ))}
-//                     </div>
-//                 </DragDropContext>
-//             </div>
-//             <div style={{ padding: 24 }}>
-//                 <DragDropContext onDragEnd={onDragEnd}>
-//
-//                     {/* ✅ outer scrollable drag zone */}
-//                     <Droppable
-//                         droppableId="board-columns"
-//                         direction="horizontal"
-//                         type="column"
-//                         isDropDisabled={true} // prevent drag over column itself
-//                     >
-//                         {(provided) => (
-//                             <div
-//                                 ref={provided.innerRef}
-//                                 {...provided.droppableProps}
-//                                 style={{
-//                                     display: 'flex',
-//                                     overflowX: 'auto',
-//                                     paddingBottom: 20,
-//                                     gap: '16px',
-//                                 }}
-//                             >
-//                                 {Object.entries(columns).map(([status, tasks], i) => (
-//                                     <div
-//                                         key={status}
-//                                         style={{
-//                                             flex: '0 0 300px',
-//                                             overflowY: 'auto',
-//                                             maxHeight: 'calc(100vh - 200px)',
-//                                         }}
-//                                     >
-//                                         <Card
-//                                             title={status.toUpperCase()}
-//                                             bordered
-//                                             bodyStyle={{ padding: 8 }}
-//                                         >
-//                                             <Droppable droppableId={status}>
-//                                                 {(provided, snapshot) => (
-//                                                     <div
-//                                                         {...provided.droppableProps}
-//                                                         ref={provided.innerRef}
-//                                                         style={{
-//                                                             minHeight: 300,
-//                                                             padding: 8,
-//                                                             backgroundColor: snapshot.isDraggingOver
-//                                                                 ? "#f0f0f0"
-//                                                                 : "#fff",
-//                                                             borderRadius: 4,
-//                                                         }}
-//                                                     >
-//                                                         {tasks.map((task, index) => (
-//                                                             <Draggable
-//                                                                 draggableId={task._id}
-//                                                                 index={index}
-//                                                                 key={task._id}
-//                                                             >
-//                                                                 {(provided, snapshot) => (
-//                                                                     <Card
-//                                                                         ref={provided.innerRef}
-//                                                                         {...provided.draggableProps}
-//                                                                         {...provided.dragHandleProps}
-//                                                                         style={{
-//                                                                             marginBottom: 8,
-//                                                                             backgroundColor: snapshot.isDragging
-//                                                                                 ? "#e6f7ff"
-//                                                                                 : "#fff",
-//                                                                             ...provided.draggableProps.style,
-//                                                                         }}
-//                                                                     >
-//                                                                         <strong>{task.taskTitle}</strong>
-//                                                                         <div
-//                                                                             style={{ fontSize: 12, color: "#888" }}
-//                                                                         >
-//                                                                             {task.taskDescription}
-//                                                                         </div>
-//                                                                     </Card>
-//                                                                 )}
-//                                                             </Draggable>
-//                                                         ))}
-//                                                         {provided.placeholder}
-//                                                     </div>
-//                                                 )}
-//                                             </Droppable>
-//                                         </Card>
-//                                     </div>
-//                                 ))}
-//                                 {provided.placeholder}
-//                             </div>
-//                         )}
-//                     </Droppable>
-//
-//                 </DragDropContext>
-//             </div>
-//         </>
-//     );
-// };

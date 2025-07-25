@@ -255,7 +255,7 @@ export const getIconByKey = (key, labelSet) => {
         console.error("Label set is undefined or not an array", labelSet);
         return null;
     }
-    const item = labelSet.find((item) => item.key === key);
+    const item = labelSet.find((item) => item.key === key || item.value === key);
     return item ? item.icon : null;
 };
 
@@ -283,37 +283,37 @@ export const taskPriorityLabel = [
         label: "No Priority",
         value: "noPriority",
         color: appColor.secondary,
-        icon: <img src={imagePaths.priority_clear} style={{width: 18, height: 18, marginRight: 8}}/>,
+        icon: <img src={imagePaths.priority_clear} style={{width: 18, height: 18}}/>,
     },
     {
         label: "Urgent",
         value: "urgent",
         color: appColor.danger,
-        icon: <img src={imagePaths.priority_urjent} style={{width: 18, height: 18, marginRight: 8}}/>,
+        icon: <img src={imagePaths.priority_urjent} style={{width: 18, height: 18}}/>,
     },
     {
         label: "High Priority",
         value: "highPriority",
         color: appColor.warning,
-        icon: <img src={imagePaths.priority_high} style={{width: 18, height: 18, marginRight: 8}}/>,
+        icon: <img src={imagePaths.priority_high} style={{width: 18, height: 18}}/>,
     },
     {
         label: "Medium Priority",
         value: "mediumPriority",
         color: appColor.success,
-        icon: <img src={imagePaths.priority_normal} style={{width: 18, height: 18, marginRight: 8}}/>,
+        icon: <img src={imagePaths.priority_normal} style={{width: 18, height: 18}}/>,
     },
     {
         label: "Low Priority",
         value: "lowPriority",
         color: appColor.info,
-        icon: <img src={imagePaths.priority_low} style={{width: 18, height: 18, marginRight: 8}}/>,
+        icon: <img src={imagePaths.priority_low} style={{width: 18, height: 18}}/>,
     },
     {
         label: "On Hold",
         value: "onHold",
         color: appColor.secondary,
-        icon: <img src={imagePaths.priority_on_hold} style={{width: 18, height: 18, marginRight: 8}}/>,
+        icon: <img src={imagePaths.priority_on_hold} style={{width: 18, height: 18}}/>,
     },
 ];
 
@@ -1183,13 +1183,13 @@ export const leaveCategoryLabel = ({disabledValues = []}) => [
 ];
 
 export const taskCategoryLabel = [
-    {label: "💻 Development", key: "development"},
-    {label: "🎨 Design", key: "design"},
-    {label: "📑 Documentation", key: "documentation"},
-    {label: "🛒 Client Request", key: "clientRequest"},
-    {label: "🔬 Testing", key: "testing"},
-    {label: "🔄 Bug Fix", key: "bugFix"},
-    {label: "💡 New Feature", key: "newFeature"},
+    {label: "💻 Development", value: "development"},
+    {label: "🎨 Design", value: "design"},
+    {label: "📑 Documentation", value: "documentation"},
+    {label: "🛒 Client Request", value: "clientRequest"},
+    {label: "🔬 Testing", value: "testing"},
+    {label: "🔄 Bug Fix", value: "bugFix"},
+    {label: "💡 New Feature", value: "newFeature"},
 ];
 
 export const projectTypeLabel = [

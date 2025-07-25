@@ -9,3 +9,13 @@ export const deleteScreenShot = async (uId, ssId, setIsLoading, successCallback)
         successCallback,
     });
 }
+
+export const reorderTasksOnServer = async (reorderedTasks) => {
+    await apiCall({
+        method: HttpMethod.PATCH,
+        url: endpoints.taskReorder,
+        data: {updates: reorderedTasks},
+        setIsLoading: false,
+        showSuccessMessage: false,
+    });
+};

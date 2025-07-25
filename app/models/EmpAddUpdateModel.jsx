@@ -214,11 +214,15 @@ const FormUi = ({form, isEditing, uploadButton, fileList, setFileList, customReq
                             ))}
 
                             {[
-                                {key: appKeys.bloodGroup, label: appString.bloodGroup, options: selectOptions(BloodGroup)},
+                                {
+                                    key: appKeys.bloodGroup,
+                                    label: appString.bloodGroup,
+                                    options: selectOptions(BloodGroup)
+                                },
                                 {
                                     key: appKeys.technology,
                                     label: appString.technology,
-                                    options: selectOptions(Technology),
+                                    options: Technology,
                                     isMulti: true
                                 }
                             ].map(({key, label, options, isMulti}) => (
@@ -359,6 +363,8 @@ export default function EmpAddUpdateModel({
                     dateOfLeaving: selectedRecord.dateOfLeaving ? dayjs(selectedRecord.dateOfLeaving) : null,
                     technology: selectedRecord.technology ? selectedRecord.technology.filter(entry => entry !== '') : [],
                 };
+
+                console.log("selectedRecord.technology=>", selectedRecord.technology)
                 form.setFieldsValue(formData);
 
             } else {
