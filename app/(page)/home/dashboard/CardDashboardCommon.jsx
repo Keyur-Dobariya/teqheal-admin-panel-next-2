@@ -39,6 +39,13 @@ export default function CardDashboardCommon() {
         );
     }
 
+    const formatHours = (milliseconds) => {
+        const hours = Math.floor(milliseconds / 3600000);
+        const minutes = Math.floor((milliseconds % 3600000) / 60000);
+        const seconds = Math.floor((milliseconds % 60000) / 1000);
+        return `${isNaN(hours) ? 0 : hours}h ${isNaN(minutes) ? 0 : minutes}m`;
+    };
+
     if(isAdmin()) {
         return (
             <Row gutter={[16, 16]}>
@@ -80,27 +87,27 @@ export default function CardDashboardCommon() {
         <Row gutter={[16, 16]}>
             <CommonGridBox
                 title="Today Working Hours"
-                value={dashboardData?.todayWorkingHours || 0}
+                value={formatHours(dashboardData?.todayWorkingHours || 0)}
                 color="A"
                 icon={<ClockCircleOutlined style={{color: getDarkColor("A"), fontSize: 18}}/>}/>
             <CommonGridBox
                 title="Weekly Hours"
-                value={dashboardData?.weeklyHours || 0}
+                value={formatHours(dashboardData?.weeklyHours || 0)}
                 color="V"
                 icon={<HistoryOutlined style={{color: getDarkColor("V"), fontSize: 18}}/>}/>
             <CommonGridBox
                 title="Monthly Hours"
-                value={dashboardData?.monthlyHours || 0}
+                value={formatHours(dashboardData?.monthlyHours || 0)}
                 color="C"
                 icon={<FieldTimeOutlined style={{color: getDarkColor("C"), fontSize: 18}}/>}/>
             <CommonGridBox
                 title="Monthly Late Arrival"
-                value={dashboardData?.monthlyLateArrivalHours || 0}
+                value={formatHours(dashboardData?.monthlyLateArrivalHours || 0)}
                 color="D"
                 icon={<FallOutlined style={{color: getDarkColor("D"), fontSize: 18}}/>}/>
             <CommonGridBox
                 title="Monthly Overtime Hours"
-                value={dashboardData?.monthlyOvertimeHours || 0}
+                value={formatHours(dashboardData?.monthlyOvertimeHours || 0)}
                 color="E"
                 icon={<SmileOutlined style={{color: getDarkColor("E"), fontSize: 18}}/>}/>
             <CommonGridBox

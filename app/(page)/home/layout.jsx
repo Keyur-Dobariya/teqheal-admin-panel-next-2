@@ -19,7 +19,7 @@ import {
     PoweroffOutlined,
     BellOutlined,
     TeamOutlined,
-    CommentOutlined, LoadingOutlined,
+    CommentOutlined, LoadingOutlined, PhoneOutlined,
 } from '@ant-design/icons';
 import {
     Button,
@@ -33,7 +33,7 @@ import {
     Modal,
     Avatar,
     Tooltip,
-    Dropdown
+    Dropdown, Form, Input
 } from 'antd';
 import {useEffect, useRef, useState} from "react";
 import AnimatedDiv, { Direction } from "../../components/AnimatedDiv";
@@ -43,7 +43,7 @@ import {router} from "next/client";
 import {usePathname, useRouter} from "next/navigation";
 import appColor from "../../utils/appColor";
 import appKeys from "../../utils/appKeys";
-import {getLocalData, storeLoginData} from "../../dataStorage/DataPref";
+import {getLocalData, isAdmin, storeLoginData} from "../../dataStorage/DataPref";
 import {LoadingComponent} from "../../components/LoadingComponent";
 import Link from "next/link";
 import {useAppData} from "../../masterData/AppDataContext";
@@ -52,6 +52,8 @@ import {endpoints} from "../../api/apiEndpoints";
 import appString from "../../utils/appString";
 import {AlertCircle, ChevronDown, ChevronRight, FileText, LogOut, Power, Settings, User} from "../../utils/icons";
 import Image from "next/image";
+import validationRules from "../../utils/validationRules";
+import {showToast} from "../../components/CommonComponents";
 
 const { Header, Sider, Content } = Layout;
 const { useBreakpoint } = Grid;
@@ -65,6 +67,8 @@ export default function HomePage({children}) {
     const [isLogoutModalOpen, setIsLogoutModalOpen] = useState(false);
     const [collapsed, setCollapsed] = useState(false);
     const [drawerVisible, setDrawerVisible] = useState(false);
+    const [isCodeModalOpen, setIsCodeModalOpen] = useState(false);
+    const [userLocation, setUserLocation] = useState({ latitude: null, longitude: null });
 
     const [breadcrumbItems, setBreadcrumbItems] = useState([]);
 
@@ -97,6 +101,26 @@ export default function HomePage({children}) {
             isApiCalledRef.current = true;
             fetchMasterData();
         }
+
+        if(!isAdmin()) {
+            if (!navigator.geolocation) {
+                showToast("error", 'Geolocation is not supported by your browser')
+                return;
+            }
+
+            navigator.geolocation.getCurrentPosition(
+                (position) => {
+                    setUserLocation({
+                        latitude: position.coords.latitude,
+                        longitude: position.coords.longitude
+                    });
+                },
+                (err) => {
+                    showToast("error", 'Unable to retrieve your location: ' + err.message)
+                }
+            );
+        }
+
     }, []);
 
     const commonMenuTheme = {
@@ -137,6 +161,8 @@ export default function HomePage({children}) {
         if (key !== appKeys.logout) {
             if (pageRoutes.myProfile.includes(key)) {
                 router.push(`${pageRoutes.myProfile}?user=${getLocalData(appKeys.employeeCode)}`);
+            } else if (pageRoutes.salaryReport.includes(key) && !isAdmin()) {
+                setIsCodeModalOpen(true);
             } else {
                 router.push(key);
             }
@@ -181,6 +207,24 @@ export default function HomePage({children}) {
         }
     }, [pathname]);
 
+    const handleCodeVerifyApi = async (values) => {
+        await apiCall({
+            method: HttpMethod.POST,
+            url: endpoints.salaryCodeVerify,
+            data: {
+                code: values.code,
+                latitude: userLocation.latitude,
+                longitude: userLocation.longitude,
+            },
+            setIsLoading: setIsLoading,
+            successCallback: (data) => {
+                setIsCodeModalOpen(false);
+                // menuClick({route: `${routes.salaryReport}/${values.code}`, state: { state: { paramDetail: { code: values.code } } }});
+                router.push(pageRoutes.salaryReport);
+            },
+        });
+    }
+
     const menuItems = [
         {
             key: pageRoutes.dashboard,
@@ -192,6 +236,7 @@ export default function HomePage({children}) {
         {
             key: 'emp',
             icon: <UserOutlined />,
+            hidden: !isAdmin(),
             label: capitalizeLastPathSegment(pageRoutes.employees),
             position: 'top',
             children: [
@@ -234,6 +279,7 @@ export default function HomePage({children}) {
             key: pageRoutes.dailyUpdate,
             icon: <FileText />,
             label: capitalizeLastPathSegment(pageRoutes.dailyUpdate),
+            hidden: !isAdmin(),
             position: 'top',
         },
         {
@@ -256,6 +302,7 @@ export default function HomePage({children}) {
                 {
                     key: pageRoutes.punchReport,
                     icon: <CodeSandboxOutlined />,
+                    hidden: !isAdmin(),
                     label: capitalizeLastPathSegment(pageRoutes.punchReport),
                 },
                 {
@@ -286,6 +333,7 @@ export default function HomePage({children}) {
         {
             key: pageRoutes.settings,
             icon: <SettingOutlined />,
+            hidden: !isAdmin(),
             label: capitalizeLastPathSegment(pageRoutes.settings),
             position: 'bottom',
         },
@@ -441,10 +489,10 @@ export default function HomePage({children}) {
                         </div>
                         {isMobile && <img src={imagePaths.icon_big_dark} alt="icon" width={150} height={45}/>}
                         <div className="flex items-center gap-4">
-                            <Badge dot status="error" offset={[-7, 5]}>
-                                <Button shape="circle" icon={<BellOutlined />} onClick={() => {
-                                }} />
-                            </Badge>
+                            {/*<Badge dot status="error" offset={[-7, 5]}>*/}
+                            {/*    <Button shape="circle" icon={<BellOutlined />} onClick={() => {*/}
+                            {/*    }} />*/}
+                            {/*</Badge>*/}
                             <Dropdown overlayStyle={{ minWidth: 200 }} menu={menuProps} trigger={["click"]}>
                                 <div className="flex items-center gap-2 cursor-pointer">
                                     <Tooltip title={getLocalData(appKeys.fullName)}>
@@ -507,6 +555,39 @@ export default function HomePage({children}) {
                         {appString.logOut}
                     </Button>
                 </div>
+            </Modal>
+            <Modal
+                title="User Code Verification!"
+                maskClosable={true}
+                centered
+                closeIcon={false}
+                open={isCodeModalOpen}
+                onOk={() => form.submit()}
+                onCancel={() => {
+                    setIsCodeModalOpen(false);
+                }}
+                onClose={() => {
+                    setIsCodeModalOpen(false);
+                }}
+                okText="Verify"
+                confirmLoading={isLoading}
+            >
+                <Form
+                    layout="vertical"
+                    onFinish={(values) => {
+                        handleCodeVerifyApi(values);
+                    }}
+                >
+                    <Form.Item
+                        name="code"
+                        label="Code"
+                        rules={[{required: true, message: `Enter salary report code!`}]}
+                    >
+                        <Input
+                            placeholder="Enter Code"
+                        />
+                    </Form.Item>
+                </Form>
             </Modal>
         </>
     );

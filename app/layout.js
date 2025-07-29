@@ -1,6 +1,7 @@
 'use client';
 
 import './globals.css';
+import './calender.css';
 import {ConfigProvider, message} from 'antd';
 import appColor from './utils/appColor';
 import {AntdRegistry} from '@ant-design/nextjs-registry';

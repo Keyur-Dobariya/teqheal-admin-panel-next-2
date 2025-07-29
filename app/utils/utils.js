@@ -2,6 +2,7 @@ import {Gender} from "./enum";
 import imagePaths from "./imagesPath";
 import CryptoJS from 'crypto-js';
 import {showToast} from "../components/CommonComponents";
+import extIcons from "./extIcons";
 
 export const getDataById = (dataList, dataId) => {
     return dataList.find((data) => data._id === dataId);
@@ -251,4 +252,41 @@ export const getTwoCharacter = (str) => {
         return firstInitial + secondInitial;
     }
     return "N/A";
+};
+
+export const getFileExtension = (input) => {
+    let filename = '';
+
+    if (typeof input === 'string') {
+        filename = input.split('?')[0].split('#')[0]; // Clean URL
+    } else if (input instanceof File) {
+        filename = input.name;
+    } else {
+        return '';
+    }
+
+    return filename.includes('.') ? filename.split('.').pop().toLowerCase() : '';
+};
+
+export const getFileIcon = (input) => {
+    const extension = getFileExtension(input);
+    return extIcons[extension] || extIcons.file;
+};
+
+export const isImageExtension = (input) => {
+    const imageExtensions = ['jpg', 'jpeg', 'png', 'gif', 'bmp', 'tif', 'tiff', 'svg'];
+    const extension = getFileExtension(input);
+    return imageExtensions.includes(extension);
+};
+
+export const isVideoExtension = (input) => {
+    const videoExtensions = ['mp4', 'avi', 'mkv', 'mov', 'flv', 'wmv', 'webm'];
+    const extension = getFileExtension(input);
+    return videoExtensions.includes(extension);
+};
+
+export const isAudioExtension = (input) => {
+    const audioExtensions = ['mp3', 'wav', 'ogg', 'aac', 'flac', 'm4a', 'wma'];
+    const extension = getFileExtension(input);
+    return audioExtensions.includes(extension);
 };

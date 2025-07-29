@@ -25,8 +25,9 @@ import {
 } from "./trackerUtils";
 import ModelDailyUpdate from "./ModelDailyUpdate";
 import CardTimeLineDrawer from "./CardTimeLineDrawer";
+import {format} from "date-fns";
 
-export default function CardTrackerClockInOut({isUpdateModalOpen, setIsUpdateModalOpen}) {
+export default function CardTrackerClockInOut({isDashboard = false, todayRecords, isUpdateModalOpen, setIsUpdateModalOpen}) {
     const [status, setStatus] = useState(STATUS.CLOCKED_OUT);
     const [attendanceData, setAttendanceData] = useState({
         punchTime: [],
@@ -45,31 +46,42 @@ export default function CardTrackerClockInOut({isUpdateModalOpen, setIsUpdateMod
     const [isLoading, setIsLoading] = useState(false);
     const [isDrawerOpen, setIsDrawerOpen] = useState(false);
     const [, setTicker] = useState(0);
+    const currentDateFormat = "hh:mm a - MMM dd, yyyy";
+    const [currentDateTime, setCurrentDateTime] = useState(null);
 
     const fetchAttendanceData = async () => {
-        await getAttendanceData(getLocalData(appKeys._id), setIsLoading, (data) => {
-            const newAttendanceData = data.data || {};
-            setAttendanceData(newAttendanceData);
-            setStatus(
-                newAttendanceData.isBreakIn
-                    ? STATUS.ON_BREAK
-                    : newAttendanceData.isPunchIn
-                        ? STATUS.CLOCKED_IN
-                        : STATUS.CLOCKED_OUT
-            );
-            const referenceTime = Date.now();
-            setTotalHoursMs(calculateTotalHours(newAttendanceData.punchTime || [], referenceTime));
-            setBreakHoursMs(calculateBreakHours(newAttendanceData.breakTime || [], referenceTime));
-        });
+        if(isDashboard) {
+            setApiData(todayRecords || {});
+        } else {
+            await getAttendanceData(getLocalData(appKeys._id), setIsLoading, (data) => {
+                setApiData(data?.data || {});
+            });
+        }
     };
 
+    const setApiData = (newAttendanceData) => {
+        setAttendanceData(newAttendanceData);
+        setStatus(
+            newAttendanceData.isBreakIn
+                ? STATUS.ON_BREAK
+                : newAttendanceData.isPunchIn
+                    ? STATUS.CLOCKED_IN
+                    : STATUS.CLOCKED_OUT
+        );
+        const referenceTime = Date.now();
+        setTotalHoursMs(calculateTotalHours(newAttendanceData.punchTime || [], referenceTime));
+        setBreakHoursMs(calculateBreakHours(newAttendanceData.breakTime || [], referenceTime));
+    }
+
     useEffect(() => {
-        const sendDataToExe = async () => {
-            if (window.electronAPI) {
-                await window.electronAPI.sendAttendanceData(attendanceData);
+        if(!isDashboard) {
+            const sendDataToExe = async () => {
+                if (window.electronAPI) {
+                    await window.electronAPI.sendAttendanceData(attendanceData);
+                }
             }
+            sendDataToExe();
         }
-        sendDataToExe();
     }, [attendanceData]);
 
     useEffect(() => {
@@ -80,6 +92,7 @@ export default function CardTrackerClockInOut({isUpdateModalOpen, setIsUpdateMod
         if (status === STATUS.CLOCKED_OUT && !attendanceData.isPunchIn) return;
 
         const timer = setInterval(() => {
+            setCurrentDateTime(format(Date.now(), currentDateFormat));
             setTicker(prev => prev + 1);
 
             const referenceTime = Date.now();
@@ -150,9 +163,10 @@ export default function CardTrackerClockInOut({isUpdateModalOpen, setIsUpdateMod
                     <div className="flex-1 font-[550] text-[15px]">{appString.clockInOut}<LoadingOutlined
                         className="ml-3" hidden={!isLoading && attendanceData} style={{color: appColor.secondPrimary}}/>
                     </div>
-                    <Tooltip title="Timeline">
-                        <div className="cursor-pointer" onClick={() => setIsDrawerOpen(true)}><Info color={appColor.secondPrimary}/></div>
-                    </Tooltip>
+                    {!isDashboard && <Tooltip title="Timeline">
+                        <div className="cursor-pointer" onClick={() => setIsDrawerOpen(true)}><Info
+                            color={appColor.secondPrimary}/></div>
+                    </Tooltip>}
                     {attendanceData.punchInAt && (
                         <div className="rounded-md flex items-center gap-[5px]"
                              style={{backgroundColor: appColor.secondPrimary, padding: "2px 5px"}}>
@@ -168,7 +182,8 @@ export default function CardTrackerClockInOut({isUpdateModalOpen, setIsUpdateMod
                     )}
                 </div>
             )}>
-                <div className="flex flex-col gap-6 p-4">
+                <div className={`flex justify-between flex-col gap-6 p-4 ${isDashboard ? "h-[300px]" : ''}`}>
+                    {isDashboard && <div className="text-center font-medium text-[15px]">{currentDateTime}</div>}
                     <Progress
                         className="place-self-center mt-2"
                         percent={progressPercent}
@@ -196,7 +211,7 @@ export default function CardTrackerClockInOut({isUpdateModalOpen, setIsUpdateMod
                             <div className="text-[13px] font-medium text-gray-500">{appString.breakTime}</div>
                         </div>
                     </div>
-                    <Row gutter={[16, 16]}>
+                    {!isDashboard && <Row gutter={[16, 16]}>
                         <Col span={12}>
                             <Button
                                 className="w-full"
@@ -223,7 +238,7 @@ export default function CardTrackerClockInOut({isUpdateModalOpen, setIsUpdateMod
                                 {isClockedIn ? appString.clockOut : appString.clockIn}
                             </Button>
                         </Col>
-                    </Row>
+                    </Row>}
                 </div>
             </Card>
             {attendanceData && <ModelDailyUpdate attendanceData={attendanceData} isUpdateModalOpen={isUpdateModalOpen} setIsUpdateModalOpen={setIsUpdateModalOpen} />}

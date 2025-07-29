@@ -1,4 +1,5 @@
 const imagePaths = {
+    ringtone: '/assets/ringtone.mp3',
     auth_design_bg: '/assets/images/auth_design_bg.svg',
     icon_big_dark: '/assets/images/icon_big_dark.png',
     icon_big_white: '/assets/images/icon_big_white.png',
@@ -18,6 +19,8 @@ const imagePaths = {
     priority_normal: '/assets/images/priority_normal.png',
     priority_on_hold: '/assets/images/priority_on_hold.png',
     priority_urjent: '/assets/images/priority_urjent.png',
+    chatIcon: '/assets/images/chatIcon.png',
+    emojiHey: '/assets/images/emojiHey.png',
 };
 
 export default imagePaths;

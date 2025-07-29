@@ -16,6 +16,8 @@ export const appColor = {
     borderClr: "#E4E7EC",
     blueBorder: "#f0f4f8",
     blueCardBg: "#FAFCFF",
+    statusAvailable: "#13A10E",
+    statusAway: "#EAA300",
 };
 
 export const colorMap = {

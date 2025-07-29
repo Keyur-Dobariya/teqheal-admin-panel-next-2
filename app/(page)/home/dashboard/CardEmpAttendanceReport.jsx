@@ -12,12 +12,13 @@ import {useMemo, useState} from "react";
 import {AlertTriangle, Clock, Watch} from "../../../utils/icons";
 import dayjs from "dayjs";
 import {DateTimeFormat} from "../../../utils/enum";
-import {colorTag} from "../../../components/CommonComponents";
+import {colorTag, timeTag} from "../../../components/CommonComponents";
 import {endpoints} from "../../../api/apiEndpoints";
 import {getLocalData} from "../../../dataStorage/DataPref";
 import appKeys from "../../../utils/appKeys";
 import {useAppData} from "../../../masterData/AppDataContext";
 import apiCall, {HttpMethod} from "../../../api/apiServiceProvider";
+import {formatMilliseconds} from "../../../utils/utils";
 const { useBreakpoint } = Grid;
 const { RangePicker } = DatePicker;
 
@@ -40,6 +41,10 @@ export default function CardEmpAttendanceReport() {
         );
     }, [empReportData, currentPage, pageSize]);
 
+    const timeFormater = (time) => {
+        return time ? formatMilliseconds(time) : "00:00:00";
+    }
+
     const empReportTableColumn = () => [
         {
             title: "Date",
@@ -57,7 +62,7 @@ export default function CardEmpAttendanceReport() {
             key: "totalHours",
             align: 'center',
             render: (totalHours) => {
-                return colorTag(totalHours, appColor.secondPrimary);
+                return timeTag(timeFormater(totalHours), 'geekblue');
             },
         },
         {
@@ -66,7 +71,7 @@ export default function CardEmpAttendanceReport() {
             key: "workingHours",
             align: 'center',
             render: (workingHours) => {
-                return colorTag(workingHours, appColor.success);
+                return timeTag(timeFormater(workingHours), 'green');
             },
         },
         {
@@ -75,7 +80,7 @@ export default function CardEmpAttendanceReport() {
             key: "breakHours",
             align: 'center',
             render: (breakHours) => {
-                return colorTag(breakHours, appColor.danger);
+                return timeTag(timeFormater(breakHours), 'red');
             },
         },
         {
@@ -84,7 +89,7 @@ export default function CardEmpAttendanceReport() {
             key: "lateArrival",
             align: 'center',
             render: (lateArrival) => {
-                return colorTag(lateArrival, appColor.warning);
+                return timeTag(timeFormater(lateArrival), 'orange');
             },
         },
         {
@@ -93,7 +98,7 @@ export default function CardEmpAttendanceReport() {
             key: "overtime",
             align: 'center',
             render: (overtime) => {
-                return colorTag(overtime, appColor.info);
+                return timeTag(timeFormater(overtime), 'purple');
             },
         },
     ];

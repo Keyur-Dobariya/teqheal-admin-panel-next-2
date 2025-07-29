@@ -8,12 +8,7 @@ import {
     Check,
     ChevronsUp, Clock,
     Copy, Eye, EyeOff, FilePlus,
-    Filter, List,
-    Plus,
     Search,
-    ShoppingCart,
-    Tag as TagIcon,
-    User
 } from "../../../utils/icons";
 import {AppstoreOutlined, BarsOutlined} from '@ant-design/icons';
 import {

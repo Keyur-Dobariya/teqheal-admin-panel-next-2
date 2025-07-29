@@ -24,7 +24,8 @@ export default function CardNoticeBoard() {
                 </div>
             )
         }>
-            <div className="max-h-[160px] overflow-y-auto" style={{ scrollbarWidth: "none" }}>
+            {/*<div className="max-h-[160px] overflow-y-auto" style={{ scrollbarWidth: "none" }}>*/}
+            <div className="h-[300px] overflow-y-auto" style={{ scrollbarWidth: "none" }}>
                 <Empty className="m-[15px]" />
                 {/*{notices ? <List*/}
                 {/*    dataSource={[]}*/}

@@ -83,11 +83,35 @@ html, body {
   word-break: break-word;
   position: relative;
   transition: background-color 0.2s ease-in-out;
+  margin-bottom: 10px;
+}
+
+.messageSent .messageContainer {
+  background-color: var(--second-primary-color);
+  color: white;
+}
+
+.messageContainer:hover {
+  background-color: rgba(255, 255, 255, 0.09);
+}
+
+.messageSent .messageContainer:hover {
+  background-color: #6075ff;
+}
+
+.messageContainer {
+  background-color: #f4f4f4;
+  border-radius: 10px;
+  padding: 5px 10px;
+  max-width: 100%;
+  word-break: break-word;
+  position: relative;
+  transition: background-color 0.2s ease-in-out;
 }
 
 .messageContainer:hover {
   /*background-color: #eeedff;*/
-  background-color: #f1f1f1;
+  background-color: #ededed;
   transition: background-color 0.2s ease-in-out;
 }
 
@@ -145,4 +169,147 @@ html, body {
   font-weight: 550;
   cursor: pointer;
   font-size: 12px;
+}
+
+
+
+
+
+.senderName {
+  font-size: 12px;
+  font-weight: 500;
+  color: #1a1a1a;
+}
+
+.messageSent .senderName {
+  color: white;
+}
+
+.messageItem {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+}
+
+.messageItemHov {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+}
+
+.messageItemHov:hover .messageTime {
+  display: inline-block;
+}
+
+.messageText {
+  color: black;
+}
+
+.messageSent {
+  flex-direction: row-reverse;
+}
+
+.messageSent .messageText {
+  color: white;
+}
+
+.messageSent .messageActions button {
+  color: #d9d9d9;
+}
+
+.messageTime {
+  font-size: 11px;
+  font-weight: 450;
+  color: #4e4e4e;
+  align-self: center;
+  display: none;
+}
+
+.messageReceived {
+  flex-direction: row;
+}
+
+.attachments {
+  display: flex;
+  min-width: 250px;
+  width: 100%;
+  max-width: 250px;
+  max-height: 250px;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 10px;
+  border-radius: 10px;
+  border: 1px solid #e8e8e8;
+  background: #f6f6f6;
+  padding: 7px;
+  cursor: pointer;
+  transition: background 0.3s ease;
+}
+
+.attachments:hover {
+  background: #ececec;
+  transition: background 0.3s ease;
+}
+
+.attachmentsGroup {
+  /*display: flex;*/
+  /*flex-wrap: wrap;*/
+  /*min-width: 250px;*/
+  /*width: 100%;*/
+  max-width: 77%;
+  /*min-height: auto;*/
+  /*align-items: center;*/
+  gap: 10px;
+  margin-bottom: 10px;
+  border-radius: 10px;
+  border: 1px solid #e8e8e8;
+  background: #f6f6f6;
+  padding: 7px;
+  cursor: pointer;
+  transition: background 0.3s ease;
+}
+
+.attachmentsGroup:hover {
+  background: #ececec;
+  transition: background 0.3s ease;
+}
+
+.chatCollapse {
+  flex: 1;
+  overflow-y: auto;
+  scrollbar-width: none;
+  border-radius: 0;
+  border: none;
+  background-color: white;
+}
+
+.chatCollapse .ant-collapse-header {
+  font-weight: 550;
+  font-size: 12px;
+  color: #1a1a1a;
+  padding: 10px 15px !important;
+}
+
+.chatCollapse .ant-collapse-content-box {
+  padding: 0 !important;
+}
+
+.avatar {
+  width: 30px;
+  height: 30px;
+  border-radius: 50%;
+  background-color: #888;
+  overflow: hidden;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: bold;
+  font-size: 14px;
+  color: #fff;
+}
+
+.calenderDayView {
+  font-size: 16px !important;
+  padding: 10px 0 !important;
+  border-right: 0 !important;
 }

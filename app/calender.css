@@ -1,0 +1,6 @@
+@import url('./globals.css');
+
+.fc-day {
+  font-size: 16px !important;
+  padding: 10px 0 !important;
+}

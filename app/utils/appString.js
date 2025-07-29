@@ -67,6 +67,7 @@ const appString = {
     earlyOutReminder: 'Early Out Reminder',
     attendanceReport: 'Attendance Report',
     leaveReport: 'Leave Report',
+    pendingEmp: 'Approval Pending Employees',
     noticeBoard: 'Notice Board',
     action: 'Action',
     delete: 'Delete',
