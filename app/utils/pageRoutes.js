@@ -18,6 +18,7 @@ const pageRoutes = {
     punchReport: '/home/punch-report',
     calendar: '/home/calendar',
     chatting: '/home/chatting',
+    application: '/home/application',
     myProfile: '/home/my-profile',
     settings: '/home/settings',
     calling: '/home/dashboard',

@@ -19,7 +19,7 @@ import {
     PoweroffOutlined,
     BellOutlined,
     TeamOutlined,
-    CommentOutlined, LoadingOutlined, PhoneOutlined,
+    CommentOutlined, AndroidOutlined, PhoneOutlined,
 } from '@ant-design/icons';
 import {
     Button,
@@ -322,6 +322,13 @@ export default function HomePage({children}) {
             key: pageRoutes.chatting,
             icon: <CommentOutlined />,
             label: capitalizeLastPathSegment(pageRoutes.chatting),
+            position: 'top',
+        },
+        {
+            key: pageRoutes.application,
+            icon: <AndroidOutlined />,
+            label: capitalizeLastPathSegment(pageRoutes.application),
+            hidden: !isAdmin(),
             position: 'top',
         },
         {

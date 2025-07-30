@@ -41,6 +41,12 @@ export default function Page() {
                 extendedProps: {calendar: "Success"},
             },
             {
+                id: "2",
+                title: "Meeting",
+                start: new Date(Date.now() + 86400000).toISOString().split("T")[0],
+                extendedProps: {calendar: "Danger"},
+            },
+            {
                 id: "3",
                 title: "Workshop",
                 start: new Date(Date.now() + 172800000).toISOString().split("T")[0],
