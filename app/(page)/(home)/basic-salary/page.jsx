@@ -1,6 +1,6 @@
 'use client';
 
-import {useEffect, useMemo, useState} from 'react';
+import React, {useEffect, useMemo, useState} from 'react';
 import {
     Avatar,
     Button, Card,
@@ -18,11 +18,12 @@ import {endpoints} from '../../../api/apiEndpoints';
 import appString from '../../../utils/appString';
 import appKeys from '../../../utils/appKeys';
 import dayjs from 'dayjs';
-import {decryptValue, profilePhotoManager} from "../../../utils/utils";
+import {decryptValue} from "../../../utils/utils";
 import {antTag} from "../../../components/CommonComponents";
 import {LoadingOutlined} from "@ant-design/icons";
 import appColor from "../../../utils/appColor";
 import BasicSalaryModel from "../../../models/BasicSalaryModel";
+import SafeAvatar from "../../../components/SafeAvatar";
 
 const {useBreakpoint} = Grid;
 
@@ -97,7 +98,10 @@ export default function Page() {
                 const rowUserRecord = record?.user;
                 return (
                     <div className="flex items-center gap-2">
-                        <Avatar src={profilePhotoManager({url: rowUserRecord?.profilePhoto, gender: rowUserRecord?.gender})} size="default" />
+                        <SafeAvatar
+                            userData={rowUserRecord}
+                            size="default"
+                        />
                         <div className="flex-1 font-medium">{rowUserRecord?.fullName}</div>
                     </div>
                 );

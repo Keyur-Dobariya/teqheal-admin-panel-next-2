@@ -1,6 +1,6 @@
 'use client';
 
-import {capitalizeLastPathSegment, convertCamelCase, profilePhotoManager} from "../../../utils/utils";
+import {capitalizeLastPathSegment, convertCamelCase} from "../../../utils/utils";
 import pageRoutes from "../../../utils/pageRoutes";
 import appString from "../../../utils/appString";
 import {
@@ -58,6 +58,7 @@ import {
 import appColor, {getDarkColor, getTransColor} from "../../../utils/appColor";
 import imagePaths from "../../../utils/imagesPath";
 import LeaveAddUpdateModel from "../../../models/LeaveAddUpdateModel";
+import SafeAvatar from "../../../components/SafeAvatar";
 
 const {Option} = Select;
 
@@ -213,8 +214,10 @@ export default function PageLeaveDataCommon({isReportPage}) {
             key: 'user.fullName',
             render: (text, record) => (
                 <div className="flex items-center gap-2">
-                    <Avatar src={profilePhotoManager({url: record?.user?.profilePhoto, gender: record?.user?.gender})}
-                            size="default"/>
+                    <SafeAvatar
+                        userData={record?.user}
+                        size="default"
+                    />
                     <div className="flex-1 font-medium">{record?.user?.fullName}</div>
                 </div>
             ),

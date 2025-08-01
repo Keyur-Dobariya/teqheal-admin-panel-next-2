@@ -21,32 +21,32 @@ export const appColor = {
 };
 
 export const colorMap = {
-    A: '#e34c2c',
-    B: '#30c64a',
-    C: '#3656ef',
-    D: '#F39C12',
-    E: '#8E44AD',
-    F: '#16A085',
-    G: '#F1C40F',
-    H: '#E74C3C',
-    I: '#2ECC71',
-    J: '#9B59B6',
-    K: '#34495E',
-    L: '#1ABC9C',
-    M: '#E67E22',
-    N: '#2980B9',
-    O: '#8E44AD',
-    P: '#D35400',
-    Q: '#F39C12',
-    R: '#e35b43',
-    S: '#7D3C98',
-    T: '#F1C40F',
-    U: '#2980B9',
-    V: '#27AE60',
-    W: '#8E44AD',
-    X: '#F39C12',
-    Y: '#9B59B6',
-    Z: '#34495E',
+    A: '#3b82f6', // Bright Blue
+    B: '#6366f1', // Indigo
+    C: '#8b5cf6', // Purple
+    D: '#f59e0b', // Amber
+    E: '#ec4899', // Pink
+    F: '#10b981', // Emerald
+    G: '#f97316', // Orange
+    H: '#ef4444', // Red
+    I: '#22c55e', // Green
+    J: '#a855f7', // Violet
+    K: '#64748b', // Slate
+    L: '#06b6d4', // Cyan
+    M: '#ea580c', // Orange Red
+    N: '#2563eb', // Blue
+    O: '#dc2626', // Red
+    P: '#d97706', // Orange
+    Q: '#eab308', // Yellow
+    R: '#e11d48', // Rose
+    S: '#9333ea', // Purple
+    T: '#059669', // Teal
+    U: '#1d4ed8', // Blue
+    V: '#16a34a', // Green
+    W: '#be123c', // Rose
+    X: '#ea580c', // Orange
+    Y: '#7c3aed', // Violet
+    Z: '#475569', // Slate
 };
 
 const lightenColor = (hex, percent) => {
@@ -62,15 +62,15 @@ const lightenColor = (hex, percent) => {
 };
 
 export const getLightColor = (value) => {
-    if(!value) {
-        return lightenColor(appColor.primary, 0.5);
+    if (!value) {
+        return lightenColor(appColor.primary, 0.8);
     }
     const firstChar = value.trim().charAt(0).toUpperCase();
-    return lightenColor(colorMap[firstChar], 0.5);
+    return lightenColor(colorMap[firstChar], 0.8);
 }
 
 export const getTransColor = (value) => {
-    if(!value) {
+    if (!value) {
         return lightenColor(appColor.primary, 0.9);
     }
     const firstChar = value.trim().charAt(0).toUpperCase();

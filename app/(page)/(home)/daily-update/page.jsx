@@ -15,7 +15,7 @@ import appString from "../../../utils/appString";
 import {PenTool} from "../../../utils/icons";
 import {getLocalData, isAdmin} from "../../../dataStorage/DataPref";
 import appKeys from "../../../utils/appKeys";
-import {profilePhotoManager} from "../../../utils/utils";
+import SafeAvatar from "../../../components/SafeAvatar";
 
 export default function DailyUpdatePage() {
     const {activeUsersData} = useAppData();
@@ -174,9 +174,8 @@ export default function DailyUpdatePage() {
                                     style={{ marginBottom: 16 }}
                                     title={
                                         <div className="flex items-center gap-3">
-                                            <Avatar
-                                                src={profilePhotoManager({url: item.user?.profilePhoto, gender: item.user?.gender})}
-                                                icon={<UserOutlined />}
+                                            <SafeAvatar
+                                                userData={item?.user}
                                                 size="default"
                                             />
                                             <div>

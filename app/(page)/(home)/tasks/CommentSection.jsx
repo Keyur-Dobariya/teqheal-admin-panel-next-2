@@ -53,7 +53,6 @@ import {
     formatMessageTimeReal,
     getDataById,
     getTwoCharacterFromName,
-    profilePhotoManager
 } from "../../../utils/utils";
 import {AppDataFields, useAppData} from "../../../masterData/AppDataContext";
 import {useRouter} from "next/navigation";

@@ -14,7 +14,6 @@ import appString from "../utils/appString";
 import {endpoints} from "../api/apiEndpoints";
 import apiCall, {HttpMethod} from "../api/apiServiceProvider";
 import appKeys from "../utils/appKeys";
-import {profilePhotoManager} from "../utils/utils";
 import dayjs from "dayjs";
 
 export default function ClientModel({

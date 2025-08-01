@@ -1,6 +1,6 @@
 'use client';
 
-import {decryptValue, profilePhotoManager} from "../../../utils/utils";
+import {decryptValue} from "../../../utils/utils";
 import appString from "../../../utils/appString";
 import {
     getLabelByKey,
@@ -37,6 +37,7 @@ import {endpoints} from "../../../api/apiEndpoints";
 import appColor from "../../../utils/appColor";
 import LeaveAddUpdateModel from "../../../models/LeaveAddUpdateModel";
 import {SalaryReportAddUpdateModel} from "../../../models/SalaryReportAddUpdateModel";
+import SafeAvatar from "../../../components/SafeAvatar";
 
 const {Option} = Select;
 
@@ -215,8 +216,10 @@ export default function Page() {
             hidden: !isAdmin(),
             render: (text, record) => (
                 <div className="flex items-center gap-2">
-                    <Avatar src={profilePhotoManager({url: record?.user?.profilePhoto, gender: record?.user?.gender})}
-                            size="default"/>
+                    <SafeAvatar
+                        userData={record?.user}
+                        size="default"
+                    />
                     <div className="flex-1 font-medium">{record?.user?.fullName}</div>
                 </div>
             ),

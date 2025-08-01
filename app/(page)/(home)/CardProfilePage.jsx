@@ -1,6 +1,6 @@
 'use client';
 
-import React, {useState, useEffect} from "react";
+import React, { useState, useEffect } from "react";
 import {
     Avatar, Button,
     Card,
@@ -9,33 +9,57 @@ import {
     Tag,
 } from "antd";
 
-import {AppDataFields, useAppData} from "../../masterData/AppDataContext";
+import { AppDataFields, useAppData } from "../../masterData/AppDataContext";
 
-import {EditOutlined, XOutlined} from "@ant-design/icons";
+import { EditOutlined, XOutlined } from "@ant-design/icons";
 import appString from "../../utils/appString";
 import {
     ApprovalStatus,
 } from "../../utils/enum";
 import { format } from 'date-fns';
-import {getLocalData} from "../../dataStorage/DataPref";
-import {capitalizeLastPathSegment, profilePhotoManager} from "../../utils/utils";
+import { getLocalData } from "../../dataStorage/DataPref";
+import { capitalizeLastPathSegment } from "../../utils/utils";
 import appKeys from "../../utils/appKeys";
-import {CreditCard, Facebook, Instagram, Linkedin, User} from "../../utils/icons";
+import { CreditCard, Facebook, Instagram, Linkedin, User } from "../../utils/icons";
 import appColor from "../../utils/appColor";
 import EmpAddUpdateModel from "../../models/EmpAddUpdateModel";
+import SafeAvatar from "../../components/SafeAvatar";
 
-export default function CardProfilePage({employeeCode}) {
+export default function CardProfilePage({ employeeCode }) {
     const { usersData, updateAppDataField } = useAppData();
 
     const filterUserData = usersData?.find((u) => u.employeeCode === employeeCode);
 
-    const [userProfile, setUserProfile] = useState(filterUserData);
+    // Fallback data for static export when no user is found
+    const defaultUserProfile = {
+        profilePhoto: null,
+        fullName: 'Loading...',
+        gender: 'male',
+        role: 'Employee',
+        employeeCode: employeeCode || 'default',
+        emailAddress: '',
+        dateOfBirth: new Date().toISOString(),
+        mobileNumber: '',
+        emergencyContactNo: '',
+        bloodGroup: '',
+        approvalStatus: 'pending',
+        address: '',
+        pincode: '',
+        aadharNumber: '',
+        panNumber: '',
+        bankAccountNumber: '',
+        ifscCode: '',
+        dateOfJoining: new Date().toISOString(),
+        _id: 'default'
+    };
+
+    const [userProfile, setUserProfile] = useState(filterUserData || defaultUserProfile);
     const [isModelOpen, setIsModelOpen] = useState(false);
     const [actionLoading, setActionLoading] = useState(false);
 
     useEffect(() => {
-        setUserProfile(filterUserData);
-    }, [usersData]);
+        setUserProfile(filterUserData || defaultUserProfile);
+    }, [usersData, filterUserData]);
 
     const openModalWithLoading = () => {
         setActionLoading(true);
@@ -61,7 +85,7 @@ export default function CardProfilePage({employeeCode}) {
         return status === ApprovalStatus.Approved ? 'green' : status === ApprovalStatus.Rejected ? 'red' : 'orange';
     }
 
-    const CommonInfoBox = ({title, value, isTag = false, tagColor = 'blue'}) => {
+    const CommonInfoBox = ({ title, value, isTag = false, tagColor = 'blue' }) => {
         return <Col xs={24} sm={12} md={8} >
             <div className="text-[13px] font-normal text-gray-500">{title}</div>
             <div className="text-[14px] font-medium text-gray-900 mt-1">{value ? isTag ? <Tag bordered={true} color={tagColor}>{value}</Tag> : value : '-'}</div>
@@ -79,9 +103,9 @@ export default function CardProfilePage({employeeCode}) {
                     <Card>
                         <div className="flex flex-col sm:flex-col md:flex-row justify-between items-center gap-4 p-5 md:p-4 text-center md:text-left">
                             <div className="flex flex-col md:flex-row items-center gap-4">
-                                <Avatar
+                                <SafeAvatar
+                                    userData={userProfile}
                                     size={80}
-                                    src={profilePhotoManager({ url: userProfile.profilePhoto, gender: userProfile.gender })}
                                 />
                                 <div className="flex flex-col gap-2 mt-2 md:mt-0">
                                     <div className="font-semibold text-lg md:text-base">
@@ -110,7 +134,7 @@ export default function CardProfilePage({employeeCode}) {
                                 <User color={appColor.danger} />
                                 <div>{appString.personalDetails}</div>
                             </div>
-                        )} styles={{body: {padding: 20}}}>
+                        )} styles={{ body: { padding: 20 } }}>
                         <Row gutter={[16, 30]}>
                             <CommonInfoBox title={appString.fullName} value={userProfile.fullName} />
                             <CommonInfoBox title={appString.emailAddress} value={userProfile.emailAddress} />
@@ -131,7 +155,7 @@ export default function CardProfilePage({employeeCode}) {
                                 <CreditCard color={appColor.warning} />
                                 <div>{appString.financialDetails}</div>
                             </div>
-                        )} styles={{body: {padding: 20}}}>
+                        )} styles={{ body: { padding: 20 } }}>
                         <Row gutter={[16, 30]}>
                             <CommonInfoBox title={appString.aadharNumber} value={userProfile.aadharNumber} />
                             <CommonInfoBox title={appString.panNumber} value={userProfile.panNumber} />

@@ -1,7 +1,9 @@
 import {Avatar, message, Select, Tag} from "antd";
-import {formatMilliseconds, profilePhotoManager} from "../utils/utils";
+import {formatMilliseconds} from "../utils/utils";
 import appColor from "../utils/appColor";
 import appString from "../utils/appString";
+import SafeAvatar from "./SafeAvatar";
+import React from "react";
 
 const {Option} = Select;
 
@@ -94,12 +96,9 @@ export const UserSelect = ({
                     label={user.fullName}
                 >
                     <div className="flex items-center gap-2 text-[14px]">
-                        <Avatar
+                        <SafeAvatar
+                            userData={user}
                             size="small"
-                            src={profilePhotoManager({
-                                url: user.profilePhoto,
-                                gender: user.gender,
-                            })}
                         />
                         {user.fullName}
                     </div>

@@ -1,13 +1,13 @@
 'use client';
 
-import {useState, useRef, useEffect, useCallback} from 'react';
-import {Search, Replace} from 'lucide-react';
+import { useState, useRef, useEffect, useCallback } from 'react';
+import { Search, Replace } from 'lucide-react';
 import EditorToolbar from './EditorToolbar';
-import {Send} from "../../utils/icons";
-import {SendOutlined} from "@ant-design/icons";
-import {Button} from "antd";
+import { Send } from "../../utils/icons";
+import { SendOutlined } from "@ant-design/icons";
+import { Button } from "antd";
 
-const RichTextEditor = ({customEnabledFunctions, isShowSendButton = true, onContentChange}) => {
+const RichTextEditor = ({ customEnabledFunctions, isShowSendButton = true, onContentChange }) => {
     const [content, setContent] = useState('');
     const [htmlOutput, setHtmlOutput] = useState('');
     const [showHtml, setShowHtml] = useState(false);
@@ -22,6 +22,7 @@ const RichTextEditor = ({customEnabledFunctions, isShowSendButton = true, onCont
     const [wordCount, setWordCount] = useState(0);
     const [charCount, setCharCount] = useState(0);
     const [activeFormats, setActiveFormats] = useState({});
+    const [hasContent, setHasContent] = useState(false);
 
     const [enabledFunctions, setEnabledFunctions] = useState({
         // Header
@@ -223,10 +224,14 @@ const RichTextEditor = ({customEnabledFunctions, isShowSendButton = true, onCont
     const handleContentChange = useCallback(() => {
         if (editorRef.current) {
             const content = editorRef.current.innerHTML.trim();
+            const textContent = editorRef.current.innerText?.trim() || '';
+
             if (content === '' || content === '<br>') {
                 setContent('');
+                setHasContent(false);
             } else {
                 setContent(content);
+                setHasContent(textContent.length > 0);
             }
         }
         // Check format state when content changes
@@ -392,7 +397,7 @@ ${cleanHtml}
 </body>
 </html>`;
 
-        const blob = new Blob([fullHtml], {type: 'text/html'});
+        const blob = new Blob([fullHtml], { type: 'text/html' });
         const url = URL.createObjectURL(blob);
         const a = document.createElement('a');
         a.href = url;
@@ -533,7 +538,7 @@ ${cleanHtml}
             </div>}
 
             {/* Editor Content */}
-            <div className="flex" style={{height: isFullscreen ? 'calc(100vh - 280px)' : '100px'}}>
+            <div className="flex" style={{ height: isFullscreen ? 'calc(100vh - 280px)' : '100px' }}>
                 {/* Editor */}
                 <div className={`${showHtml ? 'w-1/2 border-r' : 'w-full'} border-gray-200 relative`}>
                     <div
@@ -559,11 +564,21 @@ ${cleanHtml}
                         </div>
                     )}
                     {isShowSendButton && <div className="absolute bottom-3 right-3 cursor-pointer" title="Send">
-                        <Button size="middle" icon={<SendOutlined/>} onClick={() => {
-                            onContentChange(editorRef.current.innerText.trim());
-                            setContent('');
-                            editorRef.current.innerText = '';
-                        }}/>
+                        <Button
+                            size="middle"
+                            icon={<SendOutlined />}
+                            color="primary"
+                            variant="solid"
+                            disabled={!hasContent}
+                            onClick={() => {
+                                if (hasContent) {
+                                    onContentChange(editorRef.current.innerText.trim());
+                                    setContent('');
+                                    editorRef.current.innerText = '';
+                                    setHasContent(false);
+                                }
+                            }}
+                        />
                     </div>}
                 </div>
 

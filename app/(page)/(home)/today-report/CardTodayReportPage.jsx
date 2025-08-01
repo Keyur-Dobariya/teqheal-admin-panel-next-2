@@ -1,6 +1,6 @@
 'use client';
 
-import {useEffect, useMemo, useState} from 'react';
+import React, {useEffect, useMemo, useState} from 'react';
 import {
     Avatar,
     Button, Card, DatePicker,
@@ -20,7 +20,7 @@ import appString from '../../../utils/appString';
 import {ApprovalStatus, DateTimeFormat} from '../../../utils/enum';
 import {appColor} from '../../../utils/appColor';
 import dayjs from 'dayjs';
-import {formatMilliseconds, profilePhotoManager} from "../../../utils/utils";
+import {formatMilliseconds} from "../../../utils/utils";
 import {LoadingOutlined} from "@ant-design/icons";
 import {useRouter} from "next/navigation";
 import pageRoutes from "../../../utils/pageRoutes";
@@ -28,6 +28,7 @@ import appKeys from "../../../utils/appKeys";
 import {timeTag} from "../../../components/CommonComponents";
 import EmpScreenshotModel from "../../../models/EmpScreenshotModel";
 import AttendanceDetailModel from "../../../models/AttendanceDetailModel";
+import SafeAvatar from "../../../components/SafeAvatar";
 
 export default function CardTodayReportPage() {
     const {attendancesData} = useAppData();
@@ -78,8 +79,10 @@ export default function CardTodayReportPage() {
             key: 'userData.fullName',
             render: (text, record) => record?.userData ? (
                 <div className="flex items-center gap-2">
-                    <Avatar src={profilePhotoManager({url: record?.userData?.profilePhoto, gender: record?.userData?.gender})}
-                            size="default"/>
+                    <SafeAvatar
+                        userData={record?.userData}
+                        size="default"
+                    />
                     <div className="flex-1 font-medium">{record.userData.fullName}</div>
                 </div>
             ) : null,

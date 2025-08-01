@@ -1,6 +1,6 @@
 'use client';
 
-import {useEffect, useMemo, useState} from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import {
     Avatar,
     Button, Card,
@@ -11,26 +11,26 @@ import {
     Table,
     Tooltip,
 } from 'antd';
-import {AlertCircle, Box, Search} from '../../../utils/icons';
-import {UserPlus, Edit, Trash2, Eye, XCircle, CheckCircle} from '../../../utils/icons';
-import {useAppData, AppDataFields} from '../../../masterData/AppDataContext';
-import apiCall, {HttpMethod} from '../../../api/apiServiceProvider';
-import {endpoints} from '../../../api/apiEndpoints';
+import { AlertCircle, Box, Search } from '../../../utils/icons';
+import { UserPlus, Edit, Trash2, Eye, XCircle, CheckCircle } from '../../../utils/icons';
+import { useAppData, AppDataFields } from '../../../masterData/AppDataContext';
+import apiCall, { HttpMethod } from '../../../api/apiServiceProvider';
+import { endpoints } from '../../../api/apiEndpoints';
 import appString from '../../../utils/appString';
 import appKeys from '../../../utils/appKeys';
-import {ApprovalStatus, DateTimeFormat} from '../../../utils/enum';
-import {appColor, colorMap} from '../../../utils/appColor';
+import { ApprovalStatus, DateTimeFormat } from '../../../utils/enum';
+import { appColor, colorMap } from '../../../utils/appColor';
 import dayjs from 'dayjs';
-import {profilePhotoManager} from "../../../utils/utils";
 import EmpAddUpdateModel from "../../../models/EmpAddUpdateModel";
-import {LoadingOutlined} from "@ant-design/icons";
-import {useRouter} from "next/navigation";
+import { LoadingOutlined } from "@ant-design/icons";
+import { useRouter } from "next/navigation";
 import pageRoutes from "../../../utils/pageRoutes";
+import SafeAvatar from "../../../components/SafeAvatar";
 
-const {useBreakpoint} = Grid;
+const { useBreakpoint } = Grid;
 
 export default function CardEmpList({ isDashboard }) {
-    const {usersData, updateAppDataField} = useAppData();
+    const { usersData, updateAppDataField } = useAppData();
     const screens = useBreakpoint();
     const isMobile = !screens.md;
 
@@ -58,13 +58,13 @@ export default function CardEmpList({ isDashboard }) {
         return allData.filter(
             data =>
                 isDashboard ? data.approvalStatus === ApprovalStatus.Pending : data.approvalStatus === ApprovalStatus.Approved &&
-                (
-                    data.fullName?.toLowerCase().includes(query) ||
-                    data.emailAddress?.toLowerCase().includes(query) ||
-                    data.mobileNumber?.includes(query) ||
-                    data.role?.toLowerCase().includes(query) ||
-                    data.employeeCode?.toLowerCase().includes(query)
-                )
+                    (
+                        data.fullName?.toLowerCase().includes(query) ||
+                        data.emailAddress?.toLowerCase().includes(query) ||
+                        data.mobileNumber?.includes(query) ||
+                        data.role?.toLowerCase().includes(query) ||
+                        data.employeeCode?.toLowerCase().includes(query)
+                    )
         );
     }, [allData, searchText]);
 
@@ -88,9 +88,9 @@ export default function CardEmpList({ isDashboard }) {
     };
 
     const toggleUserStatus = async (user, checked) => {
-        setLoadingRecord(prev => ({...prev, [user._id]: true}));
-        await updateRecord(user._id, {isActive: checked});
-        setLoadingRecord(prev => ({...prev, [user._id]: false}));
+        setLoadingRecord(prev => ({ ...prev, [user._id]: true }));
+        await updateRecord(user._id, { isActive: checked });
+        setLoadingRecord(prev => ({ ...prev, [user._id]: false }));
     };
 
     const openModalWithLoading = (isEditMode, record = null) => {
@@ -132,7 +132,10 @@ export default function CardEmpList({ isDashboard }) {
             sorter: (a, b) => a.fullName.localeCompare(b.fullName),
             render: (text, record) => (
                 <div className="flex items-center gap-2">
-                    <Avatar src={profilePhotoManager({url: record.profilePhoto, gender: record.gender})} size="default" />
+                    <SafeAvatar
+                        userData={record}
+                        size="default"
+                    />
                     <div className="flex-1 font-medium">{record.fullName}</div>
                 </div>
             ),
@@ -196,7 +199,7 @@ export default function CardEmpList({ isDashboard }) {
                                 <Popconfirm
                                     title={appString.rejectConfirmation}
                                     onConfirm={async () => {
-                                        await updateRecord(record._id, {approvalStatus: ApprovalStatus.Rejected});
+                                        await updateRecord(record._id, { approvalStatus: ApprovalStatus.Rejected });
                                     }}
                                     style={{ marginRight: 35 }}
                                 >
@@ -209,7 +212,7 @@ export default function CardEmpList({ isDashboard }) {
                                 <Popconfirm
                                     title={appString.approveConfirmation}
                                     onConfirm={async () => {
-                                        await updateRecord(record._id, {approvalStatus: ApprovalStatus.Approved});
+                                        await updateRecord(record._id, { approvalStatus: ApprovalStatus.Approved });
                                     }}
                                     style={{ margin: 0 }}
                                 >
@@ -239,18 +242,18 @@ export default function CardEmpList({ isDashboard }) {
                         {actionLoading === record._id ? (
                             <LoadingOutlined />
                         ) : (
-                            <div onClick={() => handleEditClick(record)} style={{cursor: 'pointer'}}>
+                            <div onClick={() => handleEditClick(record)} style={{ cursor: 'pointer' }}>
                                 <Edit color={appColor.secondPrimary} />
                             </div>
                         )}
                     </Tooltip>
                     <Popconfirm title={appString.deleteConfirmation} onConfirm={() => deleteRecord(record)}>
                         <Tooltip title={appString.delete}>
-                            <Trash2 color={appColor.danger} style={{cursor: 'pointer'}}/>
+                            <Trash2 color={appColor.danger} style={{ cursor: 'pointer' }} />
                         </Tooltip>
                     </Popconfirm>
                     <Tooltip title={appString.view}>
-                        <div onClick={() => handleViewClick(record)} style={{cursor: 'pointer'}}>
+                        <div onClick={() => handleViewClick(record)} style={{ cursor: 'pointer' }}>
                             <Eye color={appColor.primary} />
                         </div>
                     </Tooltip>
@@ -276,14 +279,14 @@ export default function CardEmpList({ isDashboard }) {
                         <div className="flex justify-between items-center gap-2 flex-wrap">
                             <Input
                                 placeholder={appString.empSearchHint}
-                                prefix={<Search/>}
+                                prefix={<Search />}
                                 value={searchText}
                                 onChange={e => setSearchText(e.target.value)}
                                 className="w-full flex-1 max-w-90"
                             />
                             <Button
                                 type="primary"
-                                icon={<UserPlus/>}
+                                icon={<UserPlus />}
                                 onClick={handleAddClick}
                                 loading={actionLoading === 'add'}
                             >

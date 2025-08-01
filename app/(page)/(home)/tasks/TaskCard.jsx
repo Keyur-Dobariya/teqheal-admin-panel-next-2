@@ -7,6 +7,7 @@ import {Clock, Copy} from "../../../utils/icons";
 import {getIconByKey, getLabelByKey, taskCategoryLabel, taskPriorityLabel} from "../../../utils/enum";
 import dayjs from "dayjs";
 import React from "react";
+import SafeAvatar from "../../../components/SafeAvatar";
 
 export const TaskCard = ({task, activeUsersData, projectData, snapshot, handleTaskOpenClick}) => {
 
@@ -61,17 +62,10 @@ export const TaskCard = ({task, activeUsersData, projectData, snapshot, handleTa
                             }} size={27}>
                                 {assignees.map(user => (
                                     <Tooltip key={user._id} title={user.fullName}>
-                                        <Avatar
-                                            src={user.profilePhoto || null}
-                                            style={{
-                                                backgroundColor: !user.profilePhoto ? getDarkColor(user.fullName) : undefined,
-                                                color: appColor.white,
-                                                cursor: 'pointer',
-                                                fontSize: "12px"
-                                            }}
-                                        >
-                                            {!user.profilePhoto && getTwoCharacterFromName(user.fullName)}
-                                        </Avatar>
+                                        <SafeAvatar
+                                            userData={user}
+                                            showName={true}
+                                        />
                                     </Tooltip>
                                 ))}
                             </Avatar.Group>

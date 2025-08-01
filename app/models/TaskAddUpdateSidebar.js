@@ -53,16 +53,15 @@ import {
     formatMessageTimeReal,
     getDataById,
     getTwoCharacterFromName,
-    profilePhotoManager
 } from "../utils/utils";
-// import Editor from "../components/Editor";
 import {AppDataFields, useAppData} from "../masterData/AppDataContext";
 import {useRouter} from "next/navigation";
 import pageRoutes from "../utils/pageRoutes";
 import {ArrowDown, ArrowUp, Box, Delete, FileText, MessageCircle, Trash, Users} from "../utils/icons";
 import {UserSelect} from "../components/CommonComponents";
 import RichTextEditor from "../components/editor/RichTextEditor";
-import {CommentSection} from "../(page)/home/tasks/CommentSection";
+import {CommentSection} from "../(page)/(home)/tasks/CommentSection";
+import SafeAvatar from "../components/SafeAvatar";
 
 const {Option} = Select;
 const {TextArea} = Input;
@@ -81,6 +80,7 @@ export default function TaskAddUpdateSidebar({
                                                  clientRecord,
                                                  isEditing,
                                                  setIsEditing,
+                                                 handleTaskModelClose,
                                                  onSuccessCallback,
                                              }) {
 
@@ -196,7 +196,8 @@ export default function TaskAddUpdateSidebar({
     const handleEditCancel = () => {
         setIsModelOpen(false);
         setIsEditing(false);
-        router.push(pageRoutes.tasks);
+        // router.push(pageRoutes.tasks);
+        handleTaskModelClose();
         resetTaskValues();
     };
 
@@ -251,7 +252,10 @@ export default function TaskAddUpdateSidebar({
                     onClick={() => handleSelectUser(user)}
                     style={{display: "flex", alignItems: "center", gap: "10px"}}
                 >
-                    <Avatar src={profilePhotoManager({url: user.profilePhoto, gender: user.gender})} size="small"/>
+                    <SafeAvatar
+                        userData={user}
+                        size="small"
+                    />
                     {user.fullName}
                 </div>
             ),

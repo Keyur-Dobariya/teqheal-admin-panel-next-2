@@ -1,5 +1,3 @@
-import CardEarlyOutReminder from "../(page)/home/dashboard/CardEarlyOutReminder";
-
 const appString = {
     authTitle: 'Welcome to',
     appNameFull: 'Teqheal Solution',

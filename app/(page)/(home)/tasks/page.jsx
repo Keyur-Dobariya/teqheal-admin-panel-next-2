@@ -1,7 +1,7 @@
 'use client';
 
-import React, {useEffect, useMemo, useRef, useState} from "react";
-import {DragDropContext, Draggable, Droppable} from "@hello-pangea/dnd";
+import React, { useEffect, useMemo, useRef, useState } from "react";
+import { DragDropContext, Draggable, Droppable } from "@hello-pangea/dnd";
 import {
     ArrowDown,
     Calendar,
@@ -10,7 +10,7 @@ import {
     Copy, Eye, EyeOff, FilePlus,
     Search,
 } from "../../../utils/icons";
-import {AppstoreOutlined, BarsOutlined} from '@ant-design/icons';
+import { AppstoreOutlined, BarsOutlined } from '@ant-design/icons';
 import {
     Avatar,
     Badge,
@@ -43,31 +43,29 @@ import utc from 'dayjs/plugin/utc';
 import timezone from 'dayjs/plugin/timezone';
 import isSameOrAfter from "dayjs/plugin/isSameOrAfter";
 import isSameOrBefore from "dayjs/plugin/isSameOrBefore";
-import appColor, {getDarkColor} from "../../../utils/appColor";
-import apiCall, {HttpMethod} from "../../../api/apiServiceProvider";
-import {endpoints} from "../../../api/apiEndpoints";
-import {AppDataFields, useAppData} from "../../../masterData/AppDataContext";
-import {contentCopy, getDataById, getTwoCharacterFromName} from "../../../utils/utils";
+import appColor, { getDarkColor } from "../../../utils/appColor";
+import apiCall, { HttpMethod } from "../../../api/apiServiceProvider";
+import { endpoints } from "../../../api/apiEndpoints";
+import { AppDataFields, useAppData } from "../../../masterData/AppDataContext";
+import { contentCopy, getDataById, getTwoCharacterFromName } from "../../../utils/utils";
 import appKeys from "../../../utils/appKeys";
-import {showToast} from "../../../components/CommonComponents";
+import { showToast } from "../../../components/CommonComponents";
 import appString from "../../../utils/appString";
-// import {useRouter, useSearchParams} from "next/navigation";
 import TaskAddUpdateSidebar from "../../../models/TaskAddUpdateSidebar";
-import {reorderTasksOnServer} from "../../../api/apiUtils";
-import {organizeTasksByStatus, stageWiseColor} from "./taskPageUtils";
-import {TaskCard} from "./TaskCard";
-import {FilterPopover} from "./FilterPopover";
-import {TaskBoardUi} from "./TaskBoardUi";
+import { organizeTasksByStatus, stageWiseColor } from "./taskPageUtils";
+import { TaskCard } from "./TaskCard";
+import { FilterPopover } from "./FilterPopover";
+import { TaskBoardUi } from "./TaskBoardUi";
 
 dayjs.extend(utc);
 dayjs.extend(timezone);
 dayjs.extend(isSameOrAfter);
 dayjs.extend(isSameOrBefore);
 
-const {Option} = Select;
-const {RangePicker} = DatePicker;
+const { Option } = Select;
+const { RangePicker } = DatePicker;
 
-const {useBreakpoint} = Grid;
+const { useBreakpoint } = Grid;
 
 export default function Page() {
     const {
@@ -78,10 +76,34 @@ export default function Page() {
         updateAppDataField
     } = useAppData();
 
-    // const router = useRouter();
-    // const searchParams = useSearchParams();
-    // const taskId = searchParams.get('task');
-    const taskId = null;
+    const [taskId, setTaskId] = useState(null);
+
+    useEffect(() => {
+        if (typeof window !== 'undefined') {
+            const urlParams = new URLSearchParams(window.location.search);
+            const taskParam = urlParams.get('task');
+            setTaskId(taskParam);
+        }
+    }, []);
+
+    useEffect(() => {
+        const handlePopState = () => {
+            if (typeof window !== 'undefined') {
+                const urlParams = new URLSearchParams(window.location.search);
+                const taskParam = urlParams.get('task');
+                setTaskId(taskParam);
+                
+                if (!taskParam) {
+                    setAddTaskModelOpen(false);
+                    setIsTaskEditing(false);
+                    setSelectedTastRecord(null);
+                }
+            }
+        };
+
+        window.addEventListener('popstate', handlePopState);
+        return () => window.removeEventListener('popstate', handlePopState);
+    }, []);
 
     const [originalTasksByStatus, setOriginalTasksByStatus] = useState([]);
     const [tasksByStatus, setTasksByStatus] = useState([]);
@@ -126,16 +148,24 @@ export default function Page() {
     };
 
     useEffect(() => {
-        if (taskId) {
+        if (taskId && taskBoardData && Object.keys(taskBoardData).length > 0) {
             const taskRecord = getTaskById(taskId);
             if (taskRecord) {
                 setAddTaskModelOpen(true);
                 setIsShowFilterPopup(false);
                 setIsTaskEditing(true);
                 setSelectedTastRecord(taskRecord);
+            } else {
+                console.warn(`Task with ID ${taskId} not found`);
+                if (typeof window !== 'undefined') {
+                    const url = new URL(window.location);
+                    url.searchParams.delete('task');
+                    window.history.replaceState({}, '', url.toString());
+                    setTaskId(null);
+                }
             }
         }
-    }, [taskId]);
+    }, [taskId, taskBoardData]);
 
     const handleResize = () => {
         if (taskBoardContainerRef.current) {
@@ -152,7 +182,7 @@ export default function Page() {
                 // console.log('Notification:', JSON.parse(event.data));
                 updateAppDataField(AppDataFields.taskBoardData, JSON.parse(event.data) || taskBoardData);
                 const taskRecord = getTaskById(taskId);
-                setSelectedTastRecord({...taskRecord});
+                setSelectedTastRecord({ ...taskRecord });
             }
         };
 
@@ -214,12 +244,16 @@ export default function Page() {
     };
 
     useEffect(() => {
-        handleDataConditionWise(taskBoardData);
-        setOriginalTasksByStatus(organizeTasksByStatus(taskBoardData));
+        if(taskBoardData) {
+            handleDataConditionWise(taskBoardData);
+            setOriginalTasksByStatus(organizeTasksByStatus(taskBoardData));
+        }
     }, [taskBoardData]);
 
     const handleDataConditionWise = (data) => {
-        setTasksByStatus(organizeTasksByStatus(data));
+        if(data) {
+            setTasksByStatus(organizeTasksByStatus(data));
+        }
     };
 
     const filterTasks = () => {
@@ -296,11 +330,29 @@ export default function Page() {
         setAddTaskModelOpen(true);
         setIsShowFilterPopup(false);
         setIsTaskEditing(true);
-        // const params = new URLSearchParams(searchParams);
-        // params.set('task', taskDetail.taskId);
-        // router.push(`?${params.toString()}`);
-        // navigate(`/tasks/${taskDetail.taskId}`);
+
+        // Update URL with task query parameter using window.history
+        if (typeof window !== 'undefined') {
+            const url = new URL(window.location);
+            url.searchParams.set('task', taskDetail.taskId);
+            window.history.pushState({}, '', url.toString());
+            setTaskId(taskDetail.taskId);
+        }
+
         setSelectedTastRecord(taskDetail);
+    };
+
+    const handleTaskModalClose = () => {
+        setAddTaskModelOpen(false);
+        setIsTaskEditing(false);
+        setSelectedTastRecord(null);
+        
+        if (typeof window !== 'undefined') {
+            const url = new URL(window.location);
+            url.searchParams.delete('task');
+            window.history.pushState({}, '', url.toString());
+            setTaskId(null);
+        }
     };
 
     useEffect(() => {
@@ -316,13 +368,13 @@ export default function Page() {
                 marginTop: "200px",
                 overflow: "hidden"
             }}>
-                <Spin/>
+                <Spin />
             </div>
         );
     }
 
     const dataSource = taskColumnStatusLabel
-        .map(({label, value}) => ({
+        .map(({ label, value }) => ({
             key: value,
             statusLabel: label,
             children: (tasksByStatus.columns?.[value]?.tasksList || []).map((task) => ({
@@ -362,7 +414,7 @@ export default function Page() {
 
     return (
         <>
-            <div ref={taskBoardContainerRef} style={{marginRight: isAddTaskModelOpen ? 685 : 0}}>
+            <div ref={taskBoardContainerRef} style={{ marginRight: isAddTaskModelOpen ? 685 : 0 }}>
                 <Card title={(
                     <div className="py-4">
                         <Row gutter={[16, 16]} align="middle" wrap>
@@ -373,14 +425,14 @@ export default function Page() {
                                         value={viewMode}
                                         size="large"
                                         options={[
-                                            {value: 'list', icon: <BarsOutlined/>},
-                                            {value: 'board', icon: <AppstoreOutlined/>},
+                                            { value: 'list', icon: <BarsOutlined /> },
+                                            { value: 'board', icon: <AppstoreOutlined /> },
                                         ]}
                                         onChange={setViewMode}
                                     />
                                     <Input
                                         placeholder={appString.searchHint}
-                                        prefix={<Search/>}
+                                        prefix={<Search />}
                                         onChange={(e) => {
                                             const searchText = e.target.value.toLowerCase();
                                             const filteredTasks = {};
@@ -399,12 +451,12 @@ export default function Page() {
                                     />
                                 </div>
                             </Col>
-                            <Col xs={0} sm={0} md={0} lg={0} xl={0} xxl={1}/>
+                            <Col xs={0} sm={0} md={0} lg={0} xl={0} xxl={1} />
                             <Col xs={24} sm={8} md={12} lg={7} xl={5} xxl={5}>
                                 <Select
                                     placeholder="Select Client"
                                     allowClear
-                                    style={{width: "100%"}}
+                                    style={{ width: "100%" }}
                                     showSearch
                                     value={filters.client}
                                     onChange={(value) => {
@@ -432,7 +484,7 @@ export default function Page() {
                                             handleDataConditionWise(taskBoardData);
                                         }
                                     }}
-                                    style={{width: "100%"}}
+                                    style={{ width: "100%" }}
                                     showSearch
                                     filterOption={(input, option) => option.label.toLowerCase().includes(input.toLowerCase())}
                                     options={filteredProjects.map(project => ({
@@ -462,7 +514,7 @@ export default function Page() {
                             <Col xs={12} sm={6} md={6} lg={5} xl={3} xxl={3}>
                                 <Button
                                     type="primary"
-                                    icon={<FilePlus/>}
+                                    icon={<FilePlus />}
                                     onClick={handleTaskAddClick}
                                     style={{ width: "100%" }}
                                 >
@@ -473,7 +525,7 @@ export default function Page() {
                     </div>
                 )}>
                     {viewMode === 'board' ? (
-                        <TaskBoardUi tasksByStatus={tasksByStatus} setTasksByStatus={setTasksByStatus} activeUsersData={activeUsersData} activeProjectData={activeProjectData} handleTaskOpenClick={handleTaskOpenClick}/>
+                        <TaskBoardUi tasksByStatus={tasksByStatus} setTasksByStatus={setTasksByStatus} activeUsersData={activeUsersData} activeProjectData={activeProjectData} handleTaskOpenClick={handleTaskOpenClick} />
                     ) : (
                         <Table
                             columns={columns}
@@ -481,14 +533,14 @@ export default function Page() {
                             pagination={false}
                             expandable={{
                                 defaultExpandAllRows: true,
-                                expandIcon: ({expanded, onExpand, record}) =>
+                                expandIcon: ({ expanded, onExpand, record }) =>
                                     record.children ? (
                                         <span
                                             onClick={e => onExpand(record, e)}
-                                            style={{cursor: 'pointer', marginRight: 8}}
+                                            style={{ cursor: 'pointer', marginRight: 8 }}
                                         >
-          {expanded ? '▼' : '▶'}
-        </span>
+                                            {expanded ? '▼' : '▶'}
+                                        </span>
                                     ) : null,
                                 rowExpandable: record => !!record.children,
                             }}
@@ -516,6 +568,7 @@ export default function Page() {
                         clientRecord={activeClientData}
                         isEditing={isTaskEditing}
                         setIsEditing={setIsTaskEditing}
+                        handleTaskModelClose={handleTaskModalClose}
                         onSuccessCallback={(data) => {
                             handleDataConditionWise(data.data);
                         }}

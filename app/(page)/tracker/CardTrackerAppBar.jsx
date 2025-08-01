@@ -6,11 +6,11 @@ import appKeys from "../../utils/appKeys";
 import imagePaths from "../../utils/imagesPath";
 import appString from "../../utils/appString";
 import {AlertCircle, FilePlus, Grid, MoreVertical, Power, RefreshCw, RotateCw} from "../../utils/icons";
-import {profilePhotoManager} from "../../utils/utils";
 import {useRouter} from "next/navigation";
 import pageRoutes from "../../utils/pageRoutes";
-import {useEffect, useState} from "react";
+import React, {useEffect, useState} from "react";
 import {environment} from "../../api/apiEndpoints";
+import SafeAvatar from "../../components/SafeAvatar";
 
 export default function CardTrackerAppBar({userData, isUpdateModalOpen, setIsUpdateModalOpen}) {
 
@@ -72,8 +72,8 @@ export default function CardTrackerAppBar({userData, isUpdateModalOpen, setIsUpd
         <>
             <Card>
                 <div className="flex items-center gap-3 p-3">
-                    <Avatar
-                        src={profilePhotoManager({url: userData?.profilePhoto, gender: userData?.gender})}
+                    <SafeAvatar
+                        userData={userData}
                         size={40}
                         className="shadow-md"
                     />

@@ -35,30 +35,31 @@ import {
     Tooltip,
     Dropdown, Form, Input
 } from 'antd';
-import {useEffect, useRef, useState} from "react";
+import { useEffect, useRef, useState } from "react";
 import AnimatedDiv, { Direction } from "../../components/AnimatedDiv";
-import {capitalizeLastPathSegment, detectPlatform, profilePhotoManager} from "../../utils/utils";
+import { capitalizeLastPathSegment } from "../../utils/utils";
 import pageRoutes from "../../utils/pageRoutes";
-import {router} from "next/client";
-import {usePathname, useRouter} from "next/navigation";
+import { router } from "next/client";
+import { usePathname, useRouter } from "next/navigation";
 import appColor from "../../utils/appColor";
 import appKeys from "../../utils/appKeys";
-import {getLocalData, isAdmin, storeLoginData} from "../../dataStorage/DataPref";
-import {LoadingComponent} from "../../components/LoadingComponent";
+import { getLocalData, isAdmin, storeLoginData } from "../../dataStorage/DataPref";
+import { LoadingComponent } from "../../components/LoadingComponent";
 import Link from "next/link";
-import {useAppData} from "../../masterData/AppDataContext";
-import apiCall, {HttpMethod} from "../../api/apiServiceProvider";
-import {endpoints} from "../../api/apiEndpoints";
+import { useAppData } from "../../masterData/AppDataContext";
+import apiCall, { HttpMethod } from "../../api/apiServiceProvider";
+import { endpoints } from "../../api/apiEndpoints";
 import appString from "../../utils/appString";
-import {AlertCircle, ChevronDown, ChevronRight, FileText, LogOut, Power, Settings, User} from "../../utils/icons";
+import { AlertCircle, ChevronDown, ChevronRight, FileText, LogOut, Power, Settings, User } from "../../utils/icons";
 import Image from "next/image";
 import validationRules from "../../utils/validationRules";
-import {showToast} from "../../components/CommonComponents";
+import { showToast } from "../../components/CommonComponents";
+import SafeAvatar from "../../components/SafeAvatar";
 
 const { Header, Sider, Content } = Layout;
 const { useBreakpoint } = Grid;
 
-export default function HomePage({children}) {
+export default function HomePage({ children }) {
     const pathname = usePathname();
     const router = useRouter();
     const screens = useBreakpoint();
@@ -102,7 +103,7 @@ export default function HomePage({children}) {
             fetchMasterData();
         }
 
-        if(!isAdmin()) {
+        if (!isAdmin()) {
             if (!navigator.geolocation) {
                 showToast("error", 'Geolocation is not supported by your browser')
                 return;
@@ -148,16 +149,13 @@ export default function HomePage({children}) {
                     label: <div className="font-medium" style={{
                         color: item.key === appKeys.logout ? appColor.danger : undefined,
                     }}>{item.label}</div>,
-                    // label: <div className="flex items-center gap-2 font-medium" style={{
-                    //     color: item.key === appKeys.logout ? appColor.danger : undefined,
-                    // }}><div>{item.label}</div><LoadingOutlined hidden={!isRouterLoading} /></div>,
                 }))}
                 onClick={menuClick}
             />
         </ConfigProvider>
     );
 
-    const menuClick = ({key}) => {
+    const menuClick = ({ key }) => {
         if (key !== appKeys.logout) {
             if (pageRoutes.myProfile.includes(key)) {
                 router.push(`${pageRoutes.myProfile}?user=${getLocalData(appKeys.employeeCode)}`);
@@ -170,38 +168,72 @@ export default function HomePage({children}) {
         if (key === appKeys.logout) {
             setIsLogoutModalOpen(true);
         }
-        if(isMobile) {
+        if (isMobile) {
             setDrawerVisible(false);
         }
     }
 
-    const findMenuItemByKey = (key, items = menuItems, parents = []) => {
-        for (const item of items) {
-            if (item.key === key) {
-                return [...parents, item];
-            }
-            if (item.children) {
-                const result = findMenuItemByKey(key, item.children, [...parents, item]);
-                if (result) return result;
-            }
-        }
-        return null;
-    };
+    const generateBreadcrumbFromPath = (pathname) => {
+        const pathSegments = pathname.split('/').filter(Boolean);
+        const breadcrumbItems = [];
 
-    useEffect(() => {
-        const pathItems = findMenuItemByKey(pathname);
-        if (pathItems) {
-            const isDashboard = pageRoutes.dashboard.includes(pathItems[0]?.key);
-
-            const homeItem = {
+        const isDashboard = pathname === pageRoutes.dashboard;
+        if (!isDashboard) {
+            breadcrumbItems.push({
                 key: pageRoutes.dashboard,
                 icon: <HomeOutlined />,
                 label: '',
-            };
-
-            const newBreadcrumb = isDashboard ? pathItems : [homeItem, ...pathItems];
-            setBreadcrumbItems(newBreadcrumb);
+            });
         }
+
+        let currentPath = '';
+        pathSegments.forEach((segment, index) => {
+            currentPath += `/${segment}`;
+
+            if (currentPath === pageRoutes.dashboard && !isDashboard) {
+                return;
+            }
+
+            const menuItem = findMenuItemByPath(currentPath);
+
+            let label = capitalizeLastPathSegment(segment);
+            let icon = menuItem?.icon || <HomeOutlined />;
+
+            if (segment === 'employee-detail') {
+                label = 'Employee Detail';
+                icon = <UserOutlined />;
+            }
+
+            breadcrumbItems.push({
+                key: currentPath,
+                icon: icon,
+                label: label,
+            });
+        });
+
+        return breadcrumbItems;
+    };
+
+    const findMenuItemByPath = (path) => {
+        const findInItems = (items) => {
+            for (const item of items) {
+                if (item.key === path) {
+                    return item;
+                }
+                if (item.children) {
+                    const found = findInItems(item.children);
+                    if (found) return found;
+                }
+            }
+            return null;
+        };
+        return findInItems(menuItems);
+    };
+
+    useEffect(() => {
+        const breadcrumbItems = generateBreadcrumbFromPath(pathname);
+        setBreadcrumbItems(breadcrumbItems);
+
         if (containerRef.current) {
             containerRef.current.scrollTop = 0;
         }
@@ -372,7 +404,7 @@ export default function HomePage({children}) {
         {
             label: "Settings",
             key: pageRoutes.settings,
-            icon: <Settings/>,
+            icon: <Settings />,
         },
         { type: 'divider' },
         {
@@ -393,7 +425,7 @@ export default function HomePage({children}) {
 
     const renderSidebarContent = (
         <div className="flex flex-col h-full">
-            <div className="m-4 flex justify-center shrink-0">
+            <div className="m-4 flex justify-center shrink-0 cursor-pointer" onClick={() => menuClick({key: pageRoutes.dashboard})}>
                 <AnimatedDiv
                     key={!isMobile && collapsed ? "logo-collapsed" : "logo-expanded"}
                     direction={!isMobile && collapsed ? Direction.RIGHT_TO_LEFT : Direction.LEFT_TO_RIGHT}
@@ -431,11 +463,11 @@ export default function HomePage({children}) {
         );
     }
 
-    if(isLoading) {
+    if (isLoading) {
         return (
             <div className="w-full h-full flex justify-center items-center">
                 <div className="loader flex items-center justify-center">
-                    <img src={imagePaths.icon_sm_dark} alt="logo" width={35} height={35}/>
+                    <img src={imagePaths.icon_sm_dark} alt="logo" width={35} height={35} />
                 </div>
             </div>
         );
@@ -443,11 +475,11 @@ export default function HomePage({children}) {
 
     return (
         <>
-            <div className="w-screen h-screen flex flex-row overflow-hidden" style={{backgroundColor: appColor.mainBg}}>
+            <div className="w-screen h-screen flex flex-row overflow-hidden" style={{ backgroundColor: appColor.mainBg }}>
                 {!isMobile && (
                     <Sider
                         className="border-r-1 border-gray-200"
-                        style={{borderRight: `1px ${appColor.borderClr} solid`}}
+                        style={{ borderRight: `1px ${appColor.borderClr} solid` }}
                         collapsed={collapsed}
                         theme="light"
                         width={270}
@@ -472,7 +504,7 @@ export default function HomePage({children}) {
 
                 <div className=" flex flex-col flex-1 overflow-hidden">
                     <div className="flex justify-between items-center bg-white border-b-1 border-gray-200 py-3 px-5"
-                         style={{borderBottom: `1px ${appColor.borderClr} solid`}}>
+                        style={{ borderBottom: `1px ${appColor.borderClr} solid` }}>
                         <div className="flex items-center gap-3">
                             <Button
                                 shape="circle"
@@ -494,7 +526,7 @@ export default function HomePage({children}) {
                                 {capitalizeLastPathSegment(pathname)}
                             </div>}
                         </div>
-                        {isMobile && <img src={imagePaths.icon_big_dark} alt="icon" width={150} height={45}/>}
+                        {isMobile && <img src={imagePaths.icon_big_dark} alt="icon" width={150} height={45} />}
                         <div className="flex items-center gap-4">
                             {/*<Badge dot status="error" offset={[-7, 5]}>*/}
                             {/*    <Button shape="circle" icon={<BellOutlined />} onClick={() => {*/}
@@ -503,17 +535,19 @@ export default function HomePage({children}) {
                             <Dropdown overlayStyle={{ minWidth: 200 }} menu={menuProps} trigger={["click"]}>
                                 <div className="flex items-center gap-2 cursor-pointer">
                                     <Tooltip title={getLocalData(appKeys.fullName)}>
-                                        <Avatar src={profilePhotoManager({url: getLocalData(appKeys.profilePhoto), gender: getLocalData(appKeys.gender)})}/>
+                                        <SafeAvatar
+                                            isMyData={true}
+                                        />
                                     </Tooltip>
                                     {!isMobile && <div className="text-[15px] font-medium">{getLocalData(appKeys.fullName)}</div>}
-                                    {!isMobile && <ChevronDown/>}
+                                    {!isMobile && <ChevronDown />}
                                 </div>
                             </Dropdown>
                         </div>
                     </div>
                     {!pageRoutes.dashboard.includes(pathname) && <Breadcrumb
                         separator=">"
-                        style={{margin: "12px 12px 5px 25px"}}
+                        style={{ margin: "12px 12px 5px 25px" }}
                         items={breadcrumbItems.map(item => ({
                             key: item.key,
                             title: (
@@ -526,7 +560,7 @@ export default function HomePage({children}) {
                             ),
                         }))}
                     />}
-                    <div className="p-3 md:px-6 md:py-3 overflow-y-auto" ref={containerRef} style={{scrollbarWidth: "thin"}}>
+                    <div className="p-3 md:px-6 md:py-3 overflow-y-auto" ref={containerRef} style={{ scrollbarWidth: "thin" }}>
                         {children}
                     </div>
                 </div>
@@ -588,7 +622,7 @@ export default function HomePage({children}) {
                     <Form.Item
                         name="code"
                         label="Code"
-                        rules={[{required: true, message: `Enter salary report code!`}]}
+                        rules={[{ required: true, message: `Enter salary report code!` }]}
                     >
                         <Input
                             placeholder="Enter Code"

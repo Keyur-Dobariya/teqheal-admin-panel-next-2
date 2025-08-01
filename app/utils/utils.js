@@ -1,7 +1,7 @@
-import {Gender} from "./enum";
+import { Gender } from "./enum";
 import imagePaths from "./imagesPath";
 import CryptoJS from 'crypto-js';
-import {showToast} from "../components/CommonComponents";
+import { showToast } from "../components/CommonComponents";
 import extIcons from "./extIcons";
 
 export const getDataById = (dataList, dataId) => {
@@ -127,7 +127,7 @@ export const formatMessageTime = (dateString) => {
     yesterday.setDate(yesterday.getDate() - 1);
     const isYesterday = date.toDateString() === yesterday.toDateString();
 
-    const time = date.toLocaleTimeString([], {hour: '2-digit', minute: '2-digit'});
+    const time = date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
 
     if (isToday) return time;
     if (isYesterday) return `Yesterday ${time}`;
@@ -180,11 +180,11 @@ export const formatTimestamp = (timestamp) => {
     return `${month} ${day}, ${year} ${time} ${period} `;
 };
 
-export const profilePhotoManager = ({url, gender = Gender.Male}) => {
-    if(url) {
+export const profilePhotoManager = ({ url, gender = Gender.Male }) => {
+    if (url) {
         return url;
     } else {
-        if(gender === Gender.Female) {
+        if (gender === Gender.Female) {
             return imagePaths.female_profile;
         } else {
             return imagePaths.male_profile;
