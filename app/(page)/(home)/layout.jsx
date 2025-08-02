@@ -65,6 +65,8 @@ export default function HomePage({ children }) {
     const screens = useBreakpoint();
     const isMobile = !screens.lg;
 
+
+
     const [isLogoutModalOpen, setIsLogoutModalOpen] = useState(false);
     const [collapsed, setCollapsed] = useState(false);
     const [drawerVisible, setDrawerVisible] = useState(false);
