@@ -11,6 +11,7 @@ import {capitalizeLastPathSegment} from './utils/utils';
 import appString from './utils/appString';
 import {setGlobalMessageApi} from './components/CommonComponents';
 import {AppDataProvider} from './masterData/AppDataContext';
+import AppLoadingWrapper from './components/AppLoadingWrapper';
 
 export default function RootLayout({children}) {
     const [messageApi, contextHolder] = message.useMessage();
@@ -54,9 +55,11 @@ export default function RootLayout({children}) {
                 theme={antdTheme}
             >
                 {contextHolder}
-                <AppDataProvider>
-                    {children}
-                </AppDataProvider>
+                <AppLoadingWrapper>
+                    <AppDataProvider>
+                        {children}
+                    </AppDataProvider>
+                </AppLoadingWrapper>
             </ConfigProvider>
         </AntdRegistry>
         </body>

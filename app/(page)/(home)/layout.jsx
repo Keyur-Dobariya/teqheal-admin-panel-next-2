@@ -13,13 +13,12 @@ import {
     CarryOutOutlined,
     AuditOutlined,
     CalendarOutlined,
-    MessageOutlined,
     SettingOutlined,
     WalletOutlined,
     PoweroffOutlined,
-    BellOutlined,
     TeamOutlined,
-    CommentOutlined, AndroidOutlined, PhoneOutlined,
+    CommentOutlined, 
+    AndroidOutlined,
 } from '@ant-design/icons';
 import {
     Button,
@@ -29,11 +28,11 @@ import {
     Grid,
     ConfigProvider,
     Breadcrumb,
-    Badge,
     Modal,
-    Avatar,
     Tooltip,
-    Dropdown, Form, Input
+    Dropdown, 
+    Form, 
+    Input
 } from 'antd';
 import { useEffect, useRef, useState } from "react";
 import AnimatedDiv, { Direction } from "../../components/AnimatedDiv";
@@ -44,19 +43,18 @@ import appColor from "../../utils/appColor";
 import appKeys from "../../utils/appKeys";
 import { getLocalData, isAdmin, storeLoginData } from "../../dataStorage/DataPref";
 import { LoadingComponent } from "../../components/LoadingComponent";
-import Link from "next/link";
+
 import { useAppData } from "../../masterData/AppDataContext";
 import apiCall, { HttpMethod } from "../../api/apiServiceProvider";
 import { endpoints } from "../../api/apiEndpoints";
 import appString from "../../utils/appString";
-import { AlertCircle, ChevronDown, ChevronRight, FileText, LogOut, Power, Settings, User } from "../../utils/icons";
-import Image from "next/image";
-import validationRules from "../../utils/validationRules";
+import { AlertCircle, ChevronDown, ChevronRight, FileText, Power, Settings } from "../../utils/icons";
 import { showToast } from "../../components/CommonComponents";
 import SafeAvatar from "../../components/SafeAvatar";
 import {useProtectedRouter} from "../../hooks/useProtectedRouter";
+import ClientOnly from "../../components/ClientOnly";
 
-const { Header, Sider, Content } = Layout;
+const { Sider } = Layout;
 const { useBreakpoint } = Grid;
 
 export default function HomePage({ children }) {
@@ -84,10 +82,11 @@ export default function HomePage({ children }) {
 
     const fetchMasterData = async () => {
         try {
+            setIsLoading(true);
             const response = await apiCall({
                 method: HttpMethod.GET,
                 url: endpoints.getMasterData,
-                setIsLoading,
+                setIsLoading: () => {}, // Don't let apiCall control loading state
                 showSuccessMessage: false,
             });
 
@@ -97,6 +96,8 @@ export default function HomePage({ children }) {
             }
         } catch (error) {
             console.error('Failed to fetch master data:', error);
+        } finally {
+            setIsLoading(false);
         }
     };
 
@@ -456,9 +457,7 @@ export default function HomePage({ children }) {
         </div>
     );
 
-    const [ready, setReady] = useState(false);
-    useEffect(() => setReady(true), []);
-    if (!ready && isLoading) {
+    if (isLoading) {
         return (
             <div className="w-full h-full flex justify-center items-center">
                 <LoadingComponent />
@@ -466,18 +465,22 @@ export default function HomePage({ children }) {
         );
     }
 
-    if (isLoading) {
-        return (
-            <div className="w-full h-full flex justify-center items-center">
-                <div className="loader flex items-center justify-center">
-                    <img src={imagePaths.icon_sm_dark} alt="logo" width={35} height={35} />
-                </div>
-            </div>
-        );
-    }
+    // if (isLoading) {
+    //     return (
+    //         <div className="w-full h-full flex justify-center items-center">
+    //             <div className="loader flex items-center justify-center">
+    //                 <img src={imagePaths.icon_sm_dark} alt="logo" width={35} height={35} />
+    //             </div>
+    //         </div>
+    //     );
+    // }
 
     return (
-        <>
+        <ClientOnly fallback={
+            <div className="w-full h-full flex justify-center items-center">
+                <LoadingComponent />
+            </div>
+        }>
             <div className="w-screen h-screen flex flex-row overflow-hidden" style={{ backgroundColor: appColor.mainBg }}>
                 {!isMobile && (
                     <Sider
@@ -606,21 +609,17 @@ export default function HomePage({ children }) {
                 centered
                 closeIcon={false}
                 open={isCodeModalOpen}
-                onOk={() => form.submit()}
+                footer={null}
                 onCancel={() => {
                     setIsCodeModalOpen(false);
                 }}
                 onClose={() => {
                     setIsCodeModalOpen(false);
                 }}
-                okText="Verify"
-                confirmLoading={isLoading}
             >
                 <Form
                     layout="vertical"
-                    onFinish={(values) => {
-                        handleCodeVerifyApi(values);
-                    }}
+                    onFinish={handleCodeVerifyApi}
                 >
                     <Form.Item
                         name="code"
@@ -631,8 +630,20 @@ export default function HomePage({ children }) {
                             placeholder="Enter Code"
                         />
                     </Form.Item>
+                    <div className="flex justify-end gap-2 mt-4">
+                        <Button onClick={() => setIsCodeModalOpen(false)}>
+                            Cancel
+                        </Button>
+                        <Button 
+                            type="primary" 
+                            htmlType="submit"
+                            loading={isLoading}
+                        >
+                            Verify
+                        </Button>
+                    </div>
                 </Form>
             </Modal>
-        </>
+        </ClientOnly>
     );
 }
