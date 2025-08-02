@@ -15,7 +15,7 @@ const ProtectedRoute = ({ children, adminOnly = false, redirectTo = null }) => {
     useEffect(() => {
         const checkAuth = () => {
             // Check if user is logged in
-            const token = getLocalData(appKeys.token);
+            const token = getLocalData(appKeys.jwtToken);
             const userRole = getLocalData(appKeys.role);
             
             if (!token) {

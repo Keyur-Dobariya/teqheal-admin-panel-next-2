@@ -18,7 +18,7 @@ const RouteGuard = ({ children }) => {
 
     useEffect(() => {
         const checkRouteAccess = () => {
-            const token = getLocalData(appKeys.token);
+            const token = getLocalData(appKeys.jwtToken);
             const isLogin = getLocalData(appKeys.isLogin);
             const userIsAdmin = isAdmin();
 
