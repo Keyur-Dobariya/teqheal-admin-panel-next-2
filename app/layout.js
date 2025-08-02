@@ -11,11 +11,6 @@ import {capitalizeLastPathSegment} from './utils/utils';
 import appString from './utils/appString';
 import {setGlobalMessageApi} from './components/CommonComponents';
 import {AppDataProvider} from './masterData/AppDataContext';
-import {getLocalData} from './dataStorage/DataPref';
-import appKeys from './utils/appKeys';
-import InnerAppLayout from './InnerAppLayout';
-import {PageRoutingProvider} from "./appContext/PageRoutingContext";
-import AuthWrapper from './components/AuthWrapper';
 
 export default function RootLayout({children}) {
     const [messageApi, contextHolder] = message.useMessage();
@@ -60,9 +55,7 @@ export default function RootLayout({children}) {
             >
                 {contextHolder}
                 <AppDataProvider>
-                    <AuthWrapper>
-                        {children}
-                    </AuthWrapper>
+                    {children}
                 </AppDataProvider>
             </ConfigProvider>
         </AntdRegistry>

@@ -44,9 +44,11 @@ export default function Home() {
         redirectToPage();
     }, []);
 
-    return (
-        <div className="flex justify-center items-center w-screen h-screen">
-            <LoadingComponent />
-        </div>
-    );
+    return null;
+
+    // return (
+    //     <div className="flex justify-center items-center w-screen h-screen">
+    //         <LoadingComponent />
+    //     </div>
+    // );
 }

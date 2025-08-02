@@ -10,7 +10,7 @@ export const useAuth = () => {
 
     useEffect(() => {
         const checkAuth = () => {
-            const token = getLocalData(appKeys.token);
+            const token = getLocalData(appKeys.jwtToken);
             const userData = {
                 token,
                 fullName: getLocalData(appKeys.fullName),

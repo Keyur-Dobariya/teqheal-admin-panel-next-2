@@ -39,8 +39,7 @@ import { useEffect, useRef, useState } from "react";
 import AnimatedDiv, { Direction } from "../../components/AnimatedDiv";
 import { capitalizeLastPathSegment } from "../../utils/utils";
 import pageRoutes from "../../utils/pageRoutes";
-import { router } from "next/client";
-import { usePathname, useRouter } from "next/navigation";
+import { usePathname } from "next/navigation";
 import appColor from "../../utils/appColor";
 import appKeys from "../../utils/appKeys";
 import { getLocalData, isAdmin, storeLoginData } from "../../dataStorage/DataPref";
@@ -55,13 +54,15 @@ import Image from "next/image";
 import validationRules from "../../utils/validationRules";
 import { showToast } from "../../components/CommonComponents";
 import SafeAvatar from "../../components/SafeAvatar";
+import {useProtectedRouter} from "../../hooks/useProtectedRouter";
 
 const { Header, Sider, Content } = Layout;
 const { useBreakpoint } = Grid;
 
 export default function HomePage({ children }) {
     const pathname = usePathname();
-    const router = useRouter();
+    // const router = useRouter();
+    const {push} = useProtectedRouter();
     const screens = useBreakpoint();
     const isMobile = !screens.lg;
 
@@ -160,11 +161,11 @@ export default function HomePage({ children }) {
     const menuClick = ({ key }) => {
         if (key !== appKeys.logout) {
             if (pageRoutes.myProfile.includes(key)) {
-                router.push(`${pageRoutes.myProfile}?user=${getLocalData(appKeys.employeeCode)}`);
+                push(`${pageRoutes.myProfile}?user=${getLocalData(appKeys.employeeCode)}`);
             } else if (pageRoutes.salaryReport.includes(key) && !isAdmin()) {
                 setIsCodeModalOpen(true);
             } else {
-                router.push(key);
+                push(key);
             }
         }
         if (key === appKeys.logout) {
@@ -254,7 +255,7 @@ export default function HomePage({ children }) {
             successCallback: (data) => {
                 setIsCodeModalOpen(false);
                 // menuClick({route: `${routes.salaryReport}/${values.code}`, state: { state: { paramDetail: { code: values.code } } }});
-                router.push(pageRoutes.salaryReport);
+                push(pageRoutes.salaryReport);
             },
         });
     }
@@ -555,7 +556,7 @@ export default function HomePage({ children }) {
                             title: (
                                 item.key === pageRoutes.dashboard ? <HomeOutlined
                                     className="flex items-center gap-1 cursor-pointer hover:text-blue-700"
-                                    onClick={() => router.push(item.key)}
+                                    onClick={() => push(item.key)}
                                 /> : <span
                                     className="flex items-center gap-1 cursor-default"
                                 >{item.icon}{item.label}</span>
@@ -592,7 +593,7 @@ export default function HomePage({ children }) {
                         danger
                         onClick={() => {
                             localStorage.clear();
-                            router.push(pageRoutes.loginPage);
+                            push(pageRoutes.loginPage);
                         }}
                     >
                         {appString.logOut}
