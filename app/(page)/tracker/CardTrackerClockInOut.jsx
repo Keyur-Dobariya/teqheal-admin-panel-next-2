@@ -21,7 +21,7 @@ import {
     getWorkPercentage,
     calculateTotalHours,
     calculateBreakHours,
-    scheduleScreenShot
+    scheduleScreenShot, syncOfflineActions
 } from "./trackerUtils";
 import ModelDailyUpdate from "./ModelDailyUpdate";
 import CardTimeLineDrawer from "./CardTimeLineDrawer";
@@ -48,6 +48,43 @@ export default function CardTrackerClockInOut({isDashboard = false, todayRecords
     const [, setTicker] = useState(0);
     const currentDateFormat = "hh:mm a - MMM dd, yyyy";
     const [currentDateTime, setCurrentDateTime] = useState(null);
+    const [isOnline, setIsOnline] = useState(navigator.onLine);
+
+    useEffect(() => {
+        const handleOnline = () => {
+            console.log("Back online! Syncing...");
+            syncOfflineActions();
+        };
+
+        window.addEventListener('online', handleOnline);
+
+        return () => {
+            window.removeEventListener('online', handleOnline);
+        };
+    }, []);
+
+// You can also use this in UI to show offline status
+
+    useEffect(() => {
+        const updateStatus = () => {
+            const online = navigator.onLine;
+            setIsOnline(online);
+            console.log('Network status changed:', online ? 'Online' : 'Offline');
+            if (online) {
+                console.log("Back online! Syncing...");
+                syncOfflineActions();
+            }
+        };
+
+        window.addEventListener('online', updateStatus);
+        window.addEventListener('offline', updateStatus);
+        updateStatus();
+
+        return () => {
+            window.removeEventListener('online', updateStatus);
+            window.removeEventListener('offline', updateStatus);
+        };
+    }, []);
 
     const fetchAttendanceData = async () => {
         if(isDashboard) {
@@ -163,7 +200,7 @@ export default function CardTrackerClockInOut({isDashboard = false, todayRecords
                     <div className="flex-1 font-[550] text-[15px]">{appString.clockInOut}<LoadingOutlined
                         className="ml-3" hidden={!isLoading && attendanceData} style={{color: appColor.secondPrimary}}/>
                     </div>
-                    {!isDashboard && <Tooltip title="Timeline">
+                    {(!isDashboard && isOnline) && <Tooltip title="Timeline">
                         <div className="cursor-pointer" onClick={() => setIsDrawerOpen(true)}><Info
                             color={appColor.secondPrimary}/></div>
                     </Tooltip>}
@@ -217,7 +254,7 @@ export default function CardTrackerClockInOut({isDashboard = false, todayRecords
                                 className="w-full"
                                 color="danger"
                                 variant={isOnBreak ? "solid" : "outlined"}
-                                disabled={isLoading && !isClockedIn}
+                                disabled={isOnline ? isLoading && !isClockedIn : true}
                                 icon={<Coffee size={16}/>}
                                 onClick={handleBreak}
                                 loading={isBreakLoading}
@@ -230,7 +267,7 @@ export default function CardTrackerClockInOut({isDashboard = false, todayRecords
                                 className="w-full"
                                 color="primary"
                                 variant={isClockedIn ? "solid" : "outlined"}
-                                disabled={isLoading && isOnBreak}
+                                disabled={isOnline ? isLoading && isOnBreak : true}
                                 icon={isClockedIn ? <LogoutOutlined rotate={180}/> : <LoginOutlined/>}
                                 onClick={handlePunch}
                                 loading={isClockLoading}

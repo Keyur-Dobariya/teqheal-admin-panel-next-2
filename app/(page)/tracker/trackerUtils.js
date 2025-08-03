@@ -3,6 +3,7 @@ import {endpoints} from "../../api/apiEndpoints";
 import appKeys from "../../utils/appKeys";
 import {useEffect} from "react";
 import {getLocalData} from "../../dataStorage/DataPref";
+import {clearOfflineActions, getOfflineActions, saveOfflineAction} from "./offlineStorage";
 
 let timerActive = false;
 let randomEventTimeout = null;
@@ -146,6 +147,12 @@ export const handlePunchBreak = async (userId, data, setIsLoading, successCallba
         ...data,
     };
     try {
+        if (!navigator.onLine) {
+            await saveOfflineAction({ type: 'PUNCH', timestamp: Date.now(), data: requestData });
+            successCallback?.({ data: requestData });
+            return;
+        }
+
         await apiCall({
             method: HttpMethod.POST,
             url: endpoints.addAttendance,
@@ -169,6 +176,15 @@ export const handleScreenShotUpload = async (userId, imageUrl, mouseEventCount, 
     formData.append(appKeys.mouseEventCount, keyboardKeyPressCount);
 
     try {
+        if (!navigator.onLine) {
+            await saveOfflineAction({
+                type: "SCREENSHOT",
+                timestamp: Date.now(),
+                data: { userId, imageUrl, mouseEventCount, keyboardKeyPressCount }
+            });
+            return;
+        }
+
         await apiCall({
             method: HttpMethod.POST,
             url: endpoints.addAttendance,
@@ -181,6 +197,34 @@ export const handleScreenShotUpload = async (userId, imageUrl, mouseEventCount, 
         console.error('Punch in/out failed:', error);
     }
 };
+
+export async function syncOfflineActions() {
+    const actions = await getOfflineActions();
+
+    for (const action of actions) {
+        try {
+            if (action.type === "PUNCH") {
+                await apiCall({
+                    method: HttpMethod.POST,
+                    url: endpoints.addAttendance,
+                    data: action.data,
+                    showSuccessMessage: false,
+                });
+            } else if (action.type === "SCREENSHOT") {
+                await handleScreenShotUpload(
+                    action.data.userId,
+                    action.data.imageUrl,
+                    action.data.mouseEventCount,
+                    action.data.keyboardKeyPressCount
+                );
+            }
+        } catch (err) {
+            console.error("Failed to sync offline action", action, err);
+        }
+    }
+
+    await clearOfflineActions();
+}
 
 function base64ToBlob(base64Data, contentType = 'image/png') {
     const byteCharacters = atob(base64Data.split(',')[1]);

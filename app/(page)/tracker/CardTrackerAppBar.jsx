@@ -1,21 +1,39 @@
 'use client';
 
-import {Avatar, Card, Dropdown, Modal} from "antd";
+import {Avatar, Card, Dropdown, Modal, Tooltip} from "antd";
 import {appColor} from "../../utils/appColor";
 import appKeys from "../../utils/appKeys";
 import imagePaths from "../../utils/imagesPath";
 import appString from "../../utils/appString";
-import {AlertCircle, FilePlus, Grid, MoreVertical, Power, RefreshCw, RotateCw} from "../../utils/icons";
+import {AlertCircle, FilePlus, Grid, MoreVertical, Power, RefreshCw, RotateCw, WifiOff} from "../../utils/icons";
 import {useRouter} from "next/navigation";
 import pageRoutes from "../../utils/pageRoutes";
 import React, {useEffect, useState} from "react";
 import {environment} from "../../api/apiEndpoints";
 import SafeAvatar from "../../components/SafeAvatar";
+import {syncOfflineActions} from "./trackerUtils";
 
 export default function CardTrackerAppBar({userData, isUpdateModalOpen, setIsUpdateModalOpen}) {
 
     const router = useRouter();
     const [isLogoutModalOpen, setIsLogoutModalOpen] = useState(false);
+    const [isOnline, setIsOnline] = useState(navigator.onLine);
+
+    useEffect(() => {
+        const updateStatus = () => {
+            const online = navigator.onLine;
+            setIsOnline(online);
+        };
+
+        window.addEventListener('online', updateStatus);
+        window.addEventListener('offline', updateStatus);
+        updateStatus();
+
+        return () => {
+            window.removeEventListener('online', updateStatus);
+            window.removeEventListener('offline', updateStatus);
+        };
+    }, []);
 
     const handleMenuClick = async ({key}) => {
         if (key === 'refresh') {
@@ -39,7 +57,7 @@ export default function CardTrackerAppBar({userData, isUpdateModalOpen, setIsUpd
         {
             label: "Refresh",
             key: 'refresh',
-            icon: <RotateCw size={15} />
+            icon: <RotateCw size={15} />,
         },
         {
             label: "Task Board",
@@ -92,11 +110,15 @@ export default function CardTrackerAppBar({userData, isUpdateModalOpen, setIsUpd
                             {appString.motiveLine}
                         </div>
                     </div>
-                    <Dropdown menu={{ items, onClick: handleMenuClick }} trigger={['click']}>
+                    {isOnline ? <Dropdown menu={{items, onClick: handleMenuClick}} trigger={['click']}>
                         <div className="cursor-pointer">
-                            <MoreVertical size={18} color={appColor.secondPrimary} />
+                            <MoreVertical size={18} color={appColor.secondPrimary}/>
                         </div>
-                    </Dropdown>
+                    </Dropdown> : <Tooltip title="No Internet">
+                        <div className="cursor-pointer">
+                            <WifiOff size={16} color={appColor.danger} />
+                        </div>
+                    </Tooltip>}
                 </div>
             </Card>
 
