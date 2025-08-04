@@ -19,7 +19,6 @@ const EmpScreenshotModel = ({
   screenshots,
   setScreenshots,
   empID,
-  onClose,
 }) => {
   const [galleryItems, setGalleryItems] = useState([]);
 
@@ -85,11 +84,9 @@ const EmpScreenshotModel = ({
       title="Screenshot Viewer"
       open={open}
       onCancel={() => {
-        onClose();
         setSsModelOpen(false);
       }}
       onClose={() => {
-        onClose();
         setSsModelOpen(false);
       }}
       centered
