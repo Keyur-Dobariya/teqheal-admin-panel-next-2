@@ -1,0 +1,15 @@
+{
+  "projects": {
+    "default": "whogetsa"
+  },
+  "targets": {
+    "whogetsa": {
+      "hosting": {
+        "devtracker": [
+          "devtracker"
+        ]
+      }
+    }
+  },
+  "etags": {}
+}
