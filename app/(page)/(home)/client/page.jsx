@@ -59,7 +59,7 @@ export default function Page() {
     const deleteRecord = async (record) => {
         await apiCall({
             method: HttpMethod.DELETE,
-            url: `${endpoints.deleteBasicSalary}${record._id}`,
+            url: `${endpoints.deleteClient}${record._id}`,
             setIsLoading,
             successCallback: handleUpdatedData,
         });

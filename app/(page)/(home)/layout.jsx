@@ -361,12 +361,19 @@ export default function HomePage({ children }) {
             position: 'top',
         },
         {
-            key: pageRoutes.application,
+            key: pageRoutes.appUpdate,
             icon: <AndroidOutlined />,
-            label: capitalizeLastPathSegment(pageRoutes.application),
+            label: capitalizeLastPathSegment(pageRoutes.appUpdate),
             hidden: !isAdmin(),
             position: 'top',
         },
+        // {
+        //     key: pageRoutes.application,
+        //     icon: <AndroidOutlined />,
+        //     label: capitalizeLastPathSegment(pageRoutes.application),
+        //     hidden: !isAdmin(),
+        //     position: 'top',
+        // },
         {
             key: pageRoutes.myProfile,
             icon: <UserOutlined />,

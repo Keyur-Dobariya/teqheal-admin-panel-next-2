@@ -25,7 +25,7 @@ export default function SignUp() {
             const formData = form.getFieldsValue();
             await apiCall({
                 method: HttpMethod.POST,
-                url: endpoints.login,
+                url: endpoints.signUp,
                 data: formData,
                 setIsLoading: setLoading,
                 successCallback: () => router.push(pageRoutes.loginPage),

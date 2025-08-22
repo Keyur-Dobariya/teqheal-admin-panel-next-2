@@ -22,6 +22,7 @@ const pageRoutes = {
     myProfile: '/my-profile',
     settings: '/settings',
     calling: '/dashboard',
+    appUpdate: '/app-update',
 };
 
 export default pageRoutes;

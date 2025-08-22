@@ -1,4 +1,4 @@
-export const isDevMode = false;
+export const isDevMode = true;
 
 // firebase target:apply hosting default whogetsa
 // firebase deploy --only hosting:devtracker
@@ -12,7 +12,7 @@ const environment = {
 };
 
 const endpoints = {
-    uploadImageApi: `https://tracker.teqheal.com/upload.php`,
+    uploadFileApi: `https://tracker.teqheal.com/uploadFile.php`,
     postToken: `${environment.apiBaseUrl}/api/postToken`,
     getMasterData: `${environment.apiBaseUrl}/api/getMasterData`,
     login: `${environment.apiBaseUrl}/auth/login`,
@@ -112,6 +112,12 @@ const endpoints = {
     updateApp: `${environment.apiBaseUrl}/api/updateApp`,
     deleteApp: `${environment.apiBaseUrl}/api/deleteApp`,
     addAppVersion: `${environment.apiBaseUrl}/api/addAppVersion`,
+    addSoftApp: `${environment.apiBaseUrl}/api/addSoftApp`,
+    updateSoftApp: `${environment.apiBaseUrl}/api/updateSoftApp`,
+    deleteSoftApp: `${environment.apiBaseUrl}/api/deleteSoftApp`,
+    getAllSoftApps: `${environment.apiBaseUrl}/api/getAllSoftApps`,
+    getSingleSoftApp: `${environment.apiBaseUrl}/api/getSingleSoftApp`,
+    isUpdateAvailable: `${environment.apiBaseUrl}/api/isUpdateAvailable`,
 };
 
 export {environment, endpoints};
