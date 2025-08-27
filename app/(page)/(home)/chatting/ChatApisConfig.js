@@ -69,7 +69,7 @@ export const singleFileUploadApi = async ({file, folderType, setIsLoading, onSuc
 
         await apiCall({
             method: HttpMethod.POST,
-            url: endpoints.upload,
+            url: endpoints.uploadFiles,
             data: formData,
             setIsLoading: setIsLoading,
             isMultipart: true,

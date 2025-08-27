@@ -404,20 +404,29 @@ export default function HomePage({ children }) {
             label: (
                 <div className="flex items-center">
                     <div className="flex-1">
-                        <div className="text-gray-900 text-[15px]">{getLocalData(appKeys.fullName)}</div>
-                        <div className="text-gray-600 text-[13px]">{getLocalData(appKeys.emailAddress)}</div>
+                        <div className="text-gray-900 text-[15px]">
+                            {getLocalData(appKeys.fullName)}
+                        </div>
+                        <div className="text-gray-600 text-[13px]">
+                            {getLocalData(appKeys.emailAddress)}
+                        </div>
                     </div>
                     <ChevronRight />
                 </div>
             ),
         },
         { type: 'divider' },
-        {
-            label: "Settings",
-            key: pageRoutes.settings,
-            icon: <Settings />,
-        },
-        { type: 'divider' },
+        ...(isAdmin()
+                ? [
+                    {
+                        label: "Settings",
+                        key: pageRoutes.settings,
+                        icon: <Settings />,
+                    },
+                    { type: 'divider' },
+                ]
+                : []
+        ),
         {
             label: (
                 <div className="flex items-center gap-2 text-red-600 text-[15px]">
@@ -428,6 +437,7 @@ export default function HomePage({ children }) {
             key: 'logout',
         },
     ];
+
 
     const menuProps = {
         items: profileMenuItems,
@@ -601,9 +611,9 @@ export default function HomePage({ children }) {
                     <Button
                         type="primary"
                         danger
-                        onClick={() => {
-                            localStorage.clear();
+                        onClick={async () => {
                             push(pageRoutes.loginPage);
+                            await localStorage.clear();
                         }}
                     >
                         {appString.logOut}

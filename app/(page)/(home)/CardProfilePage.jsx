@@ -30,35 +30,12 @@ export default function CardProfilePage({ employeeCode }) {
 
     const filterUserData = usersData?.find((u) => u.employeeCode === employeeCode);
 
-    // Fallback data for static export when no user is found
-    const defaultUserProfile = {
-        profilePhoto: null,
-        fullName: 'Loading...',
-        gender: 'male',
-        role: 'Employee',
-        employeeCode: employeeCode || 'default',
-        emailAddress: '',
-        dateOfBirth: new Date().toISOString(),
-        mobileNumber: '',
-        emergencyContactNo: '',
-        bloodGroup: '',
-        approvalStatus: 'pending',
-        address: '',
-        pincode: '',
-        aadharNumber: '',
-        panNumber: '',
-        bankAccountNumber: '',
-        ifscCode: '',
-        dateOfJoining: new Date().toISOString(),
-        _id: 'default'
-    };
-
-    const [userProfile, setUserProfile] = useState(filterUserData || defaultUserProfile);
+    const [userProfile, setUserProfile] = useState(filterUserData);
     const [isModelOpen, setIsModelOpen] = useState(false);
     const [actionLoading, setActionLoading] = useState(false);
 
     useEffect(() => {
-        setUserProfile(filterUserData || defaultUserProfile);
+        setUserProfile(filterUserData);
     }, [usersData, filterUserData]);
 
     const openModalWithLoading = () => {
@@ -109,10 +86,10 @@ export default function CardProfilePage({ employeeCode }) {
                                 />
                                 <div className="flex flex-col gap-2 mt-2 md:mt-0">
                                     <div className="font-semibold text-lg md:text-base">
-                                        {userProfile.fullName} {userProfile._id === getLocalData(appKeys._id) ? "(You)" : ''}
+                                        {userProfile?.fullName} {userProfile?._id === getLocalData(appKeys._id) ? "(You)" : ''}
                                     </div>
                                     <div className="text-sm text-gray-600">
-                                        {userProfile.role} | {userProfile.employeeCode}
+                                        {userProfile?.role} | {userProfile?.employeeCode}
                                     </div>
                                 </div>
                             </div>
@@ -136,17 +113,17 @@ export default function CardProfilePage({ employeeCode }) {
                             </div>
                         )} styles={{ body: { padding: 20 } }}>
                         <Row gutter={[16, 30]}>
-                            <CommonInfoBox title={appString.fullName} value={userProfile.fullName} />
-                            <CommonInfoBox title={appString.emailAddress} value={userProfile.emailAddress} />
-                            <CommonInfoBox title={appString.dateOfBirth} value={format(new Date(userProfile.dateOfBirth), 'dd MMMM, yyyy')} />
-                            <CommonInfoBox title={appString.mobileNumber} value={userProfile.mobileNumber} />
-                            <CommonInfoBox title={appString.emergencyContactNo} value={userProfile.emergencyContactNo} />
-                            <CommonInfoBox title={appString.gender} value={userProfile.gender} />
-                            <CommonInfoBox title={appString.bloodGroup} value={userProfile.bloodGroup} />
-                            <CommonInfoBox title={appString.role} value={userProfile.role} />
-                            <CommonInfoBox title={appString.approvalStatus} value={capitalizeLastPathSegment(userProfile.approvalStatus)} isTag={true} tagColor={approvalStatusColor(userProfile.approvalStatus)} />
-                            <CommonInfoBox title={appString.address} value={userProfile.address} />
-                            <CommonInfoBox title={appString.pincode} value={userProfile.pincode} />
+                            <CommonInfoBox title={appString.fullName} value={userProfile?.fullName} />
+                            <CommonInfoBox title={appString.emailAddress} value={userProfile?.emailAddress} />
+                            <CommonInfoBox title={appString.dateOfBirth} value={userProfile?.dateOfBirth ? format(new Date(userProfile?.dateOfBirth), 'dd MMMM, yyyy') : null} />
+                            <CommonInfoBox title={appString.mobileNumber} value={userProfile?.mobileNumber} />
+                            <CommonInfoBox title={appString.emergencyContactNo} value={userProfile?.emergencyContactNo} />
+                            <CommonInfoBox title={appString.gender} value={userProfile?.gender} />
+                            <CommonInfoBox title={appString.bloodGroup} value={userProfile?.bloodGroup} />
+                            <CommonInfoBox title={appString.role} value={userProfile?.role} />
+                            <CommonInfoBox title={appString.approvalStatus} value={capitalizeLastPathSegment(userProfile?.approvalStatus)} isTag={true} tagColor={approvalStatusColor(userProfile?.approvalStatus)} />
+                            <CommonInfoBox title={appString.address} value={userProfile?.address} />
+                            <CommonInfoBox title={appString.pincode} value={userProfile?.pincode} />
                         </Row>
                     </Card>
                     <Card
@@ -157,11 +134,11 @@ export default function CardProfilePage({ employeeCode }) {
                             </div>
                         )} styles={{ body: { padding: 20 } }}>
                         <Row gutter={[16, 30]}>
-                            <CommonInfoBox title={appString.aadharNumber} value={userProfile.aadharNumber} />
-                            <CommonInfoBox title={appString.panNumber} value={userProfile.panNumber} />
-                            <CommonInfoBox title={appString.bankAccountNumber} value={userProfile.bankAccountNumber} />
-                            <CommonInfoBox title={appString.ifscCode} value={userProfile.ifscCode} />
-                            <CommonInfoBox title={appString.dateOfJoining} value={format(new Date(userProfile.dateOfJoining), 'dd MMMM, yyyy')} />
+                            <CommonInfoBox title={appString.aadharNumber} value={userProfile?.aadharNumber} />
+                            <CommonInfoBox title={appString.panNumber} value={userProfile?.panNumber} />
+                            <CommonInfoBox title={appString.bankAccountNumber} value={userProfile?.bankAccountNumber} />
+                            <CommonInfoBox title={appString.ifscCode} value={userProfile?.ifscCode} />
+                            <CommonInfoBox title={appString.dateOfJoining} value={userProfile?.dateOfJoining ? format(new Date(userProfile?.dateOfJoining), 'dd MMMM, yyyy') : null} />
                         </Row>
                     </Card>
                 </div>

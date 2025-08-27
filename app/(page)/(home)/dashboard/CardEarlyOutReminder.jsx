@@ -13,28 +13,30 @@ import {AlertTriangle, Clock, Watch} from "../../../utils/icons";
 
 export default function CardEarlyOutReminder() {
 
-    const data = [
-        {
-            time: '01h:00m',
-            date: '01 Jan, 2025',
-        },
-        {
-            time: '02h:15m',
-            date: '03 Jan, 2025',
-        },
-        {
-            time: '01h:15m',
-            date: '05 Jan, 2025',
-        },
-        {
-            time: '00h:45m',
-            date: '15 Jan, 2025',
-        },
-        {
-            time: '00h:20m',
-            date: '23 Jan, 2025',
-        },
-    ];
+    // const data = [
+    //     {
+    //         time: '01h:00m',
+    //         date: '01 Jan, 2025',
+    //     },
+    //     {
+    //         time: '02h:15m',
+    //         date: '03 Jan, 2025',
+    //     },
+    //     {
+    //         time: '01h:15m',
+    //         date: '05 Jan, 2025',
+    //     },
+    //     {
+    //         time: '00h:45m',
+    //         date: '15 Jan, 2025',
+    //     },
+    //     {
+    //         time: '00h:20m',
+    //         date: '23 Jan, 2025',
+    //     },
+    // ];
+
+    const data = [];
 
     return (
         <Card title={
@@ -48,7 +50,7 @@ export default function CardEarlyOutReminder() {
                 </div>
             )
         }>
-            <div className="max-h-[300px] overflow-y-auto" style={{ scrollbarWidth: "none" }}>
+            <div className="h-[300px] overflow-y-auto" style={{ scrollbarWidth: "none" }}>
                 <List
                     dataSource={data}
                     renderItem={(item, index) => (

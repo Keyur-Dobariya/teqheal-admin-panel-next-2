@@ -91,8 +91,10 @@ export default function PageLeaveDataCommon({isReportPage}) {
     const [filters, setFilters] = useState({
         user: isAdmin() ? null : getLocalData(appKeys._id),
         leaveCategory: null,
-        year: defaultYear,
-        month: defaultMonth,
+        year: isReportPage ? defaultYear : null,
+        month: null,
+        // year: defaultYear,
+        // month: defaultMonth,
     });
 
     const getQueryParams = () => {
@@ -416,7 +418,7 @@ export default function PageLeaveDataCommon({isReportPage}) {
                     <DatePicker
                         allowClear={false}
                         picker="year"
-                        value={dayjs().year(filters.year)}
+                        value={filters.year ? dayjs().year(filters.year) : null}
                         onChange={(date) =>
                             setFilters((prev) => ({...prev, year: date ? date.year() : null}))
                         }
@@ -428,7 +430,7 @@ export default function PageLeaveDataCommon({isReportPage}) {
                         allowClear={false}
                         picker="month"
                         format="MMMM"
-                        value={dayjs(`${filters.year}-${String(filters.month).padStart(2, '0')}`, 'YYYY-MM')}
+                        value={filters.year && filters.month ? dayjs(`${filters.year}-${String(filters.month).padStart(2, '0')}`, 'YYYY-MM') : null}
                         onChange={(date) =>
                             setFilters((prev) => ({
                                 ...prev,

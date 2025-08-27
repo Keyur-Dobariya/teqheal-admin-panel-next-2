@@ -92,15 +92,15 @@ export default function CardEmpAttendanceReport() {
                 return timeTag(timeFormater(lateArrival), 'orange');
             },
         },
-        {
-            title: "Overtime",
-            dataIndex: "overtime",
-            key: "overtime",
-            align: 'center',
-            render: (overtime) => {
-                return timeTag(timeFormater(overtime), 'purple');
-            },
-        },
+        // {
+        //     title: "Overtime",
+        //     dataIndex: "overtime",
+        //     key: "overtime",
+        //     align: 'center',
+        //     render: (overtime) => {
+        //         return timeTag(timeFormater(overtime), 'purple');
+        //     },
+        // },
     ];
 
     const getEmpReportData = async () => {
@@ -153,36 +153,37 @@ export default function CardEmpAttendanceReport() {
 
     return (
         <div>
-            <Table
-                pagination={false}
-                columns={empReportTableColumn()}
-                dataSource={paginatedData}
-                // scroll={{ x: true, y: !screens.xl ? 300 : 240 }}
-                // scroll={{ x: true, scrollToFirstRowOnChange: true }}
-                loading={isLoading}
-                bordered
-                title={() => (
-                    <div className="flex items-center gap-2">
-                        <LineChartOutlined style={{color: colorMap.F}} />
-                        <div className="flex-1 font-[550] text-[15px]">{appString.attendanceReport}</div>
-                        <RangePicker presets={rangePresets} onChange={onRangeChange} />
-                    </div>
-                )}
-                footer={() => (
-                    <div className="flex justify-center">
-                        <Pagination
-                            current={currentPage}
-                            pageSize={pageSize}
-                            total={empReportData.length}
-                            onChange={(page, size) => {
-                                setCurrentPage(page);
-                                setPageSize(size);
-                            }}
-                            showSizeChanger={false}
-                        />
-                    </div>
-                )}
-            />
+            <Card>
+                <Table
+                    pagination={false}
+                    columns={empReportTableColumn()}
+                    dataSource={paginatedData}
+                    // scroll={{ x: true, y: !screens.xl ? 300 : 240 }}
+                    // scroll={{ x: true, scrollToFirstRowOnChange: true }}
+                    loading={isLoading}
+                    title={() => (
+                        <div className="flex items-center gap-2">
+                            <LineChartOutlined style={{color: colorMap.F}} />
+                            <div className="flex-1 font-[550] text-[15px]">{appString.attendanceReport}</div>
+                            <RangePicker presets={rangePresets} onChange={onRangeChange} />
+                        </div>
+                    )}
+                    footer={() => (
+                        <div className="flex justify-center">
+                            <Pagination
+                                current={currentPage}
+                                pageSize={pageSize}
+                                total={empReportData.length}
+                                onChange={(page, size) => {
+                                    setCurrentPage(page);
+                                    setPageSize(size);
+                                }}
+                                showSizeChanger={false}
+                            />
+                        </div>
+                    )}
+                />
+            </Card>
         </div>
     );
 }

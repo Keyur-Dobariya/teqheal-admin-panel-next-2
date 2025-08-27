@@ -86,8 +86,6 @@ const endpoints = {
     sendMessage: `${environment.apiBaseUrl}/api/sendMessage`,
     getMessages: `${environment.apiBaseUrl}/api/getMessages`,
     chatApi: `${environment.apiBaseUrl}/api/chat`,
-    upload: `${environment.apiBaseUrl}/api/upload`,
-    delete: `${environment.apiBaseUrl}/api/delete`,
     uploadFile: `${environment.apiBaseUrl}/api/uploadFile`,
     uploadMultiFiles: `${environment.apiBaseUrl}/api/uploadMultiFiles`,
     deleteFile: `${environment.apiBaseUrl}/api/deleteFile`,
