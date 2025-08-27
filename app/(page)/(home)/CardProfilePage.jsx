@@ -26,16 +26,18 @@ import EmpAddUpdateModel from "../../models/EmpAddUpdateModel";
 import SafeAvatar from "../../components/SafeAvatar";
 
 export default function CardProfilePage({ employeeCode }) {
-    const { usersData, updateAppDataField } = useAppData();
+    const { usersData, loginUserData, updateAppDataField } = useAppData();
 
     const filterUserData = usersData?.find((u) => u.employeeCode === employeeCode);
 
-    const [userProfile, setUserProfile] = useState(filterUserData);
+    const empData = filterUserData._id === getLocalData(appKeys._id) ? loginUserData : filterUserData;
+
+    const [userProfile, setUserProfile] = useState(empData);
     const [isModelOpen, setIsModelOpen] = useState(false);
     const [actionLoading, setActionLoading] = useState(false);
 
     useEffect(() => {
-        setUserProfile(filterUserData);
+        setUserProfile(empData);
     }, [usersData, filterUserData]);
 
     const openModalWithLoading = () => {

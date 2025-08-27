@@ -133,6 +133,11 @@ const appKeys = {
     taskAttachments: "taskAttachments",
     taskAddedBy: "taskAddedBy",
     comments: "comments",
+    eventTitle: "eventTitle",
+    eventDetail: "eventDetail",
+    eventType: "eventType",
+    eventLeaveType: "eventLeaveType",
+    eventDate: "eventDate",
 };
 
 export default appKeys;

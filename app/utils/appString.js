@@ -231,6 +231,11 @@ const appString = {
     taskPriority: "Task Priority",
     taskAssignee: "Task Assignee",
     taskCategory: "Task Category",
+    eventTitle: "Event Title",
+    eventDetail: "Event Detail",
+    eventType: "Event Type",
+    eventLeaveType: "Event LeaveType",
+    eventDate: "Event Date",
 };
 
 export default appString;

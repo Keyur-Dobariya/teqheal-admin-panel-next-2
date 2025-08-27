@@ -53,7 +53,7 @@ export default function CardEmpAttendanceReport() {
             align: 'center',
             render: (createdAt) => {
                 if (!createdAt) return "-";
-                return <div className="w-20 flex justify-center items-center text-center">{dayjs(createdAt).format(DateTimeFormat.DDMMMMYYYY)}</div>;
+                return dayjs(createdAt).format(DateTimeFormat.DDMMMMYYYY);
             },
         },
         {
@@ -62,7 +62,9 @@ export default function CardEmpAttendanceReport() {
             key: "totalHours",
             align: 'center',
             render: (totalHours) => {
-                return timeTag(timeFormater(totalHours), 'geekblue');
+                return (
+                    <div className="flex items-center justify-center">{timeTag(timeFormater(totalHours), 'geekblue')}</div>
+                );
             },
         },
         {
@@ -71,7 +73,9 @@ export default function CardEmpAttendanceReport() {
             key: "workingHours",
             align: 'center',
             render: (workingHours) => {
-                return timeTag(timeFormater(workingHours), 'green');
+                return (
+                    <div className="flex items-center justify-center">{timeTag(timeFormater(workingHours), 'green')}</div>
+                );
             },
         },
         {
@@ -80,7 +84,9 @@ export default function CardEmpAttendanceReport() {
             key: "breakHours",
             align: 'center',
             render: (breakHours) => {
-                return timeTag(timeFormater(breakHours), 'red');
+                return (
+                    <div className="flex items-center justify-center">{timeTag(timeFormater(breakHours), 'red')}</div>
+                );
             },
         },
         {
@@ -89,7 +95,9 @@ export default function CardEmpAttendanceReport() {
             key: "lateArrival",
             align: 'center',
             render: (lateArrival) => {
-                return timeTag(timeFormater(lateArrival), 'orange');
+                return (
+                    <div className="flex items-center justify-center">{timeTag(timeFormater(lateArrival), 'orange')}</div>
+                );
             },
         },
         // {
@@ -158,8 +166,7 @@ export default function CardEmpAttendanceReport() {
                     pagination={false}
                     columns={empReportTableColumn()}
                     dataSource={paginatedData}
-                    // scroll={{ x: true, y: !screens.xl ? 300 : 240 }}
-                    // scroll={{ x: true, scrollToFirstRowOnChange: true }}
+                    scroll={{ x: "max-content" }}
                     loading={isLoading}
                     title={() => (
                         <div className="flex items-center gap-2">

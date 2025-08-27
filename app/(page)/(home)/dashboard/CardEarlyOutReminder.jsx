@@ -44,9 +44,7 @@ export default function CardEarlyOutReminder() {
                 <div className="flex items-center gap-2">
                     <AlertTriangle color={appColor.danger} />
                     <div className="font-[550] text-[15px]">{appString.earlyOutReminder}</div>
-                    <div className="w-[21px] h-[21px] shadow-sm bg-gray-50/50 border-[1px] border-gray-200 rounded-md text-center text-sm">
-                        5
-                    </div>
+                    <div className="w-[21px] h-[21px] shadow-sm bg-gray-50/50 border-[1px] border-gray-200 rounded-md text-center text-sm">{data.length || 0}</div>
                 </div>
             )
         }>
