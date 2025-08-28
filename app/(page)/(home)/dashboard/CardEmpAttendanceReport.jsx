@@ -8,7 +8,7 @@ import {
     PauseOutlined,
 } from "@ant-design/icons";
 import appString from "../../../utils/appString";
-import {useMemo, useState} from "react";
+import {useEffect, useMemo, useState} from "react";
 import {AlertTriangle, Clock, Watch} from "../../../utils/icons";
 import dayjs from "dayjs";
 import {DateTimeFormat} from "../../../utils/enum";
@@ -19,11 +19,9 @@ import appKeys from "../../../utils/appKeys";
 import {useAppData} from "../../../masterData/AppDataContext";
 import apiCall, {HttpMethod} from "../../../api/apiServiceProvider";
 import {formatMilliseconds} from "../../../utils/utils";
-const { useBreakpoint } = Grid;
 const { RangePicker } = DatePicker;
 
 export default function CardEmpAttendanceReport() {
-    const screens = useBreakpoint();
     const {attendancesData} = useAppData();
     const [empReportData, setEmpReportData] = useState(attendancesData);
     const [startDate, setStartDate] = useState();
@@ -31,15 +29,13 @@ export default function CardEmpAttendanceReport() {
 
     const [isLoading, setIsLoading] = useState(false);
 
-    const [currentPage, setCurrentPage] = useState(1);
-    const [pageSize, setPageSize] = useState(5);
+    useEffect(() => {
+        setEmpReportData(attendancesData);
+    }, [attendancesData]);
 
     const paginatedData = useMemo(() => {
-        return [...empReportData].reverse().slice(
-            (currentPage - 1) * pageSize,
-            currentPage * pageSize
-        );
-    }, [empReportData, currentPage, pageSize]);
+        return [...empReportData].reverse();
+    }, [empReportData]);
 
     const timeFormater = (time) => {
         return time ? formatMilliseconds(time) : "00:00:00";
@@ -163,7 +159,7 @@ export default function CardEmpAttendanceReport() {
         <div>
             <Card>
                 <Table
-                    pagination={false}
+                    pagination={{ pageSize: 5, position: ["bottomCenter"], showSizeChanger: false }}
                     columns={empReportTableColumn()}
                     dataSource={paginatedData}
                     scroll={{ x: "max-content" }}
@@ -173,20 +169,6 @@ export default function CardEmpAttendanceReport() {
                             <LineChartOutlined style={{color: colorMap.F}} />
                             <div className="flex-1 font-[550] text-[15px]">{appString.attendanceReport}</div>
                             <RangePicker presets={rangePresets} onChange={onRangeChange} />
-                        </div>
-                    )}
-                    footer={() => (
-                        <div className="flex justify-center">
-                            <Pagination
-                                current={currentPage}
-                                pageSize={pageSize}
-                                total={empReportData.length}
-                                onChange={(page, size) => {
-                                    setCurrentPage(page);
-                                    setPageSize(size);
-                                }}
-                                showSizeChanger={false}
-                            />
                         </div>
                     )}
                 />

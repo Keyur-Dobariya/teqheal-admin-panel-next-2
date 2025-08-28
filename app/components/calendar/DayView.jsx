@@ -1,10 +1,20 @@
+import { useEffect, useMemo, useState } from 'react';
 import { EventCard } from './EventCard';
 import { Typography, Empty } from 'antd';
-import { format, parseISO } from 'date-fns';
+import { format, parseISO, isSameDay, getHours, getMinutes } from 'date-fns';
 
 const { Title, Text } = Typography;
 
 export const DayView = ({ currentDate, eventsData, onEventClick }) => {
+    const [currentTime, setCurrentTime] = useState(new Date());
+
+    useEffect(() => {
+        const interval = setInterval(() => {
+            setCurrentTime(new Date());
+        }, 60 * 1000);
+        return () => clearInterval(interval);
+    }, []);
+
     const dayEvents = eventsData.filter(event => {
         const eventStart = parseISO(event.eventDate);
         const eventEnd = event.endDate ? parseISO(event.endDate) : eventStart;
@@ -12,6 +22,8 @@ export const DayView = ({ currentDate, eventsData, onEventClick }) => {
     });
 
     const timeSlots = Array.from({ length: 24 }, (_, i) => i);
+
+    const isToday = isSameDay(currentDate, currentTime);
 
     return (
         <div className="flex-1 overflow-auto bg-white">
@@ -43,21 +55,34 @@ export const DayView = ({ currentDate, eventsData, onEventClick }) => {
                     <Title level={5} className="!mb-4 text-black">
                         Time Slots
                     </Title>
-                    <div className="flex flex-col gap-2">
-                        {timeSlots.map((hour) => (
-                            <div
-                                key={hour}
-                                className="flex items-center gap-2 p-2 rounded cursor-pointer hover:bg-gray-100 transition-colors"
-                                onClick={() => {
+                    <div className="flex flex-col gap-0 relative">
+                        {timeSlots.map((hour) => {
+                            const slotTime = new Date(currentDate);
+                            slotTime.setHours(hour, 0, 0, 0);
 
-                                }}
-                            >
-                                <div className="w-16 text-sm text-gray-500">
-                                    {format(new Date().setHours(hour, 0, 0, 0), 'HH:mm')}
+                            const isCurrentHour = isToday && hour === getHours(currentTime);
+                            const minutes = getMinutes(currentTime);
+                            const lineTop = (minutes / 60) * 100;
+
+                            return (
+                                <div
+                                    key={hour}
+                                    className="relative flex items-center gap-2 p-2 h-16 border-b border-gray-200 rounded cursor-pointer hover:bg-gray-100 transition-colors"
+                                >
+                                    <div className="w-11 text-sm text-gray-500 pt-1">
+                                        {format(slotTime, 'HH:mm')}
+                                    </div>
+                                    <div className="flex-1 relative h-full">
+                                        {isCurrentHour && (
+                                            <div
+                                                className="absolute left-0 right-0 h-[1px] bg-red-500 z-10"
+                                                style={{ top: `${lineTop}%` }}
+                                            />
+                                        )}
+                                    </div>
                                 </div>
-                                <div className="flex-1 h-[1px] bg-gray-200"></div>
-                            </div>
-                        ))}
+                            );
+                        })}
                     </div>
                 </div>
             </div>

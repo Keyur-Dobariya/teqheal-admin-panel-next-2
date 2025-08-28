@@ -35,6 +35,7 @@ const routeConfig = {
     application: { path: '/application', type: enumRouteType.admin },
     settings: { path: '/settings', type: enumRouteType.admin },
     appUpdate: { path: '/app-update', type: enumRouteType.admin },
+    rolePermission: { path: '/role-permission', type: enumRouteType.admin },
 };
 
 const pageRoutes = new Proxy(routeConfig, {

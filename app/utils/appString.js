@@ -1,6 +1,7 @@
 const appString = {
     authTitle: 'Welcome to',
     appNameFull: 'Teqheal Solution',
+    productNameFull: 'Teqheal Tracker',
     appName1: 'Teqheal',
     appName2: 'Solution',
     empSystem: 'Employee Management System',

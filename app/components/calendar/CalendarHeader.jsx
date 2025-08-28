@@ -9,6 +9,7 @@ import {
     RightOutlined,
     PlusOutlined,
 } from "@ant-design/icons";
+import {isAdmin} from "../../dataStorage/DataPref";
 
 export const CalendarHeader = ({
                                    currentDate,
@@ -64,9 +65,9 @@ export const CalendarHeader = ({
                     variant="outlined"
                     onClick={onNext}
                     icon={<RightOutlined />} />
-                <Button type="primary" icon={<PlusOutlined />} onClick={onAddEvent}>
+                {isAdmin() && <Button type="primary" icon={<PlusOutlined/>} onClick={onAddEvent}>
                     Add Event
-                </Button>
+                </Button>}
             </div>
         </div>
     );

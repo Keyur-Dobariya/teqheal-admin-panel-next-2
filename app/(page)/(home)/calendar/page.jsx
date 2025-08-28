@@ -9,6 +9,7 @@ import EventDialog from "../../../components/calendar/EventDialog";
 import { addDays, addMonths, addYears, subDays, subMonths, subYears } from "date-fns";
 import {Card} from "antd";
 import {AppDataFields, useAppData} from "../../../masterData/AppDataContext";
+import {isAdmin} from "../../../dataStorage/DataPref";
 
 export default function Page() {
     const {eventsData, updateAppDataField} = useAppData();
@@ -67,9 +68,11 @@ export default function Page() {
     };
 
     const handleDateClick = (date) => {
-        setSelectedDate(date);
-        setSelectedEvent(undefined);
-        setIsEventDialogOpen(true);
+        if(isAdmin()) {
+            setSelectedDate(date);
+            setSelectedEvent(undefined);
+            setIsEventDialogOpen(true);
+        }
     };
 
     const handleAddEvent = () => {

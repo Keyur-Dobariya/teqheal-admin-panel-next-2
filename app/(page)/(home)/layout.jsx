@@ -14,6 +14,7 @@ import SalaryReportCodeVerifyModel from "./(panelCommonUtils)/SalaryReportCodeVe
 import useHomePageLayout from "../../hooks/useHomePageLayout";
 import ToolbarUi from "./(panelCommonUtils)/ToolbarUi";
 import SidebarAndDrawerUi from "./(panelCommonUtils)/SidebarAndDrawerUi";
+import FooterUi from "./(panelCommonUtils)/FooterUi";
 
 export default function HomePage({children}) {
     const {
@@ -75,7 +76,7 @@ export default function HomePage({children}) {
                     menuClick={menuClick}
                 />
 
-                <div className=" flex flex-col flex-1 overflow-hidden">
+                <div className="flex flex-col flex-1 overflow-hidden">
                     <ToolbarUi
                         isMobile={isMobile}
                         collapsed={collapsed}
@@ -87,9 +88,11 @@ export default function HomePage({children}) {
 
                     <BreadcrumbGenerator pathname={pathname}/>
 
-                    <div className="p-3 md:px-6 md:py-3 overflow-y-auto" ref={containerRef}
-                         style={{scrollbarWidth: "thin"}}>
-                        {children}
+                    <div className="flex-1 overflow-y-auto" ref={containerRef} style={{scrollbarWidth: "thin"}}>
+                        <div className="h-full flex flex-col gap-4">
+                            <div className="flex-1 p-3 md:px-6 md:py-3">{children}</div>
+                            <FooterUi />
+                        </div>
                     </div>
                 </div>
             </div>

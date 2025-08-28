@@ -12,7 +12,6 @@ export default function Page() {
     useEffect(() => {
         const getUserData = async () => {
             const userData = await window.electronAPI.getLoginData();
-            console.log("userData=>", userData)
             if (userData?.data) {
                 setUserData(userData?.data);
             }

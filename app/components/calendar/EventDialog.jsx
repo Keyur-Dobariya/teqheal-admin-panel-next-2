@@ -9,6 +9,7 @@ import appKeys from "../../utils/appKeys";
 import appString from "../../utils/appString";
 import apiCall, {HttpMethod} from "../../api/apiServiceProvider";
 import {endpoints} from "../../api/apiEndpoints";
+import {isAdmin} from "../../dataStorage/DataPref";
 
 const { TextArea } = Input;
 
@@ -85,6 +86,7 @@ const EventDialog = ({ open, onOpenChange, event, initialDate, onSave }) => {
                 form={form}
                 layout="vertical"
                 onValuesChange={handleFieldChange}
+                disabled={!isAdmin()}
             >
                 <Row gutter={16}>
                     <Col xs={24} sm={12}>

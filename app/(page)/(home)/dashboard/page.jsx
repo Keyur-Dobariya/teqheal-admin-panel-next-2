@@ -1,8 +1,7 @@
 'use client';
 
-import {Col, Grid, Row} from "antd";
+import {Col, Row} from "antd";
 import CardClockInOut from "./CardClockInOut";
-import CardLiveTracking from "./CardLiveTracking";
 import CardTodayActivity from "./CardTodayActivity";
 import CardDashboardCommon from "./CardDashboardCommon";
 import CardGreeting from "./CardGreeting";
@@ -12,7 +11,6 @@ import CardEmpAttendanceReport from "./CardEmpAttendanceReport";
 import {isAdmin} from "../../../dataStorage/DataPref";
 import CardTodayReportPage from "../today-report/CardTodayReportPage";
 import CardEmpList from "../employees/CardEmpList";
-import CardTrackerClockInOut from "../../tracker/CardTrackerClockInOut";
 import {useAppData} from "../../../masterData/AppDataContext";
 
 export default function Page() {
@@ -33,32 +31,17 @@ export default function Page() {
             <CardDashboardCommon />
             {!isAdmin() && <Row gutter={[16, 16]}>
                 <Col xs={24} md={12} lg={12} xl={12} xxl={6}>
-                    {/*<CardClockInOut/>*/}
-                    <CardTrackerClockInOut isDashboard={true} todayRecords={todayRecords}/>
+                    <CardClockInOut todayRecords={todayRecords}/>
                 </Col>
                 <Col xs={24} md={12} lg={12} xl={12} xxl={6}>
                     <CardTodayActivity todayRecords={todayRecords}/>
                 </Col>
                 <Col xs={24} md={12} lg={12} xl={12} xxl={6}>
                     <CardNoticeBoard/>
-                    {/*<Row gutter={[16, 16]}>*/}
-                    {/*    <Col span={24}>*/}
-                    {/*        <CardLiveTracking/>*/}
-                    {/*    </Col>*/}
-                    {/*    <Col span={24}>*/}
-                    {/*        <CardNoticeBoard/>*/}
-                    {/*    </Col>*/}
-                    {/*</Row>*/}
                 </Col>
                 <Col xs={24} md={12} lg={12} xl={12} xxl={6}>
                     <CardEarlyOutReminder/>
                 </Col>
-                {/*<Col xs={24} md={24} lg={24} xl={16} xxl={12}>*/}
-                {/*    <CardEmpLeaveReport />*/}
-                {/*</Col>*/}
-                {/*<Col xs={24} md={24} lg={24} xl={24} xxl={24}>*/}
-                {/*    <CardEmpAttendanceReport />*/}
-                {/*</Col>*/}
             </Row>}
             {isAdmin() && <CardEmpList isDashboard={true} />}
             {isAdmin() ? <CardTodayReportPage /> : <CardEmpAttendanceReport/>}
