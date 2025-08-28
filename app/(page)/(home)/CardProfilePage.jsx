@@ -5,7 +5,7 @@ import {
     Avatar, Button,
     Card,
     Col,
-    Row,
+    Row, Skeleton,
     Tag,
 } from "antd";
 
@@ -67,7 +67,8 @@ export default function CardProfilePage({ employeeCode }) {
     const CommonInfoBox = ({ title, value, isTag = false, tagColor = 'blue' }) => {
         return <Col xs={24} sm={12} md={8} >
             <div className="text-[13px] font-normal text-gray-500">{title}</div>
-            <div className="text-[14px] font-medium text-gray-900 mt-1">{value ? isTag ? <Tag bordered={true} color={tagColor}>{value}</Tag> : value : '-'}</div>
+            {userProfile ? <div className="text-[14px] font-medium text-gray-900 mt-1">{value ? isTag ?
+                <Tag bordered={true} color={tagColor}>{value}</Tag> : value : '-'}</div> : <Skeleton active title={false} paragraph={{ rows: 1 }}  />}
         </Col>;
     }
 
@@ -77,7 +78,7 @@ export default function CardProfilePage({ employeeCode }) {
                 <div className="flex flex-col gap-5 p-5">
                     <div className="flex justify-between items-center font-medium text-[17px]">
                         <div>{appString.profile}</div>
-                        <Button loading={actionLoading} icon={<EditOutlined />} onClick={handleEditClick}>{appString.edit}</Button>
+                        <Button disabled={!userProfile} loading={actionLoading} icon={<EditOutlined />} onClick={handleEditClick}>{appString.edit}</Button>
                     </div>
                     <Card>
                         <div className="flex flex-col sm:flex-col md:flex-row justify-between items-center gap-4 p-5 md:p-4 text-center md:text-left">
@@ -87,12 +88,12 @@ export default function CardProfilePage({ employeeCode }) {
                                     size={80}
                                 />
                                 <div className="flex flex-col gap-2 mt-2 md:mt-0">
-                                    <div className="font-semibold text-lg md:text-base">
+                                    {userProfile ? <div className="font-semibold text-lg md:text-base">
                                         {userProfile?.fullName} {userProfile?._id === getLocalData(appKeys._id) ? "(You)" : ''}
-                                    </div>
-                                    <div className="text-sm text-gray-600">
+                                    </div> : <Skeleton active title={false} paragraph={{ rows: 1 }}  />}
+                                    {userProfile ? <div className="text-sm text-gray-600">
                                         {userProfile?.role} | {userProfile?.employeeCode}
-                                    </div>
+                                    </div> : <Skeleton active title={false} paragraph={{ rows: 1 }}  />}
                                 </div>
                             </div>
                             <div className="flex gap-3 mt-2 md:mt-0">
@@ -100,10 +101,6 @@ export default function CardProfilePage({ employeeCode }) {
                                 <Button shape="circle" color="geekblue" variant="outlined" icon={<XOutlined />} />
                                 <Button shape="circle" color="geekblue" variant="outlined" icon={<Linkedin />} />
                                 <Button shape="circle" color="geekblue" variant="outlined" icon={<Instagram />} />
-                                {/*<Button shape="circle" color="blue" variant="outlined" icon={<Facebook />} />*/}
-                                {/*<Button shape="circle" color="purple" variant="outlined" icon={<XOutlined />} />*/}
-                                {/*<Button shape="circle" color="geekblue" variant="outlined" icon={<Linkedin />} />*/}
-                                {/*<Button shape="circle" color="magenta" variant="outlined" icon={<Instagram />} />*/}
                             </div>
                         </div>
                     </Card>
