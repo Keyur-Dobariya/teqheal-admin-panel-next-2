@@ -23,7 +23,7 @@ import dayjs from 'dayjs';
 import {formatMilliseconds} from "../../../utils/utils";
 import {LoadingOutlined} from "@ant-design/icons";
 import {useRouter} from "next/navigation";
-import pageRoutes from "../../../utils/pageRoutes";
+import { pageRoutes } from "../../../utils/pageRoutes";
 import appKeys from "../../../utils/appKeys";
 import {timeTag} from "../../../components/CommonComponents";
 import EmpScreenshotModel from "../../../models/EmpScreenshotModel";

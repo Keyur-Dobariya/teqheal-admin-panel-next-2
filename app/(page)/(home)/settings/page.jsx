@@ -7,12 +7,10 @@ import appString from "../../../utils/appString";
 import {useAppData} from "../../../masterData/AppDataContext";
 import {CardDailyTime} from "./CardDailyTime";
 import {CardOfficeUpdates} from "./CardOfficeUpdates";
-
-const {useBreakpoint} = Grid;
+import useHomePageLayout from "../../../hooks/useHomePageLayout";
 
 export default function Page() {
-    const screens = useBreakpoint();
-    const isMobile = !screens.md;
+    const {isMobile} = useHomePageLayout();
 
     const tabKeys = {
         appSetting: appString.appSetting,

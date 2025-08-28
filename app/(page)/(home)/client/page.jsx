@@ -22,13 +22,11 @@ import {getTwoCharacter} from "../../../utils/utils";
 import {LoadingOutlined} from "@ant-design/icons";
 import appColor from "../../../utils/appColor";
 import ClientModel from "../../../models/ClientModel";
-
-const {useBreakpoint} = Grid;
+import useHomePageLayout from "../../../hooks/useHomePageLayout";
 
 export default function Page() {
     const {clientsData, updateAppDataField} = useAppData();
-    const screens = useBreakpoint();
-    const isMobile = !screens.md;
+    const {isMobile} = useHomePageLayout();
 
     const [allData, setAllData] = useState(clientsData);
     const [isModelOpen, setIsModelOpen] = useState(false);

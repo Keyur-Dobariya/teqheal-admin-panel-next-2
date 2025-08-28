@@ -7,7 +7,7 @@ import imagePaths from "../../utils/imagesPath";
 import appString from "../../utils/appString";
 import {AlertCircle, FilePlus, Grid, MoreVertical, Power, RefreshCw, RotateCw, WifiOff} from "../../utils/icons";
 import {useRouter} from "next/navigation";
-import pageRoutes from "../../utils/pageRoutes";
+import { pageRoutes } from "../../utils/pageRoutes";
 import React, {useEffect, useState} from "react";
 import {environment} from "../../api/apiEndpoints";
 import SafeAvatar from "../../components/SafeAvatar";

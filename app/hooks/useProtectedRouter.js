@@ -4,46 +4,14 @@ import { useEffect } from 'react';
 import { usePathname, useRouter } from 'next/navigation';
 import { getLocalData, isAdmin } from '../dataStorage/DataPref';
 import appKeys from '../utils/appKeys';
-import pageRoutes from '../utils/pageRoutes';
-
-const publicRoutes = [
-    '/',
-    pageRoutes.loginPage,
-    pageRoutes.signupPage,
-    pageRoutes.forgotPasswordPage,
-];
-
-const adminOnlyRoutes = [
-    pageRoutes.employees,
-    pageRoutes.todayReport,
-    pageRoutes.basicSalary,
-    pageRoutes.dailyUpdate,
-    pageRoutes.punchReport,
-    pageRoutes.application,
-    pageRoutes.settings,
-];
-
-const protectedRoutes = [
-    pageRoutes.dashboard,
-    pageRoutes.tracker,
-    pageRoutes.employeeDetail,
-    pageRoutes.client,
-    pageRoutes.project,
-    pageRoutes.tasks,
-    pageRoutes.leave,
-    pageRoutes.leaveReport,
-    pageRoutes.salaryReport,
-    pageRoutes.calendar,
-    pageRoutes.chatting,
-    pageRoutes.myProfile,
-];
+import {adminRoutes, pageRoutes, protectedRoutes, publicRoutes} from '../utils/pageRoutes';
 
 const getRedirectPath = (path, isLoggedIn, isAdminUser) => {
-    if (!isLoggedIn && (protectedRoutes.includes(path) || adminOnlyRoutes.includes(path))) {
+    if (!isLoggedIn && (protectedRoutes.includes(path) || adminRoutes.includes(path))) {
         return pageRoutes.loginPage;
     }
 
-    if (isLoggedIn && adminOnlyRoutes.includes(path) && !isAdminUser) {
+    if (isLoggedIn && adminRoutes.includes(path) && !isAdminUser) {
         return pageRoutes.dashboard;
     }
 

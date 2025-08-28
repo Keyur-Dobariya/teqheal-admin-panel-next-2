@@ -5,7 +5,7 @@ import { Button, Checkbox, Form, Input } from "antd";
 import { useRouter } from "next/navigation";
 import appString from "../../../utils/appString";
 import appKeys from "../../../utils/appKeys";
-import pageRoutes from "../../../utils/pageRoutes";
+import { pageRoutes } from "../../../utils/pageRoutes";
 import AnimatedDiv, {Direction} from "../../../components/AnimatedDiv";
 import {useState} from "react";
 import apiCall, {HttpMethod} from "../../../api/apiServiceProvider";

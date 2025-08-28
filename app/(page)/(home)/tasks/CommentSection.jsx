@@ -56,7 +56,7 @@ import {
 } from "../../../utils/utils";
 import {AppDataFields, useAppData} from "../../../masterData/AppDataContext";
 import {useRouter} from "next/navigation";
-import pageRoutes from "../../../utils/pageRoutes";
+import { pageRoutes } from "../../../utils/pageRoutes";
 import {ArrowDown, ArrowUp, Box, Delete, FileText, MessageCircle, Trash, Users} from "../../../utils/icons";
 import RichTextEditor from "../../../components/editor/RichTextEditor";
 

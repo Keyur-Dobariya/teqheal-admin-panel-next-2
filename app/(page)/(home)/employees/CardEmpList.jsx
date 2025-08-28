@@ -23,18 +23,13 @@ import { appColor, colorMap } from '../../../utils/appColor';
 import dayjs from 'dayjs';
 import EmpAddUpdateModel from "../../../models/EmpAddUpdateModel";
 import { LoadingOutlined } from "@ant-design/icons";
-import { useRouter } from "next/navigation";
-import pageRoutes from "../../../utils/pageRoutes";
+import { pageRoutes } from "../../../utils/pageRoutes";
 import SafeAvatar from "../../../components/SafeAvatar";
-
-const { useBreakpoint } = Grid;
+import useHomePageLayout from "../../../hooks/useHomePageLayout";
 
 export default function CardEmpList({ isDashboard }) {
     const { usersData, updateAppDataField } = useAppData();
-    const screens = useBreakpoint();
-    const isMobile = !screens.md;
-
-    const router = useRouter();
+    const {isMobile, push} = useHomePageLayout();
 
     const [allData, setAllData] = useState(usersData);
     const [isModelOpen, setIsModelOpen] = useState(false);
@@ -115,7 +110,7 @@ export default function CardEmpList({ isDashboard }) {
     };
 
     const handleViewClick = (record) => {
-        router.push(`${pageRoutes.employeeDetail}?user=${record.employeeCode}`);
+        push(`${pageRoutes.employeeDetail}?user=${record.employeeCode}`);
     };
 
     const columns = [

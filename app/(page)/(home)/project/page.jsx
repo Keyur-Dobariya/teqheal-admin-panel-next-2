@@ -31,13 +31,11 @@ import {
     taskPriorityLabel
 } from "../../../utils/enum";
 import ProjectModel from "../../../models/ProjectModel";
-
-const {useBreakpoint} = Grid;
+import useHomePageLayout from "../../../hooks/useHomePageLayout";
 
 export default function Page() {
     const {activeUsersData, activeClientData, projectsData, updateAppDataField} = useAppData();
-    const screens = useBreakpoint();
-    const isMobile = !screens.md;
+    const {isMobile} = useHomePageLayout();
 
     const [allData, setAllData] = useState(projectsData);
     const [isModelOpen, setIsModelOpen] = useState(false);

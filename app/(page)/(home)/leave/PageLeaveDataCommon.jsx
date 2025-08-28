@@ -1,7 +1,7 @@
 'use client';
 
 import {capitalizeLastPathSegment, convertCamelCase} from "../../../utils/utils";
-import pageRoutes from "../../../utils/pageRoutes";
+import { pageRoutes } from "../../../utils/pageRoutes";
 import appString from "../../../utils/appString";
 import {
     ApprovalStatus,
@@ -59,16 +59,14 @@ import appColor, {getDarkColor, getTransColor} from "../../../utils/appColor";
 import imagePaths from "../../../utils/imagesPath";
 import LeaveAddUpdateModel from "../../../models/LeaveAddUpdateModel";
 import SafeAvatar from "../../../components/SafeAvatar";
+import useHomePageLayout from "../../../hooks/useHomePageLayout";
 
 const {Option} = Select;
-
-const {useBreakpoint} = Grid;
 
 export default function PageLeaveDataCommon({isReportPage}) {
 
     const {activeUsersData} = useAppData();
-    const screens = useBreakpoint();
-    const isMobile = !screens.md;
+    const {isMobile} = useHomePageLayout();
 
     const [allData, setAllData] = useState([]);
     const [isModelOpen, setIsModelOpen] = useState(false);

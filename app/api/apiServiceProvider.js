@@ -1,6 +1,6 @@
 import axios from "axios";
 import {showToast} from "../components/CommonComponents";
-import pageRoutes from "../utils/pageRoutes";
+import { pageRoutes } from "../utils/pageRoutes";
 import {redirect} from "next/navigation";
 import appKeys from "../utils/appKeys";
 

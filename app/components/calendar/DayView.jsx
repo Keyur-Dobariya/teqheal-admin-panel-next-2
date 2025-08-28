@@ -16,7 +16,6 @@ export const DayView = ({ currentDate, eventsData, onEventClick }) => {
     return (
         <div className="flex-1 overflow-auto bg-white">
             <div className="p-6">
-                {/* Header */}
                 <div className="mb-6">
                     <Title level={4} className="!m-0 !mb-2 text-black">
                         {format(currentDate, 'EEEE, MMMM d, yyyy')}
@@ -26,7 +25,6 @@ export const DayView = ({ currentDate, eventsData, onEventClick }) => {
                     </Text>
                 </div>
 
-                {/* Events */}
                 {dayEvents.length === 0 ? (
                     <Empty description="No events scheduled" className="py-12" />
                 ) : (
@@ -41,7 +39,6 @@ export const DayView = ({ currentDate, eventsData, onEventClick }) => {
                     </div>
                 )}
 
-                {/* Time grid */}
                 <div className="mt-8 border-t border-gray-200 pt-6">
                     <Title level={5} className="!mb-4 text-black">
                         Time Slots
@@ -51,6 +48,9 @@ export const DayView = ({ currentDate, eventsData, onEventClick }) => {
                             <div
                                 key={hour}
                                 className="flex items-center gap-2 p-2 rounded cursor-pointer hover:bg-gray-100 transition-colors"
+                                onClick={() => {
+
+                                }}
                             >
                                 <div className="w-16 text-sm text-gray-500">
                                     {format(new Date().setHours(hour, 0, 0, 0), 'HH:mm')}

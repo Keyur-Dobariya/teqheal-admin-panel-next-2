@@ -7,7 +7,7 @@ import { getLocalData, storeLoginData } from './dataStorage/DataPref';
 import appKeys from './utils/appKeys';
 import apiCall, { HttpMethod } from './api/apiServiceProvider';
 import { endpoints } from './api/apiEndpoints';
-import pageRoutes from './utils/pageRoutes';
+import { pageRoutes } from './utils/pageRoutes';
 import {LoadingComponent} from "./components/LoadingComponent";
 import {detectPlatform} from "./utils/utils";
 

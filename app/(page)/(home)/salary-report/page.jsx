@@ -38,16 +38,14 @@ import appColor from "../../../utils/appColor";
 import LeaveAddUpdateModel from "../../../models/LeaveAddUpdateModel";
 import {SalaryReportAddUpdateModel} from "../../../models/SalaryReportAddUpdateModel";
 import SafeAvatar from "../../../components/SafeAvatar";
+import useHomePageLayout from "../../../hooks/useHomePageLayout";
 
 const {Option} = Select;
-
-const {useBreakpoint} = Grid;
 
 export default function Page() {
 
     const {activeUsersData} = useAppData();
-    const screens = useBreakpoint();
-    const isMobile = !screens.md;
+    const {isMobile} = useHomePageLayout();
 
     const [allData, setAllData] = useState([]);
     const [isModelOpen, setIsModelOpen] = useState(false);

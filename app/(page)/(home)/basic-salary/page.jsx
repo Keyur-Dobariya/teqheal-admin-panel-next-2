@@ -2,9 +2,7 @@
 
 import React, {useEffect, useMemo, useState} from 'react';
 import {
-    Avatar,
     Button, Card,
-    Grid,
     Input,
     Popconfirm,
     Table,
@@ -24,13 +22,11 @@ import {LoadingOutlined} from "@ant-design/icons";
 import appColor from "../../../utils/appColor";
 import BasicSalaryModel from "../../../models/BasicSalaryModel";
 import SafeAvatar from "../../../components/SafeAvatar";
-
-const {useBreakpoint} = Grid;
+import useHomePageLayout from "../../../hooks/useHomePageLayout";
 
 export default function Page() {
     const {activeUsersData, basicSalaryData, updateAppDataField} = useAppData();
-    const screens = useBreakpoint();
-    const isMobile = !screens.md;
+    const {isMobile} = useHomePageLayout();
 
     const [allData, setAllData] = useState(basicSalaryData);
     const [isModelOpen, setIsModelOpen] = useState(false);
