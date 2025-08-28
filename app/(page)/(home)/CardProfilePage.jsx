@@ -30,7 +30,7 @@ export default function CardProfilePage({ employeeCode }) {
 
     const filterUserData = usersData?.find((u) => u.employeeCode === employeeCode);
 
-    const empData = filterUserData._id === getLocalData(appKeys._id) ? loginUserData : filterUserData;
+    const empData = filterUserData?._id === getLocalData(appKeys._id) ? loginUserData : filterUserData;
 
     const [userProfile, setUserProfile] = useState(empData);
     const [isModelOpen, setIsModelOpen] = useState(false);
