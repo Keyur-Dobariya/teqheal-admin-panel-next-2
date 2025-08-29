@@ -21,6 +21,7 @@ const imagePaths = {
     priority_urjent: '/assets/images/priority_urjent.png',
     chatIcon: '/assets/images/chatIcon.png',
     emojiHey: '/assets/images/emojiHey.png',
+    siteAppIcon: '/assets/images/siteAppIcon.png',
 };
 
 export default imagePaths;

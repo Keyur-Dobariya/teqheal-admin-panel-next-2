@@ -1,0 +1,16 @@
+{
+  "name": "Teqheal Tracker",
+  "short_name": "App",
+  "description": "An awesome app made bt Teqheal Solution",
+  "start_url": "/",
+  "background_color": "#ffffff",
+  "theme_color": "#000000",
+  "display": "standalone",
+  "icons": [
+    {
+      "src": "/assets/images/siteAppIcon.png",
+      "sizes": "512x512",
+      "type": "image/png"
+    }
+  ]
+}

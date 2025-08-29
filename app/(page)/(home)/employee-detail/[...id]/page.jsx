@@ -10,5 +10,5 @@ export async function generateStaticParams() {
 export default function Page({ params }) {
     const employeeCode = params?.id?.[0] || 'default';
 
-    return <CardProfilePage employeeCode={employeeCode} />;
+    return <CardProfilePage employeeCode={employeeCode} isMyProfile={false} />;
 }

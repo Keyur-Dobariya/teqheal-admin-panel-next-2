@@ -8,7 +8,7 @@ function EmployeeDetailContent() {
     const searchParams = useSearchParams();
     const employeeCode = searchParams?.get('user') || 'default';
 
-    return <CardProfilePage employeeCode={employeeCode} />;
+    return <CardProfilePage employeeCode={employeeCode} isMyProfile={false} />;
 }
 
 export default function Page() {
