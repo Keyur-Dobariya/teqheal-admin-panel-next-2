@@ -1,66 +1,26 @@
-'use client';
-
 import './globals.css';
 import './calender.css';
-import {ConfigProvider, message} from 'antd';
-import appColor from './utils/appColor';
-import {AntdRegistry} from '@ant-design/nextjs-registry';
-import {usePathname} from 'next/navigation';
-import {createContext, useContext, useEffect, useRef, useState} from 'react';
-import {capitalizeLastPathSegment} from './utils/utils';
-import appString from './utils/appString';
-import {setGlobalMessageApi} from './components/CommonComponents';
-import {AppDataProvider} from './masterData/AppDataContext';
+import { AntdRegistry } from '@ant-design/nextjs-registry';
 import AppLoadingWrapper from './components/AppLoadingWrapper';
+import { AppDataProvider } from './masterData/AppDataContext';
+import ClientLayout from './ClientLayout';
 
-export default function RootLayout({children}) {
-    const [messageApi, contextHolder] = message.useMessage();
-    setGlobalMessageApi(messageApi);
+export const metadata = {
+    title: "Teqheal Solution",
+    description: "abc",
+    manifest: "/manifest.json",
+};
 
-    const pathname = usePathname();
-    const urlToTitle = capitalizeLastPathSegment(pathname);
-    const pageTitle = urlToTitle
-        ? `${urlToTitle} - ${appString.appNameFull}`
-        : `${appString.appNameFull} - ${appString.empSystem}`;
-
-    useEffect(() => {
-        document.title = pageTitle;
-    }, [pathname]);
-
-    const antdTheme = {
-        components: {
-            Input: {},
-            Button: {contentFontSizeLG: 15},
-            Card: {bodyPadding: 0, headerPadding: 15},
-            Timeline: {itemPaddingBottom: 0},
-            Dropdown: {fontSize: 14},
-            Tabs: {/*margin: 0, */fontSize: 14},
-            Table: { cellFontSize: 15},
-        },
-        token: {
-            colorPrimary: appColor.secondPrimary,
-            colorBorderSecondary: appColor.borderClr,
-            borderRadius: 8,
-            fontFamily: 'var(--font-sans)',
-            fontSize: 13,
-        },
-    };
-
+export default function RootLayout({ children }) {
     return (
         <html lang="en">
-        <body className="antialiased" cz-shortcut-listen="true">
+        <body className="antialiased">
         <AntdRegistry>
-            <ConfigProvider
-                componentSize="large"
-                theme={antdTheme}
-            >
-                {contextHolder}
+            <ClientLayout>
                 <AppLoadingWrapper>
-                    <AppDataProvider>
-                        {children}
-                    </AppDataProvider>
+                    <AppDataProvider>{children}</AppDataProvider>
                 </AppLoadingWrapper>
-            </ConfigProvider>
+            </ClientLayout>
         </AntdRegistry>
         </body>
         </html>
