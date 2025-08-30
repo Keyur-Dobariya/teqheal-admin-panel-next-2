@@ -8,6 +8,11 @@
   "display": "standalone",
   "icons": [
     {
+      "src": "/assets/images/siteAppIcon-192.png",
+      "sizes": "192x192",
+      "type": "image/png"
+    },
+    {
       "src": "/assets/images/siteAppIcon.png",
       "sizes": "512x512",
       "type": "image/png"
