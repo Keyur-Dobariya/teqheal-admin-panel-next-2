@@ -116,6 +116,11 @@ const endpoints = {
     getAllSoftApps: `${environment.apiBaseUrl}/api/getAllSoftApps`,
     getSingleSoftApp: `${environment.apiBaseUrl}/api/getSingleSoftApp`,
     isUpdateAvailable: `${environment.apiBaseUrl}/api/isUpdateAvailable`,
+    companies: `${environment.apiBaseUrl}/api/companies`,
+    roles: `${environment.apiBaseUrl}/api/roles`,
+    companyRoles: (companyId) => `${environment.apiBaseUrl}/api/companies/${companyId}/roles`,
+    companyModules: (companyId) => `${environment.apiBaseUrl}/api/companies/${companyId}/modules`,
+    modules: `${environment.apiBaseUrl}/api/modules`,
 };
 
 export {environment, endpoints};

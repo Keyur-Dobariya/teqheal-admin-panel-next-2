@@ -60,7 +60,7 @@ export default function CardProfilePage({ profileData, handleEditSuccess }) {
 
     return (
         <>
-            <Card loading={!profileData}>
+            <Card>
                 <div className="flex flex-col gap-5 p-5">
                     <div className="flex justify-between items-center font-medium text-[17px]">
                         <div>{appString.profile}</div>
@@ -68,19 +68,20 @@ export default function CardProfilePage({ profileData, handleEditSuccess }) {
                     </div>
                     <Card>
                         <div className="flex flex-col sm:flex-col md:flex-row justify-between items-center gap-4 p-5 md:p-4 text-center md:text-left">
-                            <div className="flex flex-col md:flex-row items-center gap-4">
+                            <div className="flex flex-1 flex-col md:flex-row items-center gap-4">
                                 <SafeAvatar
                                     userData={profileData}
                                     size={80}
                                 />
-                                <div className="flex flex-col gap-2 mt-2 md:mt-0">
-                                    {profileData ? <div className="font-semibold text-lg md:text-base">
+                                {profileData && <div className="flex flex-col gap-2 mt-2 md:mt-0">
+                                    <div className="font-semibold text-lg md:text-base">
                                         {profileData?.fullName} {profileData?._id === getLocalData(appKeys._id) ? "(You)" : ''}
-                                    </div> : <Skeleton active title={false} paragraph={{ rows: 1 }}  />}
-                                    {profileData ? <div className="text-sm text-gray-600">
+                                    </div>
+                                    <div className="text-sm text-gray-600">
                                         {profileData?.role} | {profileData?.employeeCode}
-                                    </div> : <Skeleton active title={false} paragraph={{ rows: 1 }}  />}
-                                </div>
+                                    </div>
+                                </div>}
+                                {!profileData && <div className="w-30"><Skeleton active title={false} paragraph={{rows: 2}}/></div>}
                             </div>
                             <div className="flex gap-3 mt-2 md:mt-0">
                                 <Button shape="circle" color="geekblue" variant="outlined" icon={<Facebook />} />

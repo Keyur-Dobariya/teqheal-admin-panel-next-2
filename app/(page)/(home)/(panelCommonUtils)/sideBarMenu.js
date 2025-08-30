@@ -24,6 +24,24 @@ const menuItems = [
         label: capitalizeLastPathSegment(pageRoutes.dashboard),
         position: 'top',
     },
+    // {
+    //     key: pageRoutes.companies,
+    //     icon: <HomeOutlined />,
+    //     label: capitalizeLastPathSegment(pageRoutes.companies),
+    //     position: 'top',
+    // },
+    // {
+    //     key: pageRoutes.modules,
+    //     icon: <HomeOutlined />,
+    //     label: capitalizeLastPathSegment(pageRoutes.modules),
+    //     position: 'top',
+    // },
+    // {
+    //     key: pageRoutes.roles,
+    //     icon: <HomeOutlined />,
+    //     label: capitalizeLastPathSegment(pageRoutes.roles),
+    //     position: 'top',
+    // },
     {
         key: 'emp',
         icon: <UserOutlined />,
