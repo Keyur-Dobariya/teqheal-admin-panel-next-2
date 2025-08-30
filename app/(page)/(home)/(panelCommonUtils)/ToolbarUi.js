@@ -22,20 +22,33 @@ export default function ToolbarUi({
                                   }) {
 
     const [deferredPrompt, setDeferredPrompt] = useState(null);
+    const [isIOS, setIsIOS] = useState(false);
+    const [isStandalone, setIsStandalone] = useState(false);
 
     useEffect(() => {
+        // Detect iOS
+        setIsIOS(
+            /iPad|iPhone|iPod/.test(navigator.userAgent) && !window.MSStream);
+
+        // Detect if already installed
+        setIsStandalone(
+            window.matchMedia("(display-mode: standalone)").matches
+        );
+
+        // Listen for Android install prompt
         const handler = (e) => {
-            e.preventDefault();
+            e.preventDefault(); // Prevent default mini-infobar
             setDeferredPrompt(e);
         };
         window.addEventListener("beforeinstallprompt", handler);
 
-        return () => window.removeEventListener("beforeinstallprompt", handler);
+        return () =>
+            window.removeEventListener("beforeinstallprompt", handler);
     }, []);
 
     const handleInstallClick = async () => {
         if (!deferredPrompt) return;
-        deferredPrompt.prompt();
+        deferredPrompt.prompt(); // Show the install prompt
         const { outcome } = await deferredPrompt.userChoice;
         console.log("User choice:", outcome);
         setDeferredPrompt(null);
@@ -45,6 +58,8 @@ export default function ToolbarUi({
         items: profileMenuItems,
         onClick: menuClick,
     };
+
+    if (isStandalone) return null;
 
     return (
         <div className="flex justify-between items-center bg-white border-b-1 border-gray-200 py-3 px-5"
@@ -72,9 +87,29 @@ export default function ToolbarUi({
             </div>
             {isMobile && <img src={imagePaths.icon_big_dark} alt="icon" width={150} height={45} />}
             <div className="flex items-center gap-4">
-                <button onClick={handleInstallClick}>
-                    📲 Install App
-                </button>
+                <div>
+                    <h3>Install App</h3>
+
+                    {/* Android Button */}
+                    {deferredPrompt && (
+                        <button onClick={handleInstallClick}>📲 Install App</button>
+                    )}
+
+                    {/* iOS Instructions */}
+                    {isIOS && (
+                        <p>
+                            To install this app on your iOS device, tap the share button
+                            <span role="img" aria-label="share icon">
+            ⎋
+          </span>{" "}
+                            and then <strong>Add to Home Screen</strong>{" "}
+                            <span role="img" aria-label="plus icon">
+            ➕
+          </span>
+                            .
+                        </p>
+                    )}
+                </div>
                 <Dropdown overlayStyle={{ minWidth: 200 }} menu={menuProps} trigger={["click"]}>
                     <div className="flex items-center gap-2 cursor-pointer">
                         <Tooltip title={getLocalData(appKeys.fullName)}>
