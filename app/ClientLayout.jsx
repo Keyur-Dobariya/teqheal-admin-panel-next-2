@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect } from "react";
+import {useEffect, useState} from "react";
 import { ConfigProvider, message } from "antd";
 import { usePathname } from "next/navigation";
 import { capitalizeLastPathSegment } from "./utils/utils";
@@ -12,6 +12,8 @@ export default function ClientLayout({ children }) {
     const [messageApi, contextHolder] = message.useMessage();
     setGlobalMessageApi(messageApi);
 
+    const [isInstalled, setIsInstalled] = useState(false);
+
     const pathname = usePathname();
     const urlToTitle = capitalizeLastPathSegment(pathname);
     const pageTitle = urlToTitle
@@ -21,6 +23,19 @@ export default function ClientLayout({ children }) {
     useEffect(() => {
         document.title = pageTitle;
     }, [pathname]);
+
+    useEffect(() => {
+        // Check if app is running in standalone mode
+        if (window.matchMedia("(display-mode: standalone)").matches) {
+            setIsInstalled(true);
+        }
+
+        // Some browsers (iOS Safari) use `navigator.standalone`
+        if (window.navigator.standalone === true) {
+            setIsInstalled(true);
+        }
+    }, []);
+
 
     const antdTheme = {
         components: {
@@ -43,6 +58,11 @@ export default function ClientLayout({ children }) {
 
     return (
         <ConfigProvider componentSize="large" theme={antdTheme}>
+            {/*{isInstalled ? (*/}
+            {/*    <p>✅ App is installed</p>*/}
+            {/*) : (*/}
+            {/*    <p>📱 App is not installed (running in browser)</p>*/}
+            {/*)}*/}
             {contextHolder}
             {children}
         </ConfigProvider>

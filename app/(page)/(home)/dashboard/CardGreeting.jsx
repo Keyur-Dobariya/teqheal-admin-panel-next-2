@@ -27,8 +27,7 @@ export default function CardGreeting() {
                 </div>
                 <div className="flex flex-col flex-1 min-w-0 gap-1">
                     <div className="flex items-center text-[17px] font-medium gap-2">
-                        <div>{appString.hey},</div>
-                        <div>{getLocalData(appKeys.fullName)} ({getLocalData(appKeys.role)})</div>
+                        <div>{appString.hey}, {getLocalData(appKeys.fullName)} ({getLocalData(appKeys.role)})</div>
                         <img src={imagePaths.heyWaveHand} alt="hey" width={22} height={22}/>
                     </div>
                     <div className="text-[13px] text-gray-500 truncate">{appString.motiveLine}</div>

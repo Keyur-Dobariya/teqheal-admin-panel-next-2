@@ -8,6 +8,15 @@ const passwordHasNumber = /\d/;
 const passwordHasSpecialChar = /[@$!%*?&]/;
 
 const validationRules = {
+    [appKeys.firstName]: [
+        { required: true, message: appString.firstNameV1 },
+    ],
+    [appKeys.middleName]: [
+        { required: true, message: appString.middleNameV1 },
+    ],
+    [appKeys.lastName]: [
+        { required: true, message: appString.lastNameV1 },
+    ],
     [appKeys.fullName]: [
         { required: true, message: appString.fullNameV1 },
     ],

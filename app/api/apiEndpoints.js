@@ -29,7 +29,6 @@ const endpoints = {
     addAttendance: `${environment.apiBaseUrl}/api/addAttendance`,
     empDashboard: `${environment.apiBaseUrl}/api/empDashboard/`,
     getTodayAttendance: `${environment.apiBaseUrl}/api/getTodayAttendance`,
-    userProfile: `${environment.apiBaseUrl}/api/userProfile/`,
     adminDashboard: `${environment.apiBaseUrl}/api/adminDashboard`,
     userWiseAttendanceData: `${environment.apiBaseUrl}/api/userWiseAttendanceData/`,
     deleteScreenshot: `${environment.apiBaseUrl}/api/deleteScreenshot`,
@@ -120,7 +119,15 @@ const endpoints = {
     roles: `${environment.apiBaseUrl}/api/roles`,
     companyRoles: (companyId) => `${environment.apiBaseUrl}/api/companies/${companyId}/roles`,
     companyModules: (companyId) => `${environment.apiBaseUrl}/api/companies/${companyId}/modules`,
-    modules: `${environment.apiBaseUrl}/api/modules`,
+    addUpdateModule: `${environment.apiBaseUrl}/api/addUpdateModule`,
+    deleteModule: `${environment.apiBaseUrl}/api/deleteModule/:id`,
+    getAllModules: `${environment.apiBaseUrl}/api/getAllModules`,
+    addUpdateCompany: `${environment.apiBaseUrl}/api/addUpdateCompany`,
+    deleteCompany: `${environment.apiBaseUrl}/api/deleteCompany/:id`,
+    getAllCompanies: `${environment.apiBaseUrl}/api/getAllCompanies`,
+    getSingleCompany: `${environment.apiBaseUrl}/api/getSingleCompany/:id`,
+    generateJoinToken: `${environment.apiBaseUrl}/api/generateJoinToken`,
+    getCompanyByJoinToken: `${environment.apiBaseUrl}/api/getCompanyByJoinToken`,
 };
 
 export {environment, endpoints};

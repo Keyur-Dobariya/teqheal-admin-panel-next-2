@@ -10,7 +10,6 @@ import {useEffect, useState} from "react";
 import AnimatedDiv, {Direction} from "../../../components/AnimatedDiv";
 import apiCall, {HttpMethod} from "../../../api/apiServiceProvider";
 import {endpoints} from "../../../api/apiEndpoints";
-import {getLocalData} from "../../../dataStorage/DataPref";
 
 export default function ForgotPassword() {
     const [form] = Form.useForm();
@@ -20,11 +19,6 @@ export default function ForgotPassword() {
     // console.log("data=>", data);
 
     const [loading, setLoading] = useState(false);
-
-    useEffect(() => {
-        const savedName = getLocalData("fullName")
-        console.log("savedName", savedName)
-    }, []);
 
     const onFormSubmit = async () => {
         try {

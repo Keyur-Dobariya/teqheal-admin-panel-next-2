@@ -9,7 +9,7 @@ import { pageRoutes } from "../../../utils/pageRoutes";
 import AnimatedDiv, {Direction} from "../../../components/AnimatedDiv";
 import {useEffect, useState} from "react";
 import apiCall, {HttpMethod} from "../../../api/apiServiceProvider";
-import {getLocalData, storeLoginData} from "../../../dataStorage/DataPref";
+import {storeLoginData} from "../../../dataStorage/DataPref";
 import {endpoints, environment, isDevMode} from "../../../api/apiEndpoints";
 import validationRules from "../../../utils/validationRules";
 import {detectPlatform} from "../../../utils/utils";

@@ -1,73 +1,262 @@
 "use client";
-import { useState, useEffect } from "react";
-import { Table, Button, Modal, Form, Input } from "antd";
-import axios from "axios";
+import React, {useState, useEffect} from "react";
+import {
+    Table,
+    Button,
+    Popconfirm,
+    Card,
+    Switch,
+    Avatar,
+} from "antd";
 import apiCall, {HttpMethod} from "../../../api/apiServiceProvider";
 import {endpoints} from "../../../api/apiEndpoints";
+import {
+    DeleteOutlined,
+    EditOutlined, LinkOutlined,
+    PlusOutlined
+} from "@ant-design/icons";
+import appKeys from "../../../utils/appKeys";
+import {Package} from "../../../utils/icons";
+import {CompanyModal} from "./CompanyModal";
+import appString from "../../../utils/appString";
+import dayjs from "dayjs";
+import {dayTypeLabel, getLabelByKey, leaveHalfDayTypeLabel, leaveTypeLabel} from "../../../utils/enum";
 
-export default function Companies() {
+export default function CompanyPage() {
+    const [modules, setModules] = useState([]);
     const [companies, setCompanies] = useState([]);
-    const [open, setOpen] = useState(false);
-    const [form] = Form.useForm();
+    const [isModelOpen, setIsModelOpen] = useState(false);
+    const [selectedRecord, setSelectedRecord] = useState(null);
+    const [loading, setLoading] = useState(false);
+    const [loadingRecord, setLoadingRecord] = useState({});
 
     useEffect(() => {
+        fetchModules();
         fetchCompanies();
     }, []);
 
-    const fetchCompanies = async () => {
+    const fetchModules = async () => {
         await apiCall({
             method: HttpMethod.GET,
-            url: endpoints.companyModules("68b155824a332d6973b7fa07"),
+            url: endpoints.getAllModules,
             setIsLoading: false,
             showSuccessMessage: false,
             successCallback: (data) => {
-                setCompanies(data);
+                const filteredModules = (data?.data || []).filter(module => !module.isForSuperAdmin);
+                setModules(filteredModules);
             },
         });
     };
 
-    const handleAdd = async (values) => {
+    const fetchCompanies = async () => {
+        setLoading(true);
         await apiCall({
-            method: HttpMethod.POST,
-            url: endpoints.companies,
-            data: values,
-            setIsLoading: false,
+            method: HttpMethod.GET,
+            url: endpoints.getAllCompanies,
+            setIsLoading: setLoading,
             showSuccessMessage: false,
             successCallback: (data) => {
-                fetchCompanies();
-                setOpen(false);
+                setCompanies(data?.data || []);
             },
         });
+    };
+
+    const deleteCompany = async (id) => {
+        setLoading(true);
+        await apiCall({
+            method: HttpMethod.DELETE,
+            url: endpoints.deleteCompany.replace(":id", id),
+            setIsLoading: setLoading,
+            showSuccessMessage: true,
+            successCallback: (data) => {
+                setCompanies(data?.data || []);
+            },
+        });
+    };
+
+    const updateRecord = async (postData) => {
+        setLoading(true);
+        await apiCall({
+            method: HttpMethod.POST,
+            url: endpoints.addUpdateCompany,
+            data: postData,
+            isMultipart: true,
+            setIsLoading: setLoading,
+            showSuccessMessage: true,
+            successCallback: () => {
+                fetchCompanies();
+                setIsModelOpen(false);
+                setSelectedRecord(null);
+            },
+        });
+    };
+
+    const generateJoinToken = async (record) => {
+        setLoadingRecord(prev => ({ ...prev, [record._id]: true }));
+        await apiCall({
+            method: HttpMethod.POST,
+            url: endpoints.generateJoinToken,
+            data: {
+                companyId: record._id
+            },
+            setIsLoading: false,
+            showSuccessMessage: true,
+            successCallback: () => {
+                setLoadingRecord(prev => ({ ...prev, [record._id]: false }));
+                fetchCompanies();
+            },
+            errorCallback: () => {
+                setLoadingRecord(prev => ({ ...prev, [record._id]: false }));
+            }
+        });
+    };
+
+    const handleEdit = (record) => {
+        setSelectedRecord(record);
+        setIsModelOpen(true);
     };
 
     const columns = [
-        { title: "Company Name", dataIndex: "name" },
-        { title: "Domain", dataIndex: "domain" },
-        { title: "Action", render: (_, record) => (
-                <Button onClick={() => console.log("Manage Modules", record._id)}>
-                    Manage Modules
-                </Button>
-            )}
+        Table.EXPAND_COLUMN,
+        {
+            title: "Company Name",
+            dataIndex: "companyName",
+            key: "companyName",
+            render: (text, record) => (
+                <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                    <Avatar
+                        src={record.companyIcon}
+                        icon={!record.companyIcon && <Package />}
+                        size="small"
+                        alt={text}
+                    />
+                    <span>{text}</span>
+                </div>
+            ),
+        },
+        {title: "Admin Email", dataIndex: "adminEmail", key: "adminEmail"},
+        {
+            title: "Join Token",
+            key: "joinToken",
+            width: 160,
+            render: (_, record) => (
+                <div className="flex gap-2">
+                    <Button
+                        type="primary"
+                        icon={<LinkOutlined />}
+                        loading={!!loadingRecord[record._id]}
+                        onClick={() => generateJoinToken(record)}
+                    >
+                        Generate
+                    </Button>
+                    {record.adminJoinToken && (
+                        <span style={{ marginLeft: 8, fontWeight: 500 }}>{record.adminJoinToken}</span>
+                    )}
+                </div>
+            ),
+        },
+        {
+            title: "Is Active",
+            dataIndex: "isActive",
+            key: "isActive",
+            width: 120,
+            render: (value, record) => (
+                <Switch
+                    checked={value}
+                    onChange={async (checked) => {
+                        const postData = {
+                            companyId: record._id,
+                            isActive: checked,
+                        };
+                        await updateRecord(postData);
+                    }}
+                />
+            ),
+        },
+        {
+            title: "Operations",
+            key: "operations",
+            width: 150,
+            fixed: "right",
+            render: (_, record) => (
+                <div className="flex gap-2">
+                    <Button icon={<EditOutlined/>} type="text" onClick={() => handleEdit(record)}/>
+                    <Popconfirm
+                        title="Are you sure to delete this company?"
+                        onConfirm={() => deleteCompany(record._id)}
+                        okText="Yes"
+                        cancelText="No"
+                    >
+                        <Button danger type="text" icon={<DeleteOutlined/>}/>
+                    </Popconfirm>
+                </div>
+            ),
+        },
     ];
 
-    return (
-        <div className="p-5">
-            <div className="flex justify-between mb-4">
-                <h2 className="text-xl font-bold">Companies</h2>
-                <Button type="primary" onClick={() => setOpen(true)}>+ Add Company</Button>
-            </div>
-            <Table dataSource={companies} columns={columns} rowKey="_id" />
+    const extraFieldCommon = (title, value) => {
+        return value && true ? <div className="flex items-center text-[14px] gap-2 my-1">
+            <div className="text-gray-600 text-[13px]">{title}:</div>
+            <div className="text-gray-950">{value}</div>
+        </div> : null;
+    }
 
-            <Modal title="Add Company" open={open} onCancel={() => setOpen(false)} onOk={() => form.submit()}>
-                <Form form={form} onFinish={handleAdd} layout="vertical">
-                    <Form.Item name="name" label="Company Name" rules={[{ required: true }]}>
-                        <Input />
-                    </Form.Item>
-                    <Form.Item name="domain" label="Domain">
-                        <Input />
-                    </Form.Item>
-                </Form>
-            </Modal>
+    const tableExpandRows = (record) => {
+        return (
+            <div>
+                {extraFieldCommon("companyWebsite", record?.companyWebsite)}
+                {extraFieldCommon("companyAddress", record?.companyAddress)}
+                {extraFieldCommon(appString.startDate, dayjs(record.startDate).format("DD, MMM YYYY"))}
+                {extraFieldCommon(appString.endDate, dayjs(record.endDate).format("DD, MMM YYYY"))}
+                {extraFieldCommon(appString.createdAt, dayjs(record.createdAt).format("DD, MMM YYYY [at] hh:mm a"))}
+            </div>
+        );
+    }
+
+    return (
+        <div>
+            <Card>
+                <Table
+                    dataSource={companies}
+                    columns={columns}
+                    rowKey={appKeys._id}
+                    expandable={{
+                        expandedRowRender: record => (
+                            tableExpandRows(record)
+                        ),
+                    }}
+                    scroll={{x: "max-content"}}
+                    title={() => (
+                        <div className="flex justify-between items-center">
+                            <div className="text-lg font-semibold">Companies</div>
+                            <Button
+                                type="primary"
+                                icon={<PlusOutlined/>}
+                                onClick={() => {
+                                    setSelectedRecord(null);
+                                    setIsModelOpen(true);
+                                }}
+                            >
+                                Add Company
+                            </Button>
+                        </div>
+                    )}
+                    loading={loading}
+                    pagination={{pageSize: 10}}
+                />
+            </Card>
+
+            <CompanyModal
+                isModelOpen={isModelOpen}
+                setIsModelOpen={setIsModelOpen}
+                selectedRecord={selectedRecord}
+                setSelectedRecord={setSelectedRecord}
+                modules={modules}
+                loading={loading}
+                onSubmit={async (postData) => {
+                    await updateRecord(postData);
+                }}
+            />
         </div>
     );
 }

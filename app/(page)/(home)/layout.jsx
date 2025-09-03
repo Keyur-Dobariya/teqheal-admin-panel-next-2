@@ -12,7 +12,7 @@ import BreadcrumbGenerator from "./(panelCommonUtils)/BreadcrumbGenerator";
 import LogOutModel from "./(panelCommonUtils)/LogOutModel";
 import SalaryReportCodeVerifyModel from "./(panelCommonUtils)/SalaryReportCodeVerifyModel";
 import useHomePageLayout from "../../hooks/useHomePageLayout";
-import ToolbarUi from "./(panelCommonUtils)/ToolbarUi";
+import HeaderUi from "./(panelCommonUtils)/HeaderUi";
 import SidebarAndDrawerUi from "./(panelCommonUtils)/SidebarAndDrawerUi";
 import FooterUi from "./(panelCommonUtils)/FooterUi";
 
@@ -77,7 +77,7 @@ export default function HomePage({children}) {
                 />
 
                 <div className="flex flex-col flex-1 overflow-hidden">
-                    <ToolbarUi
+                    <HeaderUi
                         isMobile={isMobile}
                         collapsed={collapsed}
                         setCollapsed={setCollapsed}

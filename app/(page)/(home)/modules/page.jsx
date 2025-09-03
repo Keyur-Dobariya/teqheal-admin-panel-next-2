@@ -1,94 +1,293 @@
 "use client";
-import { useState, useEffect } from "react";
-import { Table, Button, Modal, Form, Input, Select, Tag } from "antd";
-import apiCall, {HttpMethod} from "../../../api/apiServiceProvider";
-import {endpoints} from "../../../api/apiEndpoints";
+import React, { useState, useEffect } from "react";
+import {Table, Button, Modal, Form, Input, Select, Tag, Popconfirm, Card, Switch, Row, Col} from "antd";
+import apiCall, { HttpMethod } from "../../../api/apiServiceProvider";
+import { endpoints } from "../../../api/apiEndpoints";
+import appKeys from "../../../utils/appKeys";
+import {DeleteOutlined, EditOutlined, PlusOutlined} from "@ant-design/icons";
+import {convertCamelCase} from "../../../utils/utils";
+import {routeConfig} from "../../../utils/pageRoutes";
 
 export default function Page() {
     const [modules, setModules] = useState([]);
     const [open, setOpen] = useState(false);
     const [form] = Form.useForm();
+    const [selectedModuleId, setSelectedModuleId] = useState(null);
+    const [loading, setLoading] = useState(false);
+    const isAllPermission = Form.useWatch("isAllPermission", form);
+
+    const defaultActions = [
+        { label: 'Add', value: 'add', color: '#3b82f6' },      // blue-500
+        { label: 'Edit', value: 'edit', color: '#f59e42' },    // orange-400
+        { label: 'Delete', value: 'delete', color: '#ef4444' },// red-500
+        { label: 'View', value: 'view', color: '#22c55e' },    // green-500
+        { label: 'Approve', value: 'approve', color: '#a855f7' },// purple-500
+        { label: 'Reject', value: 'reject', color: '#a855f7' }, // purple-500
+        { label: 'Status', value: 'status', color: '#06b6d4' },// cyan-500
+        { label: 'Upload', value: 'upload', color: '#06b6d4' },// cyan-500
+        { label: 'Download', value: 'download', color: '#06b6d4' },// cyan-500
+        { label: 'Manage', value: 'manage', color: '#fbbf24' },// gold/yellow-400
+        { label: 'Publish', value: 'publish', color: '#fbbf24' },// gold/yellow-400
+        { label: 'Lock', value: 'lock', color: '#6b7280' },    // gray-500
+        { label: 'Unlock', value: 'unlock', color: '#6b7280' },// gray-500
+        { label: 'Screenshot View', value: 'screenshotView', color: '#6b7280' },// gray-500
+        { label: 'Mouse Keyboard Event View', value: 'mouseKeyboardEventView', color: '#6b7280' },// gray-500
+    ];
 
     useEffect(() => {
         fetchModules();
     }, []);
 
     const fetchModules = async () => {
+        setLoading(true);
         await apiCall({
             method: HttpMethod.GET,
-            url: endpoints.modules,
-            setIsLoading: false,
+            url: endpoints.getAllModules,
+            setIsLoading: setLoading,
             showSuccessMessage: false,
             successCallback: (data) => {
-                setModules(data);
+                setModules(data?.data);
             },
         });
     };
 
-    const handleAdd = async (values) => {
+    const deleteModule = async (id) => {
+        setLoading(true);
+        await apiCall({
+            method: HttpMethod.DELETE,
+            url: endpoints.deleteModule.replace(':id', id),
+            setIsLoading: setLoading,
+            showSuccessMessage: true,
+            successCallback: (data) => {
+                setModules(data?.data);
+            },
+        });
+    };
+
+    const handleAddOrUpdate = async (values) => {
+        const postData = {
+            moduleName: values.moduleName,
+            description: values.description,
+            actions: values.actions || [],
+            ...(selectedModuleId ? { moduleId: selectedModuleId } : {}),
+        };
+
+        await updateRecord(postData);
+    };
+
+    const updateRecord = async (postData) => {
+        setLoading(true);
         await apiCall({
             method: HttpMethod.POST,
-            url: endpoints.modules,
-            data: values,
-            setIsLoading: false,
+            url: endpoints.addUpdateModule,
+            data: postData,
+            setIsLoading: setLoading,
             showSuccessMessage: true,
             successCallback: () => {
                 fetchModules();
                 setOpen(false);
                 form.resetFields();
+                setSelectedModuleId(null);
             },
         });
     };
 
+    const handleEdit = (record) => {
+        setSelectedModuleId(record._id);
+        form.setFieldsValue({
+            ...record,
+            moduleName: convertCamelCase(record.moduleName),
+        });
+        setOpen(true);
+    };
+
+    const getActionColor = (action) => {
+        const found = defaultActions.find((item) => item.value === action);
+        return found ? found.color : "#3b82f6";
+    };
+
     const columns = [
-        { title: "Module Name", dataIndex: "name" },
-        { title: "Description", dataIndex: "description" },
+        { title: "Module Name", dataIndex: "moduleName", key: "moduleName", render: (moduleName) => convertCamelCase(moduleName) },
         {
-            title: "Permissions",
-            dataIndex: "permissions",
-            render: (perms) =>
-                perms?.map((p) => (
-                    <Tag color="blue" key={p}>
-                        {p}
-                    </Tag>
-                )),
+            title: "Actions",
+            dataIndex: "actions",
+            key: "actions",
+            render: (actions) =>
+                <div className="flex flex-wrap gap-2 items-center">
+                    {
+                        actions?.length > 0 ? actions?.map((action) => (
+                            <div key={action} className={`px-[6px] py-[2px] rounded-md text-white text-xs cursor-pointer`} style={{ backgroundColor: getActionColor(action) }}>
+                                {convertCamelCase(action)}
+                            </div>
+                        )) : "No actions added"
+                    }
+                </div>
         },
+        {
+            title: "Is For Super Admin",
+            dataIndex: "isForSuperAdmin",
+            key: "isForSuperAdmin",
+            width: 140,
+            render: (value, record) => (
+                <Switch
+                    checked={value}
+                    onChange={async (checked) => {
+                        const postData = {
+                            moduleId: record._id,
+                            isForSuperAdmin: checked,
+                        };
+                        await updateRecord(postData);
+                    }}
+                />
+            ),
+        },
+        {
+            title: "Is Active",
+            dataIndex: "isActive",
+            key: "isActive",
+            width: 100,
+            render: (value, record) => (
+                <Switch
+                    checked={value}
+                    onChange={async (checked) => {
+                        const postData = {
+                            moduleId: record._id,
+                            isActive: checked,
+                        };
+                        await updateRecord(postData);
+                    }}
+                />
+            ),
+        },
+        // { title: "Description", dataIndex: "description", key: "description" },
+        {
+            title: "Operations",
+            key: "operations",
+            width: 150,
+            fixed: 'right',
+            render: (_, record) => (
+                <div className="flex gap-2">
+                    <Button
+                        icon={<EditOutlined />}
+                        type="text"
+                        onClick={() => handleEdit(record)}
+                    />
+
+                    <Popconfirm
+                        title="Are you sure to delete this module?"
+                        onConfirm={() => deleteModule(record._id)}
+                        okText="Yes"
+                        cancelText="No"
+                    >
+                        <Button
+                            danger
+                            type="text"
+                            icon={<DeleteOutlined />}
+                        />
+                    </Popconfirm>
+                </div>
+            ),
+        }
     ];
 
-    return (
-        <div className="p-5">
-            <div className="flex justify-between mb-4">
-                <h2 className="text-xl font-bold">Modules</h2>
-                <Button type="primary" onClick={() => setOpen(true)}>
-                    + Add Module
-                </Button>
-            </div>
+    const addedModulePaths = modules.map(module => module.moduleName);
 
-            <Table dataSource={modules} columns={columns} rowKey="_id" />
+    const filteredModuleRouteOptions = Object.keys(routeConfig)
+        .filter(routeKey => routeConfig[routeKey].path !== '/' && !addedModulePaths.includes(routeKey))
+        .map(routeKey => ({
+            value: routeKey,
+            label: convertCamelCase(routeKey),
+        }));
+
+    return (
+        <div>
+            <Card>
+                <Table
+                    dataSource={modules}
+                    columns={columns}
+                    rowKey={appKeys._id}
+                    title={() => (
+                        <div className="flex justify-between items-center">
+                            <div className="text-lg font-semibold">Modules</div>
+                            <Button type="primary" icon={<PlusOutlined />} onClick={() => { form.resetFields(); setSelectedModuleId(null); setOpen(true); }}>
+                                Add Module
+                            </Button>
+                        </div>
+                    )}
+                    loading={loading}
+                    pagination={{ pageSize: 10 }}
+                />
+            </Card>
 
             <Modal
-                title="Add Module"
+                title={selectedModuleId ? "Update Module" : "Add Module"}
                 open={open}
+                maskClosable={false}
                 onCancel={() => setOpen(false)}
                 onOk={() => form.submit()}
+                okText={selectedModuleId ? "Update" : "Add"}
+                width={450}
             >
-                <Form form={form} onFinish={handleAdd} layout="vertical">
+                <Form form={form} onFinish={handleAddOrUpdate} layout="vertical" preserve={false}>
                     <Form.Item
-                        name="name"
+                        name="moduleName"
                         label="Module Name"
-                        rules={[{ required: true }]}
+                        rules={[{ required: true, message: "Please select the module name!" }]}
                     >
-                        <Input />
+                        <Select
+                            showSearch
+                            placeholder="Select module name"
+                            options={filteredModuleRouteOptions}
+                            filterOption={(input, option) =>
+                                option.label.toLowerCase().includes(input.toLowerCase())
+                            }
+                            style={{ width: "100%" }}
+                        />
                     </Form.Item>
-                    <Form.Item name="description" label="Description">
-                        <Input.TextArea />
-                    </Form.Item>
-                    <Form.Item name="permissions" label="Permissions">
+
+                    <Form.Item name="actions" label="Actions">
                         <Select
                             mode="tags"
-                            style={{ width: "100%" }}
-                            placeholder="Enter permissions (e.g., read, add, update, delete)"
+                            options={defaultActions}
+                            placeholder="Enter actions (e.g., read, add, update, delete)"
+                            tokenSeparators={[","]}
+                            style={{ width: '100%' }}
+                            disabled={isAllPermission === true}
+                            allowClear
+                            onInputKeyDown={(e) => {
+                                if (e.key === 'Enter' && e.target.value.trim()) {
+                                    e.preventDefault();
+                                    const currentValues = form.getFieldValue('actions') || [];
+                                    const inputVal = e.target.value.trim();
+                                    if (inputVal && !currentValues.includes(inputVal)) {
+                                        form.setFieldsValue({ actions: [...currentValues, inputVal] });
+                                        e.target.value = '';
+                                    }
+                                }
+                            }}
                         />
+                    </Form.Item>
+
+                    <Row gutter={16}>
+                        <Col span={8}>
+                            <Form.Item name="isAllPermission" label="Is All Permission">
+                                <Switch />
+                            </Form.Item>
+                        </Col>
+                        <Col span={8}>
+                            <Form.Item name="isForSuperAdmin" label="Is For Super Admin">
+                                <Switch />
+                            </Form.Item>
+                        </Col>
+                        <Col span={8}>
+                            <Form.Item name="isActive" label="Is Active">
+                                <Switch checked />
+                            </Form.Item>
+                        </Col>
+                    </Row>
+
+                    <Form.Item name="description" label="Description">
+                        <Input.TextArea placeholder="Enter module description" rows={3} />
                     </Form.Item>
                 </Form>
             </Modal>

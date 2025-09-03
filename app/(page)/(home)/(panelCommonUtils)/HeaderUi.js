@@ -8,8 +8,9 @@ import appKeys from "../../../utils/appKeys";
 import SafeAvatar from "../../../components/SafeAvatar";
 import {ChevronDown} from "../../../utils/icons";
 import {profileMenuItems} from "./sideBarMenu";
+import {useAppData} from "../../../masterData/AppDataContext";
 
-export default function ToolbarUi({
+export default function HeaderUi({
                                       isMobile,
                                       collapsed,
                                       setCollapsed,
@@ -17,9 +18,10 @@ export default function ToolbarUi({
                                       pathname,
                                       menuClick,
                                   }) {
+    const { loginUserData } = useAppData();
 
     const menuProps = {
-        items: profileMenuItems,
+        items: profileMenuItems(loginUserData),
         onClick: menuClick,
     };
 

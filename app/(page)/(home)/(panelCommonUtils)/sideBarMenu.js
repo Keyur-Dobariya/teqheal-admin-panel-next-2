@@ -7,6 +7,7 @@ import {
     HomeOutlined, PoweroffOutlined, SettingOutlined,
     StockOutlined,
     TeamOutlined,
+    BookOutlined,
     UserOutlined, WalletOutlined
 } from "@ant-design/icons";
 import {capitalizeLastPathSegment} from "../../../utils/utils";
@@ -24,18 +25,20 @@ const menuItems = [
         label: capitalizeLastPathSegment(pageRoutes.dashboard),
         position: 'top',
     },
-    // {
-    //     key: pageRoutes.companies,
-    //     icon: <HomeOutlined />,
-    //     label: capitalizeLastPathSegment(pageRoutes.companies),
-    //     position: 'top',
-    // },
-    // {
-    //     key: pageRoutes.modules,
-    //     icon: <HomeOutlined />,
-    //     label: capitalizeLastPathSegment(pageRoutes.modules),
-    //     position: 'top',
-    // },
+    {
+        key: pageRoutes.modules,
+        icon: <ApartmentOutlined />,
+        hidden: !isAdmin(),
+        label: capitalizeLastPathSegment(pageRoutes.modules),
+        position: 'top',
+    },
+    {
+        key: pageRoutes.companies,
+        icon: <BookOutlined />,
+        hidden: !isAdmin(),
+        label: capitalizeLastPathSegment(pageRoutes.companies),
+        position: 'top',
+    },
     // {
     //     key: pageRoutes.roles,
     //     icon: <HomeOutlined />,
@@ -171,45 +174,47 @@ const menuItems = [
 const topItems = menuItems.filter(item => item.position !== 'bottom');
 const bottomItems = menuItems.filter(item => item.position === 'bottom');
 
-const profileMenuItems = [
-    {
-        key: pageRoutes.myProfile,
-        label: (
-            <div className="flex items-center">
-                <div className="flex-1">
-                    <div className="text-gray-900 text-[15px]">
-                        {getLocalData(appKeys.fullName)}
+const profileMenuItems = (userData) => {
+    return [
+        {
+            key: pageRoutes.myProfile,
+            label: (
+                <div className="flex items-center">
+                    <div className="flex-1">
+                        <div className="text-gray-900 text-[15px]">
+                            {userData?.userName}
+                        </div>
+                        <div className="text-gray-600 text-[13px]">
+                            {userData?.emailAddress}
+                        </div>
                     </div>
-                    <div className="text-gray-600 text-[13px]">
-                        {getLocalData(appKeys.emailAddress)}
-                    </div>
+                    <ChevronRight />
                 </div>
-                <ChevronRight />
-            </div>
+            ),
+        },
+        { type: 'divider' },
+        ...(isAdmin()
+                ? [
+                    {
+                        label: "Settings",
+                        key: pageRoutes.settings,
+                        icon: <Settings />,
+                    },
+                    { type: 'divider' },
+                ]
+                : []
         ),
-    },
-    { type: 'divider' },
-    ...(isAdmin()
-            ? [
-                {
-                    label: "Settings",
-                    key: pageRoutes.settings,
-                    icon: <Settings />,
-                },
-                { type: 'divider' },
-            ]
-            : []
-    ),
-    {
-        label: (
-            <div className="flex items-center gap-2 text-red-600 text-[15px]">
-                <Power size={15} />
-                <div>LogOut</div>
-            </div>
-        ),
-        key: 'logout',
-    },
-];
+        {
+            label: (
+                <div className="flex items-center gap-2 text-red-600 text-[15px]">
+                    <Power size={15} />
+                    <div>LogOut</div>
+                </div>
+            ),
+            key: 'logout',
+        },
+    ];
+};
 
 const commonMenuTheme = {
     components: {
