@@ -1,5 +1,5 @@
 "use client";
-import React, { useState, useEffect } from "react";
+import React, {useState, useEffect, useRef} from "react";
 import {Table, Button, Modal, Form, Input, Select, Tag, Popconfirm, Card, Switch, Row, Col} from "antd";
 import apiCall, { HttpMethod } from "../../../api/apiServiceProvider";
 import { endpoints } from "../../../api/apiEndpoints";
@@ -15,12 +15,15 @@ export default function Page() {
     const [selectedModuleId, setSelectedModuleId] = useState(null);
     const [loading, setLoading] = useState(false);
     const isAllPermission = Form.useWatch("isAllPermission", form);
+    const fetchTriggered = useRef(false);
 
     const defaultActions = [
         { label: 'Add', value: 'add', color: '#3b82f6' },      // blue-500
         { label: 'Edit', value: 'edit', color: '#f59e42' },    // orange-400
         { label: 'Delete', value: 'delete', color: '#ef4444' },// red-500
-        { label: 'View', value: 'view', color: '#22c55e' },    // green-500
+        { label: 'Read', value: 'read', color: '#22c55e' },    // green-500
+        { label: 'View All', value: 'viewAll', color: '#22c55e' },    // green-500
+        { label: 'View Only Mentioned', value: 'viewOnlyMentioned', color: '#22c55e' },    // green-500
         { label: 'Approve', value: 'approve', color: '#a855f7' },// purple-500
         { label: 'Reject', value: 'reject', color: '#a855f7' }, // purple-500
         { label: 'Status', value: 'status', color: '#06b6d4' },// cyan-500
@@ -35,7 +38,10 @@ export default function Page() {
     ];
 
     useEffect(() => {
-        fetchModules();
+        if (!fetchTriggered.current) {
+            fetchTriggered.current = true;
+            fetchModules();
+        }
     }, []);
 
     const fetchModules = async () => {
@@ -203,7 +209,7 @@ export default function Page() {
         <div>
             <Card>
                 <Table
-                    dataSource={modules}
+                    dataSource={[...(modules || [])].reverse()}
                     columns={columns}
                     rowKey={appKeys._id}
                     title={() => (
@@ -215,7 +221,7 @@ export default function Page() {
                         </div>
                     )}
                     loading={loading}
-                    pagination={{ pageSize: 10 }}
+                    pagination={{ pageSize: 100 }}
                 />
             </Card>
 

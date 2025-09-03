@@ -101,7 +101,6 @@ function ProfileContent() {
             form={form}
             name="signup"
             onKeyDown={null}
-            disabled={!companyRecord}
             initialValues={{ remember: true }}
         >
             <Row gutter={16}>

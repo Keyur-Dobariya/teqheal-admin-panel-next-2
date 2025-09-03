@@ -1,6 +1,7 @@
 const appKeys = {
     isLogin: "isLogin",
     jwtToken: "jwtToken",
+    companyId: "companyId",
     _id: "_id",
     firstName: "firstName",
     middleName: "middleName",

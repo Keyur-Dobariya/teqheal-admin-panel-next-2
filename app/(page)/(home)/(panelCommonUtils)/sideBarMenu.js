@@ -8,7 +8,7 @@ import {
     StockOutlined,
     TeamOutlined,
     BookOutlined,
-    UserOutlined, WalletOutlined
+    UserOutlined, WalletOutlined, LockOutlined
 } from "@ant-design/icons";
 import {capitalizeLastPathSegment} from "../../../utils/utils";
 import {getLocalData, isAdmin} from "../../../dataStorage/DataPref";
@@ -39,12 +39,13 @@ const menuItems = [
         label: capitalizeLastPathSegment(pageRoutes.companies),
         position: 'top',
     },
-    // {
-    //     key: pageRoutes.roles,
-    //     icon: <HomeOutlined />,
-    //     label: capitalizeLastPathSegment(pageRoutes.roles),
-    //     position: 'top',
-    // },
+    {
+        key: pageRoutes.roles,
+        icon: <LockOutlined />,
+        hidden: !isAdmin(),
+        label: capitalizeLastPathSegment(pageRoutes.roles),
+        position: 'top',
+    },
     {
         key: 'emp',
         icon: <UserOutlined />,

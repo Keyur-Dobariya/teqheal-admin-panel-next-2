@@ -1,5 +1,5 @@
 "use client";
-import React, {useState, useEffect} from "react";
+import React, {useState, useEffect, useRef} from "react";
 import {
     Table,
     Button,
@@ -13,14 +13,13 @@ import {endpoints} from "../../../api/apiEndpoints";
 import {
     DeleteOutlined,
     EditOutlined, LinkOutlined,
-    PlusOutlined
+    PlusOutlined, EyeOutlined, EyeInvisibleOutlined, ReloadOutlined
 } from "@ant-design/icons";
 import appKeys from "../../../utils/appKeys";
 import {Package} from "../../../utils/icons";
 import {CompanyModal} from "./CompanyModal";
 import appString from "../../../utils/appString";
 import dayjs from "dayjs";
-import {dayTypeLabel, getLabelByKey, leaveHalfDayTypeLabel, leaveTypeLabel} from "../../../utils/enum";
 
 export default function CompanyPage() {
     const [modules, setModules] = useState([]);
@@ -28,11 +27,16 @@ export default function CompanyPage() {
     const [isModelOpen, setIsModelOpen] = useState(false);
     const [selectedRecord, setSelectedRecord] = useState(null);
     const [loading, setLoading] = useState(false);
+    const [showToken, setShowToken] = useState({});
     const [loadingRecord, setLoadingRecord] = useState({});
+    const fetchTriggered = useRef(false);
 
     useEffect(() => {
-        fetchModules();
-        fetchCompanies();
+        if (!fetchTriggered.current) {
+            fetchTriggered.current = true;
+            fetchModules();
+            fetchCompanies();
+        }
     }, []);
 
     const fetchModules = async () => {
@@ -92,7 +96,7 @@ export default function CompanyPage() {
     };
 
     const generateJoinToken = async (record) => {
-        setLoadingRecord(prev => ({ ...prev, [record._id]: true }));
+        setLoadingRecord(prev => ({...prev, [record._id]: true}));
         await apiCall({
             method: HttpMethod.POST,
             url: endpoints.generateJoinToken,
@@ -102,11 +106,11 @@ export default function CompanyPage() {
             setIsLoading: false,
             showSuccessMessage: true,
             successCallback: () => {
-                setLoadingRecord(prev => ({ ...prev, [record._id]: false }));
+                setLoadingRecord(prev => ({...prev, [record._id]: false}));
                 fetchCompanies();
             },
             errorCallback: () => {
-                setLoadingRecord(prev => ({ ...prev, [record._id]: false }));
+                setLoadingRecord(prev => ({...prev, [record._id]: false}));
             }
         });
     };
@@ -116,6 +120,10 @@ export default function CompanyPage() {
         setIsModelOpen(true);
     };
 
+    const toggleShowToken = (id) => {
+        setShowToken(prev => ({...prev, [id]: !prev[id]}));
+    };
+
     const columns = [
         Table.EXPAND_COLUMN,
         {
@@ -123,10 +131,10 @@ export default function CompanyPage() {
             dataIndex: "companyName",
             key: "companyName",
             render: (text, record) => (
-                <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                <div style={{display: 'flex', alignItems: 'center', gap: 8}}>
                     <Avatar
                         src={record.companyIcon}
-                        icon={!record.companyIcon && <Package />}
+                        icon={!record.companyIcon && <Package/>}
                         size="small"
                         alt={text}
                     />
@@ -138,22 +146,41 @@ export default function CompanyPage() {
         {
             title: "Join Token",
             key: "joinToken",
-            width: 160,
-            render: (_, record) => (
-                <div className="flex gap-2">
+            width: 200,
+            render: (_, record) => {
+                const isExpired = record.isAdminJoinTokenExpired;
+                const visible = showToken[record._id];
+
+                return record?.adminJoinToken ? (
+                    <div
+                        className={`flex items-center gap-3 ${isExpired ? "text-red-700" : ""} select-none font-medium`}
+                    >
+                        {visible ? record.adminJoinToken : '••••••••••'}
+                        <div
+                            className="cursor-pointer"
+                            onClick={() => toggleShowToken(record._id)}
+                            title={visible ? "Hide token" : "Show token"}
+                        >
+                            {visible ? <EyeInvisibleOutlined/> : <EyeOutlined/>}
+                        </div>
+                        <ReloadOutlined
+                            onClick={() => generateJoinToken(record)}
+                            className="cursor-pointer text-sky-600 text-sm"
+                            title="Refresh token"
+                        />
+                    </div>
+                ) : (
                     <Button
                         type="primary"
-                        icon={<LinkOutlined />}
+                        icon={<LinkOutlined/>}
                         loading={!!loadingRecord[record._id]}
                         onClick={() => generateJoinToken(record)}
+                        size="small"
                     >
                         Generate
                     </Button>
-                    {record.adminJoinToken && (
-                        <span style={{ marginLeft: 8, fontWeight: 500 }}>{record.adminJoinToken}</span>
-                    )}
-                </div>
-            ),
+                );
+            },
         },
         {
             title: "Is Active",
@@ -204,8 +231,8 @@ export default function CompanyPage() {
     const tableExpandRows = (record) => {
         return (
             <div>
-                {extraFieldCommon("companyWebsite", record?.companyWebsite)}
-                {extraFieldCommon("companyAddress", record?.companyAddress)}
+                {extraFieldCommon("Company Website", record?.companyWebsite)}
+                {extraFieldCommon("Company Address", record?.companyAddress)}
                 {extraFieldCommon(appString.startDate, dayjs(record.startDate).format("DD, MMM YYYY"))}
                 {extraFieldCommon(appString.endDate, dayjs(record.endDate).format("DD, MMM YYYY"))}
                 {extraFieldCommon(appString.createdAt, dayjs(record.createdAt).format("DD, MMM YYYY [at] hh:mm a"))}

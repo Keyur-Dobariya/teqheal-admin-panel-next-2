@@ -128,6 +128,10 @@ const endpoints = {
     getSingleCompany: `${environment.apiBaseUrl}/api/getSingleCompany/:id`,
     generateJoinToken: `${environment.apiBaseUrl}/api/generateJoinToken`,
     getCompanyByJoinToken: `${environment.apiBaseUrl}/api/getCompanyByJoinToken`,
+    addUpdateRole: `${environment.apiBaseUrl}/api/addUpdateRole`,
+    deleteRole: `${environment.apiBaseUrl}/api/deleteRole/:id`,
+    assignRole: `${environment.apiBaseUrl}/api/assignRole`,
+    getRolesByCompany: `${environment.apiBaseUrl}/api/getRolesByCompany`,
 };
 
 export {environment, endpoints};
