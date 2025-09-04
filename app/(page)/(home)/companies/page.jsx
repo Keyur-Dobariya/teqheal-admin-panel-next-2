@@ -23,6 +23,7 @@ import dayjs from "dayjs";
 
 export default function CompanyPage() {
     const [modules, setModules] = useState([]);
+    const [modulePermission, setModulePermission] = useState([]);
     const [companies, setCompanies] = useState([]);
     const [isModelOpen, setIsModelOpen] = useState(false);
     const [selectedRecord, setSelectedRecord] = useState(null);
@@ -34,6 +35,7 @@ export default function CompanyPage() {
     useEffect(() => {
         if (!fetchTriggered.current) {
             fetchTriggered.current = true;
+            fetchRolePermission();
             fetchModules();
             fetchCompanies();
         }
@@ -61,6 +63,20 @@ export default function CompanyPage() {
             showSuccessMessage: false,
             successCallback: (data) => {
                 setCompanies(data?.data || []);
+            },
+        });
+    };
+
+    const fetchRolePermission = async () => {
+        await apiCall({
+            method: HttpMethod.GET,
+            url: endpoints.getRolePermission,
+            setIsLoading: false,
+            showSuccessMessage: false,
+            successCallback: (data) => {
+                if (data?.data) {
+                    setModulePermission(data?.data || []);
+                }
             },
         });
     };
@@ -135,7 +151,7 @@ export default function CompanyPage() {
                     <Avatar
                         src={record.companyIcon}
                         icon={!record.companyIcon && <Package/>}
-                        size="small"
+                        size="default"
                         alt={text}
                     />
                     <span>{text}</span>
@@ -175,7 +191,7 @@ export default function CompanyPage() {
                         icon={<LinkOutlined/>}
                         loading={!!loadingRecord[record._id]}
                         onClick={() => generateJoinToken(record)}
-                        size="small"
+                        size="middle"
                     >
                         Generate
                     </Button>
@@ -279,6 +295,7 @@ export default function CompanyPage() {
                 selectedRecord={selectedRecord}
                 setSelectedRecord={setSelectedRecord}
                 modules={modules}
+                modulePermission={modulePermission}
                 loading={loading}
                 onSubmit={async (postData) => {
                     await updateRecord(postData);

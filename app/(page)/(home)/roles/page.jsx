@@ -9,17 +9,19 @@ import {
     Modal,
     Form,
     Input,
-    Select,
+    Select, Row, Col,
 } from "antd";
 import apiCall, { HttpMethod } from "../../../api/apiServiceProvider";
 import { endpoints } from "../../../api/apiEndpoints";
 import {
+    ApartmentOutlined,
     DeleteOutlined,
     EditOutlined,
     PlusOutlined,
 } from "@ant-design/icons";
 import {getLocalData} from "../../../dataStorage/DataPref";
 import appKeys from "../../../utils/appKeys";
+import {ModuleTreeModal} from "../companies/ModuleTreeModal";
 
 export default function RolePage() {
     const [roles, setRoles] = useState([]);
@@ -27,8 +29,19 @@ export default function RolePage() {
     const [loading, setLoading] = useState(false);
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [selectedRole, setSelectedRole] = useState(null);
+    const [isOnlyPermissionEdit, setIsOnlyPermissionEdit] = useState(null);
     const [form] = Form.useForm();
     const fetchTriggered = useRef(false);
+    const [isModuleModelOpen, setIsModuleModelOpen] = useState(false);
+    const [modulePermissions, setModulePermissions] = useState([]);
+
+    useEffect(() => {
+        if (!fetchTriggered.current) {
+            fetchTriggered.current = true;
+            fetchModules();
+            fetchRoles();
+        }
+    }, []);
 
     const fetchModules = async () => {
         await apiCall({
@@ -54,18 +67,12 @@ export default function RolePage() {
             setIsLoading: setLoading,
             showSuccessMessage: false,
             successCallback: (data) => {
-                setRoles(data?.data || []);
+                if(data?.data) {
+                    setRoles(data?.data || []);
+                }
             },
         });
     };
-
-    useEffect(() => {
-        if (!fetchTriggered.current) {
-            fetchTriggered.current = true;
-            fetchModules();
-            fetchRoles();
-        }
-    }, []);
 
     const deleteRole = async (id) => {
         setLoading(true);
@@ -80,13 +87,19 @@ export default function RolePage() {
         });
     };
 
-    const handleEdit = (record) => {
+    const handleEdit = (record, isOnlyPermissionEdit) => {
         setSelectedRole(record);
-        setIsModalOpen(true);
-        form.setFieldsValue({
-            ...record,
-            // You may want to transform permissions if needed
-        });
+        if(isOnlyPermissionEdit) {
+            setModulePermissions(record.modulePermissions || []);
+            setIsOnlyPermissionEdit(true);
+            setIsModuleModelOpen(true);
+        } else {
+            setIsOnlyPermissionEdit(false);
+            setIsModalOpen(true);
+            form.setFieldsValue({
+                ...record,
+            });
+        }
     };
 
     const handleAdd = () => {
@@ -95,14 +108,26 @@ export default function RolePage() {
         setIsModalOpen(true);
     };
 
-    const handleModalOk = async () => {
+    const handleModalOk = async (permissionData = []) => {
         try {
-            const values = await form.validateFields();
-            const postData = {
-                ...values,
-                companyId: getLocalData(appKeys.companyId),
-                roleId: selectedRole?._id,
-            };
+            let postData;
+            if(isOnlyPermissionEdit) {
+                postData = {
+                    ...selectedRole,
+                    companyId: getLocalData(appKeys.companyId),
+                    modulePermissions: permissionData,
+                    ...(selectedRole ? { roleId: selectedRole?._id } : {}),
+                };
+            } else {
+                const values = await form.validateFields();
+                postData = {
+                    ...values,
+                    companyId: getLocalData(appKeys.companyId),
+                    modulePermissions: modulePermissions,
+                    ...(selectedRole ? { roleId: selectedRole?._id } : {}),
+                };
+            }
+
             setLoading(true);
             await apiCall({
                 method: HttpMethod.POST,
@@ -129,11 +154,22 @@ export default function RolePage() {
             key: "roleName",
         },
         {
+            title: "Manage Permission",
+            key: "permission",
+            width: 180,
+            align: "center",
+            render: (_, record) => (
+                <div className="flex justify-center items-center">
+                    <Button icon={<ApartmentOutlined />} type="primary" onClick={() => handleEdit(record, true)} />
+                </div>
+            ),
+        },
+        {
             title: "Is Active",
             dataIndex: "isActive",
             key: "isActive",
             width: 100,
-            render: (value, record) => (
+            render: (value, record) => record?.isManageable ? (
                 <Switch
                     checked={value}
                     onChange={async (checked) => {
@@ -152,16 +188,16 @@ export default function RolePage() {
                         });
                     }}
                 />
-            ),
+            ) : "-",
         },
         {
             title: "Operations",
             key: "operations",
             width: 150,
             fixed: "right",
-            render: (_, record) => (
+            render: (_, record) => record?.isManageable ? (
                 <div className="flex gap-2">
-                    <Button icon={<EditOutlined />} type="text" onClick={() => handleEdit(record)} />
+                    <Button icon={<EditOutlined />} type="text" onClick={() => handleEdit(record, false)} />
                     <Popconfirm
                         title="Are you sure to delete this role?"
                         onConfirm={() => deleteRole(record._id)}
@@ -171,7 +207,7 @@ export default function RolePage() {
                         <Button danger type="text" icon={<DeleteOutlined />} />
                     </Popconfirm>
                 </div>
-            ),
+            ) : "-",
         },
     ];
 
@@ -214,31 +250,36 @@ export default function RolePage() {
                         <Input placeholder="Enter role name" />
                     </Form.Item>
 
-                    <Form.Item name="isActive" label="Is Active" valuePropName="checked" initialValue={true}>
-                        <Switch />
-                    </Form.Item>
-
-                    {/* You can implement the permissions UI here,
-              e.g., a ModuleTreeModal or multi-select for permissions */}
-
-                    <Form.Item name="permissions" label="Permissions" rules={[{ required: true, message: "Please select permissions!" }]}>
-                        <Select
-                            mode="multiple"
-                            placeholder="Select permissions"
-                            options={modules.flatMap(module =>
-                                (module.actions || []).map(action => ({
-                                    label: `${module.moduleName} - ${action}`,
-                                    value: `${module._id}_${action}`,
-                                }))
-                            )}
-                        />
-                        {/*
-              Note: You need to map this multi-select selection into your permissions format on submit.
-              Alternatively, include your ModuleTreeModal here, controlled via state.
-            */}
-                    </Form.Item>
+                    <Row gutter={16} align="middle">
+                        <Col xs={24} sm={12}>
+                            <Form.Item name="isActive" label="Is Active" valuePropName="checked"
+                                       initialValue={true}>
+                                <Switch/>
+                            </Form.Item>
+                        </Col>
+                        <Col xs={24} sm={12}>
+                            <Button type="primary" style={{width: '100%'}} icon={<ApartmentOutlined/>}
+                                    iconPosition='end' onClick={() => setIsModuleModelOpen(true)}>
+                                Set Module Permission
+                            </Button>
+                        </Col>
+                    </Row>
                 </Form>
             </Modal>
+
+            {isModuleModelOpen && <ModuleTreeModal
+                isModuleModelOpen={isModuleModelOpen}
+                setIsModuleModelOpen={setIsModuleModelOpen}
+                modules={modules}
+                modulePermissions={modulePermissions}
+                isTabMode={false}
+                onSubmit={async (modulePermissions) => {
+                    setModulePermissions(modulePermissions);
+                    if(isOnlyPermissionEdit) {
+                        await handleModalOk(modulePermissions);
+                    }
+                }}
+            />}
         </div>
     );
 }

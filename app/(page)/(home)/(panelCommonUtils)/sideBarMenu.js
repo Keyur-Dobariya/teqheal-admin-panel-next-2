@@ -33,6 +33,13 @@ const menuItems = [
         position: 'top',
     },
     {
+        key: pageRoutes.rolePermission,
+        icon: <LockOutlined />,
+        hidden: !isAdmin(),
+        label: capitalizeLastPathSegment(pageRoutes.rolePermission),
+        position: 'top',
+    },
+    {
         key: pageRoutes.companies,
         icon: <BookOutlined />,
         hidden: !isAdmin(),

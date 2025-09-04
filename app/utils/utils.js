@@ -42,6 +42,19 @@ export const convertCamelCase = (text) => {
         .replace(/^./, str => str.toUpperCase());
 };
 
+export const convertLowerCaseKey = (text) => {
+    if (!text) return '';
+    const words = text.split(' ');
+    return words
+        .map((word, index) => {
+            if (index === 0) {
+                return word.toLowerCase();
+            }
+            return word.charAt(0).toUpperCase() + word.slice(1);
+        })
+        .join('');
+};
+
 export function getFirstName(fullName) {
     if (!fullName) return '';
     return fullName.trim().split(' ')[0];

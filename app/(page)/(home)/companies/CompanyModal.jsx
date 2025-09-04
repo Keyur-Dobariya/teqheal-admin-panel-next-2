@@ -7,21 +7,20 @@ import {
     Input,
     Switch,
     Row,
-    Col, DatePicker, Upload, Tree
+    Col, DatePicker, Upload
 } from "antd";
 import {
     ApartmentOutlined,
-    DownOutlined,
     PlusOutlined
 } from "@ant-design/icons";
-import {convertCamelCase} from "../../../utils/utils";
 import dayjs from "dayjs";
-import {getAllCheckedKeys, getDefaultCheckedKeys, ModuleTreeModal} from "./ModuleTreeModal";
+import {ModuleTreeModal} from "./ModuleTreeModal";
 
 export const CompanyModal = ({
                                  isModelOpen,
                                  setIsModelOpen,
                                  modules,
+                                 modulePermission,
                                  selectedRecord,
                                  setSelectedRecord,
                                  loading,
@@ -31,8 +30,19 @@ export const CompanyModal = ({
     const [form] = Form.useForm();
     const isEditing = !!selectedRecord;
     const [companyIcon, setCompanyIcon] = useState();
-    const [modulePermissions, setModulePermissions] = useState([]);
+    const [adminPermissions, setAdminPermissions] = useState([]);
+    const [userPermissions, setUserPermissions] = useState([]);
     const containerRef = useRef(null);
+
+    useEffect(() => {
+        if (selectedRecord) {
+            setAdminPermissions(selectedRecord?.adminPermissions || []);
+            setUserPermissions(selectedRecord?.userPermissions || []);
+        } else {
+            setAdminPermissions(modulePermission?.adminPermissions || []);
+            setUserPermissions(modulePermission?.userPermissions || []);
+        }
+    }, [modulePermission]);
 
     useEffect(() => {
         if (isModelOpen) {
@@ -59,7 +69,8 @@ export const CompanyModal = ({
         const postData = {
             ...formValues,
             companyIcon: companyIcon,
-            modulePermissions,
+            adminPermissions,
+            userPermissions,
             ...(selectedRecord ? {companyId: selectedRecord._id, oldCompanyIcon: selectedRecord.companyIcon} : {}),
         };
 
@@ -81,7 +92,8 @@ export const CompanyModal = ({
     const handleModelClose = () => {
         setIsModelOpen(false);
         setCompanyIcon(null);
-        setModulePermissions([]);
+        setAdminPermissions([]);
+        setUserPermissions([]);
         setSelectedRecord(null);
         form.resetFields();
         if (containerRef.current) {
@@ -186,7 +198,6 @@ export const CompanyModal = ({
                             </Col>
                         </Row>
 
-
                         <Form.Item name="companyAddress" label="Company Address">
                             <Input.TextArea placeholder="Enter company address" rows={3}/>
                         </Form.Item>
@@ -196,14 +207,14 @@ export const CompanyModal = ({
             </Modal>
 
             {isModuleModelOpen && <ModuleTreeModal
-                key={selectedRecord._id + '_' + JSON.stringify(modulePermissions)}
                 isModuleModelOpen={isModuleModelOpen}
                 setIsModuleModelOpen={setIsModuleModelOpen}
                 modules={modules}
-                modulePermissions={modulePermissions.length ? modulePermissions : selectedRecord?.modulePermissions || []}
-                onSubmit={(modulePermissionsResult) => {
-                    console.log("modulePermissionsResult=>", modulePermissionsResult)
-                    setModulePermissions(modulePermissionsResult);
+                adminPermissions={adminPermissions}
+                userPermissions={userPermissions}
+                onTabSubmit={(adminUpdatedPermissions, userUpdatedPermissions) => {
+                    setAdminPermissions(adminUpdatedPermissions);
+                    setUserPermissions(userUpdatedPermissions);
                 }}
             />}
         </>

@@ -1,4 +1,4 @@
-export const isDevMode = false;
+export const isDevMode = true;
 
 // firebase target:apply hosting default whogetsa
 // firebase deploy --only hosting:devtracker
@@ -132,6 +132,13 @@ const endpoints = {
     deleteRole: `${environment.apiBaseUrl}/api/deleteRole/:id`,
     assignRole: `${environment.apiBaseUrl}/api/assignRole`,
     getRolesByCompany: `${environment.apiBaseUrl}/api/getRolesByCompany`,
+    addUpdateAction: `${environment.apiBaseUrl}/api/addUpdateAction`,
+    deleteAction: `${environment.apiBaseUrl}/api/deleteAction/:id`,
+    getAllActions: `${environment.apiBaseUrl}/api/getAllActions`,
+    getRolePermission: `${environment.apiBaseUrl}/api/getRolePermission`,
+    modifyRolePermission: `${environment.apiBaseUrl}/api/modifyRolePermission`,
+    rolePermissionUpdateAllCompany: `${environment.apiBaseUrl}/api/rolePermission/updateAllCompany`,
+    rolePermissionUpdateSingleCompany: `${environment.apiBaseUrl}/api/rolePermission/updateCompany/:companyId`,
 };
 
 export {environment, endpoints};

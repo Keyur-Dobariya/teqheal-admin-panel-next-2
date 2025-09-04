@@ -1,41 +1,35 @@
 "use client";
 import React, {useState, useEffect, useRef} from "react";
-import {Table, Button, Modal, Form, Input, Select, Tag, Popconfirm, Card, Switch, Row, Col} from "antd";
+import {
+    Table,
+    Button,
+    Modal,
+    Form,
+    Input,
+    Select,
+    Popconfirm,
+    Card,
+    Switch,
+    Row,
+    Col,
+} from "antd";
 import apiCall, { HttpMethod } from "../../../api/apiServiceProvider";
 import { endpoints } from "../../../api/apiEndpoints";
 import appKeys from "../../../utils/appKeys";
 import {DeleteOutlined, EditOutlined, PlusOutlined} from "@ant-design/icons";
 import {convertCamelCase} from "../../../utils/utils";
 import {routeConfig} from "../../../utils/pageRoutes";
+import CardActionsShow from "./CardActionsShow";
 
 export default function Page() {
     const [modules, setModules] = useState([]);
+    const [actions, setActions] = useState([]);
     const [open, setOpen] = useState(false);
     const [form] = Form.useForm();
     const [selectedModuleId, setSelectedModuleId] = useState(null);
     const [loading, setLoading] = useState(false);
     const isAllPermission = Form.useWatch("isAllPermission", form);
     const fetchTriggered = useRef(false);
-
-    const defaultActions = [
-        { label: 'Add', value: 'add', color: '#3b82f6' },      // blue-500
-        { label: 'Edit', value: 'edit', color: '#f59e42' },    // orange-400
-        { label: 'Delete', value: 'delete', color: '#ef4444' },// red-500
-        { label: 'Read', value: 'read', color: '#22c55e' },    // green-500
-        { label: 'View All', value: 'viewAll', color: '#22c55e' },    // green-500
-        { label: 'View Only Mentioned', value: 'viewOnlyMentioned', color: '#22c55e' },    // green-500
-        { label: 'Approve', value: 'approve', color: '#a855f7' },// purple-500
-        { label: 'Reject', value: 'reject', color: '#a855f7' }, // purple-500
-        { label: 'Status', value: 'status', color: '#06b6d4' },// cyan-500
-        { label: 'Upload', value: 'upload', color: '#06b6d4' },// cyan-500
-        { label: 'Download', value: 'download', color: '#06b6d4' },// cyan-500
-        { label: 'Manage', value: 'manage', color: '#fbbf24' },// gold/yellow-400
-        { label: 'Publish', value: 'publish', color: '#fbbf24' },// gold/yellow-400
-        { label: 'Lock', value: 'lock', color: '#6b7280' },    // gray-500
-        { label: 'Unlock', value: 'unlock', color: '#6b7280' },// gray-500
-        { label: 'Screenshot View', value: 'screenshotView', color: '#6b7280' },// gray-500
-        { label: 'Mouse Keyboard Event View', value: 'mouseKeyboardEventView', color: '#6b7280' },// gray-500
-    ];
 
     useEffect(() => {
         if (!fetchTriggered.current) {
@@ -75,7 +69,7 @@ export default function Page() {
             moduleName: values.moduleName,
             description: values.description,
             actions: values.actions || [],
-            ...(selectedModuleId ? { moduleId: selectedModuleId } : {}),
+            ...(selectedModuleId ? { moduleId: selectedModuleId._id } : {}),
         };
 
         await updateRecord(postData);
@@ -108,8 +102,8 @@ export default function Page() {
     };
 
     const getActionColor = (action) => {
-        const found = defaultActions.find((item) => item.value === action);
-        return found ? found.color : "#3b82f6";
+        const found = actions.find((item) => item.actionName === action);
+        return found ? found.actionColor : "#3b82f6";
     };
 
     const columns = [
@@ -118,16 +112,22 @@ export default function Page() {
             title: "Actions",
             dataIndex: "actions",
             key: "actions",
-            render: (actions) =>
+            render: (actions) => (
                 <div className="flex flex-wrap gap-2 items-center">
-                    {
-                        actions?.length > 0 ? actions?.map((action) => (
-                            <div key={action} className={`px-[6px] py-[2px] rounded-md text-white text-xs cursor-pointer`} style={{ backgroundColor: getActionColor(action) }}>
-                                {convertCamelCase(action)}
+                    {actions?.length > 0 ? actions.map(action => {
+                        const filteredAction = actions.find(a => a._id === action._id);
+                        return (
+                            <div
+                                key={action._id}
+                                className="px-[6px] py-[2px] rounded-md text-white text-xs cursor-pointer"
+                                style={{ backgroundColor: filteredAction?.actionColor || "#3b82f6" }}
+                            >
+                                {convertCamelCase(filteredAction?.actionName || '')}
                             </div>
-                        )) : "No actions added"
-                    }
+                        );
+                    }) : "No actions added"}
                 </div>
+            )
         },
         {
             title: "Is For Super Admin",
@@ -198,15 +198,26 @@ export default function Page() {
 
     const addedModulePaths = modules.map(module => module.moduleName);
 
-    const filteredModuleRouteOptions = Object.keys(routeConfig)
-        .filter(routeKey => routeConfig[routeKey].path !== '/' && !addedModulePaths.includes(routeKey))
-        .map(routeKey => ({
-            value: routeKey,
-            label: convertCamelCase(routeKey),
+    const filteredModuleRouteOptions = Object.values(routeConfig)
+        .filter(route =>
+            route.path !== '/' &&
+            !addedModulePaths.includes(route.key)
+        )
+        .map(route => ({
+            value: route.key,
+            label: convertCamelCase(route.key),
         }));
 
     return (
         <div>
+            <CardActionsShow onActionChange={(data) => {
+                const defaultActions = data.map(action => ({
+                    label: convertCamelCase(action.actionName),
+                    value: action._id,
+                    color: action.actionColor,
+                }));
+                setActions(defaultActions);
+            }} />
             <Card>
                 <Table
                     dataSource={[...(modules || [])].reverse()}
@@ -253,24 +264,13 @@ export default function Page() {
 
                     <Form.Item name="actions" label="Actions">
                         <Select
-                            mode="tags"
-                            options={defaultActions}
-                            placeholder="Enter actions (e.g., read, add, update, delete)"
-                            tokenSeparators={[","]}
+                            mode="multiple"
+                            options={actions}
+                            placeholder="Select actions (e.g., Read, Add, Delete)"
                             style={{ width: '100%' }}
+                            optionFilterProp="label"
                             disabled={isAllPermission === true}
                             allowClear
-                            onInputKeyDown={(e) => {
-                                if (e.key === 'Enter' && e.target.value.trim()) {
-                                    e.preventDefault();
-                                    const currentValues = form.getFieldValue('actions') || [];
-                                    const inputVal = e.target.value.trim();
-                                    if (inputVal && !currentValues.includes(inputVal)) {
-                                        form.setFieldsValue({ actions: [...currentValues, inputVal] });
-                                        e.target.value = '';
-                                    }
-                                }
-                            }}
                         />
                     </Form.Item>
 
