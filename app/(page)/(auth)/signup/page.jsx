@@ -7,13 +7,15 @@ import appString from "../../../utils/appString";
 import appKeys from "../../../utils/appKeys";
 import { pageRoutes } from "../../../utils/pageRoutes";
 import AnimatedDiv, {Direction} from "../../../components/AnimatedDiv";
-import {Suspense, useEffect, useState} from "react";
+import {Suspense, useEffect, useRef, useState} from "react";
 import apiCall, {HttpMethod} from "../../../api/apiServiceProvider";
 import {endpoints} from "../../../api/apiEndpoints";
 import validationRules from "../../../utils/validationRules";
 import {AppDataFields, useAppData} from "../../../masterData/AppDataContext";
 import CardProfilePage from "../../(home)/CardProfilePage";
 import {showToast} from "../../../components/CommonComponents";
+import { jwtDecode } from "jwt-decode";
+import {getLocalData} from "../../../dataStorage/DataPref";
 
 function ProfileContent() {
     const searchParams = useSearchParams();
@@ -21,9 +23,28 @@ function ProfileContent() {
     const [form] = Form.useForm();
     const router = useRouter();
 
+    const decoded = token ? jwtDecode(token) : null;
+
     const [loading, setLoading] = useState(false);
-    const [isCompanyLoading, setIsCompanyLoading] = useState(false);
     const [companyRecord, setCompanyRecord] = useState(null);
+    const toastShownRef = useRef(false);
+
+    useEffect(() => {
+        if (decoded && !companyRecord && !toastShownRef.current) {
+            const now = Date.now();
+
+            if (decoded?.tokenExpireTime && decoded?.tokenExpireTime > now) {
+                setCompanyRecord(decoded);
+                console.log("decoded=>", decoded)
+                form.setFieldsValue({ emailAddress: decoded?.emailAddress });
+                router.replace(window.location.pathname);
+            } else {
+                showToast('error', 'Invitation link has expired. Please request a new one.');
+                toastShownRef.current = true;
+                router.replace(window.location.pathname);
+            }
+        }
+    }, [decoded]);
 
     const onFormSubmit = async () => {
         if(companyRecord) {
@@ -34,6 +55,7 @@ function ProfileContent() {
 
                 const postData = {
                     ...formData,
+                    emailAddress: companyRecord.emailAddress,
                     companyId: companyRecord.companyId
                 }
 
@@ -54,45 +76,19 @@ function ProfileContent() {
         }
     };
 
-    useEffect(() => {
-        if(token) {
-            getCompanyByJoinToken();
-        }
-    }, [token]);
-
-    useEffect(() => {
-        if (companyRecord) {
-            setTimeout(() => {
-                form.setFieldsValue({ emailAddress: companyRecord.adminEmail });
-            }, 0);
-        }
-    }, [companyRecord]);
-
-    const getCompanyByJoinToken = async () => {
-        await apiCall({
-            method: HttpMethod.POST,
-            url: endpoints.getCompanyByJoinToken,
-            data: {
-                token: token
-            },
-            setIsLoading: setIsCompanyLoading,
-            showSuccessMessage: false,
-            successCallback: (data) => {
-                if(data?.data) {
-                    setCompanyRecord(data?.data);
-                }
-            },
-        });
-    };
-
     return <AnimatedDiv className="z-10 w-full max-w-110 p-4" style={{ marginLeft: "2px" }} direction={Direction.BOTTOM_TO_TOP}>
         <div className="font-medium text-2xl xl:text-3xl">{appString.signUpTitle}</div>
         <div className="w-[25px] h-[5px] rounded-xl bg-amber-500 my-2" />
         {companyRecord ? (
-            <div className="text-gray-500 text-sm mb-7 xl:text-base">
-                Let's register and connect with{" "}
-                <span className="text-blue-950 font-medium">{companyRecord?.companyName}</span>{" "}
-                to get the things done together and faster.
+            <div>
+                <div className="text-gray-500 text-sm mb-2 xl:text-base">
+                    Let's register and connect with{" "}
+                    <span className="text-blue-950 font-medium">{companyRecord?.companyName}</span>{" "}
+                    to get the things done together and faster.
+                </div>
+                <div className="text-red-700 text-[14px] font-medium mb-7">
+                    Important: Please do not refresh the page during signup, as it may interrupt the process.
+                </div>
             </div>
         ) : (
             <div className="text-gray-500 text-sm mb-7 xl:text-base">{appString.signUpDes}</div>

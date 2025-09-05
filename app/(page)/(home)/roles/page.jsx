@@ -17,7 +17,7 @@ import {
     ApartmentOutlined,
     DeleteOutlined,
     EditOutlined,
-    PlusOutlined,
+    PlusOutlined, SendOutlined,
 } from "@ant-design/icons";
 import {getLocalData} from "../../../dataStorage/DataPref";
 import appKeys from "../../../utils/appKeys";
@@ -34,6 +34,8 @@ export default function RolePage() {
     const fetchTriggered = useRef(false);
     const [isModuleModelOpen, setIsModuleModelOpen] = useState(false);
     const [modulePermissions, setModulePermissions] = useState([]);
+
+    const [inviteEmails, setInviteEmails] = useState({});
 
     useEffect(() => {
         if (!fetchTriggered.current) {
@@ -154,6 +156,29 @@ export default function RolePage() {
             key: "roleName",
         },
         {
+            title: "Send Invitation",
+            key: "sendInvitation",
+            width: 250,
+            render: (_, record) => (
+                <div className="flex gap-2">
+                    <Input
+                        style={{flex: 1}}
+                        placeholder="Enter email"
+                        value={inviteEmails[record._id] || ""}
+                        onChange={(e) => handleInviteEmailChange(record._id, e.target.value)}
+                        size="middle"
+                    />
+                    <Button
+                        type="primary"
+                        icon={<SendOutlined />}
+                        size="middle"
+                        onClick={() => handleSendInvitation(record._id)}
+                        disabled={!inviteEmails[record._id] || inviteEmails[record._id].trim() === ""}
+                    />
+                </div>
+            ),
+        },
+        {
             title: "Manage Permission",
             key: "permission",
             width: 180,
@@ -210,6 +235,25 @@ export default function RolePage() {
             ) : "-",
         },
     ];
+
+    const handleInviteEmailChange = (roleId, value) => {
+        setInviteEmails(prev => ({ ...prev, [roleId]: value }));
+    };
+
+    const handleSendInvitation = async (roleId) => {
+        const email = inviteEmails[roleId];
+        if (!email) return;
+
+        // await apiCall({
+        //     method: HttpMethod.POST,
+        //     url: endpoints.sendInvitation,
+        //     data: { roleId, email },
+        //     showSuccessMessage: true,
+        //     successCallback: () => {
+        //         setInviteEmails(prev => ({ ...prev, [roleId]: "" })); // Clear input after send
+        //     },
+        // });
+    };
 
     return (
         <div>

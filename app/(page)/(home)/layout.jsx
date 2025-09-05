@@ -15,6 +15,9 @@ import useHomePageLayout from "../../hooks/useHomePageLayout";
 import HeaderUi from "./(panelCommonUtils)/HeaderUi";
 import SidebarAndDrawerUi from "./(panelCommonUtils)/SidebarAndDrawerUi";
 import FooterUi from "./(panelCommonUtils)/FooterUi";
+import {useAppData} from "../../masterData/AppDataContext";
+import {jwtDecode} from "jwt-decode";
+import {useModulePermissions} from "../../hooks/useModulePermissions";
 
 export default function HomePage({children}) {
     const {
@@ -26,6 +29,9 @@ export default function HomePage({children}) {
         pathname,
         push
     } = useHomePageLayout({mobileBreakpoint: 'lg'});
+
+    const { loginUserData } = useAppData();
+    const { hasModulePermission, hasActionPermission } = useModulePermissions();
 
     const [isLogoutModalOpen, setIsLogoutModalOpen] = useState(false);
     const [isCodeModalOpen, setIsCodeModalOpen] = useState(false);
@@ -73,6 +79,7 @@ export default function HomePage({children}) {
                     drawerVisible={drawerVisible}
                     setDrawerVisible={setDrawerVisible}
                     pathname={pathname}
+                    hasModulePermission={hasModulePermission}
                     menuClick={menuClick}
                 />
 
@@ -83,10 +90,11 @@ export default function HomePage({children}) {
                         setCollapsed={setCollapsed}
                         setDrawerVisible={setDrawerVisible}
                         pathname={pathname}
+                        loginUserData={loginUserData}
                         menuClick={menuClick}
                     />
 
-                    <BreadcrumbGenerator pathname={pathname}/>
+                    <BreadcrumbGenerator pathname={pathname} hasModulePermission={hasModulePermission}/>
 
                     <div className="flex-1 overflow-y-auto" ref={containerRef} style={{scrollbarWidth: "thin"}}>
                         <div className="h-full flex flex-col gap-4">

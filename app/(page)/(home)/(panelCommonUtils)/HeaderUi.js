@@ -11,14 +11,14 @@ import {profileMenuItems} from "./sideBarMenu";
 import {useAppData} from "../../../masterData/AppDataContext";
 
 export default function HeaderUi({
-                                      isMobile,
-                                      collapsed,
-                                      setCollapsed,
-                                      setDrawerVisible,
-                                      pathname,
-                                      menuClick,
-                                  }) {
-    const { loginUserData } = useAppData();
+                                     isMobile,
+                                     collapsed,
+                                     setCollapsed,
+                                     setDrawerVisible,
+                                     pathname,
+                                     loginUserData,
+                                     menuClick,
+                                 }) {
 
     const menuProps = {
         items: profileMenuItems(loginUserData),
@@ -27,15 +27,15 @@ export default function HeaderUi({
 
     return (
         <div className="flex justify-between items-center bg-white border-b-1 border-gray-200 py-3 px-5"
-             style={{ borderBottom: `1px ${appColor.borderClr} solid` }}>
+             style={{borderBottom: `1px ${appColor.borderClr} solid`}}>
             <div className="flex items-center gap-3">
                 <Button
                     shape="circle"
                     type="text"
                     icon={
                         isMobile
-                            ? <MenuUnfoldOutlined />
-                            : (collapsed ? <MenuUnfoldOutlined /> : <MenuFoldOutlined />)
+                            ? <MenuUnfoldOutlined/>
+                            : (collapsed ? <MenuUnfoldOutlined/> : <MenuFoldOutlined/>)
                     }
                     onClick={() => {
                         if (isMobile) {
@@ -49,17 +49,17 @@ export default function HeaderUi({
                     {capitalizeLastPathSegment(pathname)}
                 </div>}
             </div>
-            {isMobile && <img src={imagePaths.icon_big_dark} alt="icon" width={150} height={45} />}
+            {isMobile && <img src={imagePaths.icon_big_dark} alt="icon" width={150} height={45}/>}
             <div className="flex items-center gap-4">
-                <Dropdown overlayStyle={{ minWidth: 200 }} menu={menuProps} trigger={["click"]}>
+                <Dropdown overlayStyle={{minWidth: 200}} menu={menuProps} trigger={["click"]}>
                     <div className="flex items-center gap-2 cursor-pointer">
                         <Tooltip title={getLocalData(appKeys.fullName)}>
                             <SafeAvatar
-                                isMyData={true}
+                                userData={loginUserData}
                             />
                         </Tooltip>
                         {!isMobile && <div className="text-[15px] font-medium">{getLocalData(appKeys.fullName)}</div>}
-                        {!isMobile && <ChevronDown />}
+                        {!isMobile && <ChevronDown/>}
                     </div>
                 </Dropdown>
             </div>

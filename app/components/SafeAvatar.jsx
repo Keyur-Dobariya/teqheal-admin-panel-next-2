@@ -7,22 +7,22 @@ import { getDarkColor } from '../utils/appColor';
 import { getLocalData } from "../dataStorage/DataPref";
 import appKeys from "../utils/appKeys";
 
-const SafeAvatar = ({ userData, showName = false, isMyData = false, size, ...props }) => {
+const SafeAvatar = ({ userData, showName = false, size, ...props }) => {
     const [imageError, setImageError] = useState(false);
 
-    const profileData = userData || (isMyData ? {
-        profilePhoto: getLocalData(appKeys.profilePhoto),
-        gender: getLocalData(appKeys.gender),
-        fullName: getLocalData(appKeys.fullName),
-    } : null);
+    const profileData = {
+        profilePhoto: userData?.profilePhoto,
+        gender: userData?.gender,
+        userName: userData?.userName,
+    };
 
-    if (imageError && showName && profileData?.fullName) {
-        const initials = getTwoCharacterFromName(profileData.fullName);
+    if (imageError && showName && profileData?.userName) {
+        const initials = getTwoCharacterFromName(profileData.userName);
         return (
             <Avatar
                 size={size}
                 style={{
-                    backgroundColor: getDarkColor(profileData.fullName),
+                    backgroundColor: getDarkColor(profileData.userName),
                     color: 'white',
                     fontWeight: '500',
                     fontSize: 'auto'

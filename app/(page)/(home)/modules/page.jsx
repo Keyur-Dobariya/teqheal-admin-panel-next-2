@@ -17,7 +17,7 @@ import apiCall, { HttpMethod } from "../../../api/apiServiceProvider";
 import { endpoints } from "../../../api/apiEndpoints";
 import appKeys from "../../../utils/appKeys";
 import {DeleteOutlined, EditOutlined, PlusOutlined} from "@ant-design/icons";
-import {convertCamelCase} from "../../../utils/utils";
+import {convertCamelCase, convertLowerCaseKey} from "../../../utils/utils";
 import {routeConfig} from "../../../utils/pageRoutes";
 import CardActionsShow from "./CardActionsShow";
 
@@ -65,11 +65,17 @@ export default function Page() {
     };
 
     const handleAddOrUpdate = async (values) => {
+        let actions = [];
+        values?.actions.map(action => {
+            actions.push({
+                _id: action.value,
+            })
+        })
         const postData = {
-            moduleName: values.moduleName,
+            moduleName: convertLowerCaseKey(values.moduleName.trim()),
             description: values.description,
-            actions: values.actions || [],
-            ...(selectedModuleId ? { moduleId: selectedModuleId._id } : {}),
+            actions: actions,
+            ...(selectedModuleId ? { moduleId: selectedModuleId } : {}),
         };
 
         await updateRecord(postData);
@@ -94,16 +100,20 @@ export default function Page() {
 
     const handleEdit = (record) => {
         setSelectedModuleId(record._id);
+        let actions = [];
+        record?.actions.map(action => {
+            actions.push({
+                label: convertCamelCase(action.actionName),
+                value: action._id,
+                color: action.actionColor,
+            })
+        })
         form.setFieldsValue({
             ...record,
             moduleName: convertCamelCase(record.moduleName),
+            actions: actions,
         });
         setOpen(true);
-    };
-
-    const getActionColor = (action) => {
-        const found = actions.find((item) => item.actionName === action);
-        return found ? found.actionColor : "#3b82f6";
     };
 
     const columns = [

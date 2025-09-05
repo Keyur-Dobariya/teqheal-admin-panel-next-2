@@ -15,7 +15,7 @@ import {useAppData} from "../../../masterData/AppDataContext";
 
 export default function Page() {
 
-    const {attendancesData} = useAppData();
+    const {attendancesData, loginUserData} = useAppData();
 
     const now = new Date();
     const startOfToday = new Date(now.getFullYear(), now.getMonth(), now.getDate()).getTime();
@@ -27,7 +27,7 @@ export default function Page() {
 
     return (
         <div className="flex flex-col gap-5 mt-3">
-            <CardGreeting />
+            <CardGreeting loginUserData={loginUserData} />
             <CardDashboardCommon />
             {!isAdmin() && <Row gutter={[16, 16]}>
                 <Col xs={24} md={12} lg={12} xl={12} xxl={6}>

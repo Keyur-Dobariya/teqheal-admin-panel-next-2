@@ -2,6 +2,7 @@ import appKeys from "../utils/appKeys";
 import {UserRole} from "../utils/enum";
 
 export const storeLoginData = (data, isLoginData) => {
+  if(!data) return;
   const userData = isLoginData ? data["data"] : data;
   if(isLoginData) {
     if(data[appKeys.jwtToken]) {
@@ -9,7 +10,8 @@ export const storeLoginData = (data, isLoginData) => {
       localStorage.setItem(appKeys.jwtToken, data[appKeys.jwtToken]);
     }
   }
-  localStorage.setItem(appKeys.companyId, userData[appKeys.companyId]);
+  console.log("data=>", data)
+  localStorage.setItem(appKeys.companyId, userData[appKeys.companyId]['_id']);
   localStorage.setItem(appKeys.employeeCode, userData[appKeys.employeeCode]);
   localStorage.setItem(appKeys.fullName, userData[appKeys.fullName]);
   localStorage.setItem(appKeys.emailAddress, userData[appKeys.emailAddress]);
@@ -27,5 +29,5 @@ export const getLocalData = (key) => {
 }
 
 export const isAdmin = () => {
-  return getLocalData(appKeys.role) === UserRole.Admin;
+  return getLocalData(appKeys.role) !== UserRole.Admin;
 };

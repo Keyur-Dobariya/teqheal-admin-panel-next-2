@@ -34,8 +34,10 @@ export default function ClientOnly({children, fallback = null}) {
                 if(data?.data) {
                     appDataContext.setAllMasterData(data.data);
                     storeLoginData(data?.data?.loginUserData, false);
+                    setHasMounted(true);
+                } else {
+                    setHasMounted(true);
                 }
-                setHasMounted(true);
             },
             errorCallback: () => {
                 setHasMounted(true);

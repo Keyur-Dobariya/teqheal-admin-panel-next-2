@@ -1,4 +1,4 @@
-import {pageRoutes} from "../../../utils/pageRoutes";
+import {pageRoutes, routeConfig} from "../../../utils/pageRoutes";
 import {
     AndroidOutlined,
     ApartmentOutlined, AuditOutlined, CalendarOutlined, CarryOutOutlined,
@@ -18,169 +18,168 @@ import appKeys from "../../../utils/appKeys";
 import appColor from "../../../utils/appColor";
 import {ConfigProvider, Menu} from "antd";
 
-const menuItems = [
-    {
-        key: pageRoutes.dashboard,
-        icon: <HomeOutlined />,
-        label: capitalizeLastPathSegment(pageRoutes.dashboard),
-        position: 'top',
-    },
-    {
-        key: pageRoutes.modules,
-        icon: <ApartmentOutlined />,
-        hidden: !isAdmin(),
-        label: capitalizeLastPathSegment(pageRoutes.modules),
-        position: 'top',
-    },
-    {
-        key: pageRoutes.rolePermission,
-        icon: <LockOutlined />,
-        hidden: !isAdmin(),
-        label: capitalizeLastPathSegment(pageRoutes.rolePermission),
-        position: 'top',
-    },
-    {
-        key: pageRoutes.companies,
-        icon: <BookOutlined />,
-        hidden: !isAdmin(),
-        label: capitalizeLastPathSegment(pageRoutes.companies),
-        position: 'top',
-    },
-    {
-        key: pageRoutes.roles,
-        icon: <LockOutlined />,
-        hidden: !isAdmin(),
-        label: capitalizeLastPathSegment(pageRoutes.roles),
-        position: 'top',
-    },
-    {
-        key: 'emp',
-        icon: <UserOutlined />,
-        hidden: !isAdmin(),
-        label: capitalizeLastPathSegment(pageRoutes.employees),
-        position: 'top',
-        children: [
-            {
-                key: pageRoutes.employees,
-                icon: <TeamOutlined />,
-                label: capitalizeLastPathSegment(pageRoutes.employees),
-            },
-            {
-                key: pageRoutes.todayReport,
-                icon: <StockOutlined />,
-                label: capitalizeLastPathSegment(pageRoutes.todayReport),
-            },
-            {
-                key: pageRoutes.basicSalary,
-                icon: <DollarOutlined />,
-                label: capitalizeLastPathSegment(pageRoutes.basicSalary),
-            },
-        ],
-    },
-    {
-        key: pageRoutes.client,
-        icon: <TeamOutlined />,
-        label: capitalizeLastPathSegment(pageRoutes.client),
-        position: 'top',
-    },
-    {
-        key: pageRoutes.project,
-        icon: <CodeSandboxOutlined />,
-        label: capitalizeLastPathSegment(pageRoutes.project),
-        position: 'top',
-    },
-    {
-        key: pageRoutes.tasks,
-        icon: <ApartmentOutlined />,
-        label: capitalizeLastPathSegment(pageRoutes.tasks),
-        position: 'top',
-    },
-    {
-        key: pageRoutes.dailyUpdate,
-        icon: <FileText />,
-        label: capitalizeLastPathSegment(pageRoutes.dailyUpdate),
-        hidden: !isAdmin(),
-        position: 'top',
-    },
-    {
-        key: pageRoutes.leave,
-        icon: <CarryOutOutlined />,
-        label: capitalizeLastPathSegment(pageRoutes.leave),
-        position: 'top',
-    },
-    {
-        key: 'rep',
-        icon: <AuditOutlined />,
-        label: capitalizeLastPathSegment(appString.report),
-        position: 'top',
-        children: [
-            {
-                key: pageRoutes.leaveReport,
-                icon: <AuditOutlined />,
-                label: capitalizeLastPathSegment(pageRoutes.leaveReport),
-            },
-            {
-                key: pageRoutes.punchReport,
-                icon: <CodeSandboxOutlined />,
-                hidden: !isAdmin(),
-                label: capitalizeLastPathSegment(pageRoutes.punchReport),
-            },
-            {
-                key: pageRoutes.salaryReport,
-                icon: <WalletOutlined />,
-                label: capitalizeLastPathSegment(pageRoutes.salaryReport),
-            },
-        ]
-    },
-    {
-        key: pageRoutes.calendar,
-        icon: <CalendarOutlined />,
-        label: capitalizeLastPathSegment(pageRoutes.calendar),
-        position: 'top',
-    },
-    {
-        key: pageRoutes.chatting,
-        icon: <CommentOutlined />,
-        label: capitalizeLastPathSegment(pageRoutes.chatting),
-        position: 'top',
-    },
-    {
-        key: pageRoutes.appUpdate,
-        icon: <AndroidOutlined />,
-        label: capitalizeLastPathSegment(pageRoutes.appUpdate),
-        hidden: !isAdmin(),
-        position: 'top',
-    },
-    // {
-    //     key: pageRoutes.application,
-    //     icon: <AndroidOutlined />,
-    //     label: capitalizeLastPathSegment(pageRoutes.application),
-    //     hidden: !isAdmin(),
-    //     position: 'top',
-    // },
-    {
-        key: pageRoutes.myProfile,
-        icon: <UserOutlined />,
-        label: capitalizeLastPathSegment(pageRoutes.myProfile),
-        position: 'bottom',
-    },
-    {
-        key: pageRoutes.settings,
-        icon: <SettingOutlined />,
-        hidden: !isAdmin(),
-        label: capitalizeLastPathSegment(pageRoutes.settings),
-        position: 'bottom',
-    },
-    {
-        key: appKeys.logout,
-        icon: <PoweroffOutlined style={{ color: appColor.danger }} />,
-        label: capitalizeLastPathSegment(appKeys.logout),
-        position: 'bottom',
-    },
-];
-
-const topItems = menuItems.filter(item => item.position !== 'bottom');
-const bottomItems = menuItems.filter(item => item.position === 'bottom');
+const menuItems = (hasModulePermission) => {
+    return [
+        {
+            key: pageRoutes.dashboard,
+            icon: <HomeOutlined />,
+            label: capitalizeLastPathSegment(pageRoutes.dashboard),
+            position: 'top',
+        },
+        {
+            key: pageRoutes.modules,
+            icon: <ApartmentOutlined />,
+            hidden: !hasModulePermission(routeConfig.modules.key),
+            label: capitalizeLastPathSegment(pageRoutes.modules),
+            position: 'top',
+        },
+        {
+            key: pageRoutes.rolePermission,
+            icon: <LockOutlined />,
+            hidden: !hasModulePermission(routeConfig.rolePermission.key),
+            label: capitalizeLastPathSegment(pageRoutes.rolePermission),
+            position: 'top',
+        },
+        {
+            key: pageRoutes.companies,
+            icon: <BookOutlined />,
+            hidden: !hasModulePermission(routeConfig.companies.key),
+            label: capitalizeLastPathSegment(pageRoutes.companies),
+            position: 'top',
+        },
+        {
+            key: pageRoutes.roles,
+            icon: <LockOutlined />,
+            hidden: !hasModulePermission(routeConfig.roles.key),
+            label: capitalizeLastPathSegment(pageRoutes.roles),
+            position: 'top',
+        },
+        {
+            key: 'emp',
+            icon: <UserOutlined />,
+            hidden: !hasModulePermission(routeConfig.employees.key),
+            label: capitalizeLastPathSegment(pageRoutes.employees),
+            position: 'top',
+            children: [
+                {
+                    key: pageRoutes.employees,
+                    icon: <TeamOutlined />,
+                    label: capitalizeLastPathSegment(pageRoutes.employees),
+                },
+                {
+                    key: pageRoutes.todayReport,
+                    icon: <StockOutlined />,
+                    label: capitalizeLastPathSegment(pageRoutes.todayReport),
+                },
+                {
+                    key: pageRoutes.basicSalary,
+                    icon: <DollarOutlined />,
+                    label: capitalizeLastPathSegment(pageRoutes.basicSalary),
+                },
+            ],
+        },
+        {
+            key: pageRoutes.client,
+            icon: <TeamOutlined />,
+            label: capitalizeLastPathSegment(pageRoutes.client),
+            position: 'top',
+        },
+        {
+            key: pageRoutes.project,
+            icon: <CodeSandboxOutlined />,
+            label: capitalizeLastPathSegment(pageRoutes.project),
+            position: 'top',
+        },
+        {
+            key: pageRoutes.tasks,
+            icon: <ApartmentOutlined />,
+            label: capitalizeLastPathSegment(pageRoutes.tasks),
+            position: 'top',
+        },
+        {
+            key: pageRoutes.dailyUpdate,
+            icon: <FileText />,
+            label: capitalizeLastPathSegment(pageRoutes.dailyUpdate),
+            hidden: !hasModulePermission(routeConfig.dailyUpdate.key),
+            position: 'top',
+        },
+        {
+            key: pageRoutes.leave,
+            icon: <CarryOutOutlined />,
+            label: capitalizeLastPathSegment(pageRoutes.leave),
+            position: 'top',
+        },
+        {
+            key: 'rep',
+            icon: <AuditOutlined />,
+            label: capitalizeLastPathSegment(appString.report),
+            position: 'top',
+            children: [
+                {
+                    key: pageRoutes.leaveReport,
+                    icon: <AuditOutlined />,
+                    label: capitalizeLastPathSegment(pageRoutes.leaveReport),
+                },
+                {
+                    key: pageRoutes.punchReport,
+                    icon: <CodeSandboxOutlined />,
+                    hidden: !hasModulePermission(routeConfig.punchReport.key),
+                    label: capitalizeLastPathSegment(pageRoutes.punchReport),
+                },
+                {
+                    key: pageRoutes.salaryReport,
+                    icon: <WalletOutlined />,
+                    label: capitalizeLastPathSegment(pageRoutes.salaryReport),
+                },
+            ]
+        },
+        {
+            key: pageRoutes.calendar,
+            icon: <CalendarOutlined />,
+            label: capitalizeLastPathSegment(pageRoutes.calendar),
+            position: 'top',
+        },
+        {
+            key: pageRoutes.chatting,
+            icon: <CommentOutlined />,
+            label: capitalizeLastPathSegment(pageRoutes.chatting),
+            position: 'top',
+        },
+        {
+            key: pageRoutes.appUpdate,
+            icon: <AndroidOutlined />,
+            label: capitalizeLastPathSegment(pageRoutes.appUpdate),
+            hidden: !hasModulePermission(routeConfig.appUpdate.key),
+            position: 'top',
+        },
+        // {
+        //     key: pageRoutes.application,
+        //     icon: <AndroidOutlined />,
+        //     label: capitalizeLastPathSegment(pageRoutes.application),
+        //     hidden: !isAdmin(),
+        //     position: 'top',
+        // },
+        {
+            key: pageRoutes.myProfile,
+            icon: <UserOutlined />,
+            label: capitalizeLastPathSegment(pageRoutes.myProfile),
+            position: 'bottom',
+        },
+        {
+            key: pageRoutes.settings,
+            icon: <SettingOutlined />,
+            hidden: !hasModulePermission(routeConfig.settings.key),
+            label: capitalizeLastPathSegment(pageRoutes.settings),
+            position: 'bottom',
+        },
+        {
+            key: appKeys.logout,
+            icon: <PoweroffOutlined style={{ color: appColor.danger }} />,
+            label: capitalizeLastPathSegment(appKeys.logout),
+            position: 'bottom',
+        },
+    ];
+};
 
 const profileMenuItems = (userData) => {
     return [
@@ -257,8 +256,6 @@ const SidebarMenu = ({ items, pathname, menuClick }) => (
 
 export {
     menuItems,
-    topItems,
-    bottomItems,
     profileMenuItems,
     SidebarMenu,
 };

@@ -115,9 +115,11 @@ export default function CompanyPage() {
         setLoadingRecord(prev => ({...prev, [record._id]: true}));
         await apiCall({
             method: HttpMethod.POST,
-            url: endpoints.generateJoinToken,
+            url: endpoints.inviteUser,
             data: {
-                companyId: record._id
+                companyId: record._id,
+                roleId: record?.adminRoleId,
+                emailAddress: record?.adminEmail,
             },
             setIsLoading: false,
             showSuccessMessage: true,

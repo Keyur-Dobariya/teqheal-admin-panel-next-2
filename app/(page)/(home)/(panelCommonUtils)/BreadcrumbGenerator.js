@@ -7,7 +7,7 @@ import {capitalizeLastPathSegment} from "../../../utils/utils";
 import {Breadcrumb} from "antd";
 import {menuItems} from "./sideBarMenu";
 
-export default function BreadcrumbGenerator({pathname}) {
+export default function BreadcrumbGenerator({pathname, hasModulePermission}) {
     const [breadcrumbItems, setBreadcrumbItems] = useState([]);
 
     useEffect(() => {
@@ -69,7 +69,7 @@ export default function BreadcrumbGenerator({pathname}) {
             }
             return null;
         };
-        return findInItems(menuItems);
+        return findInItems(menuItems(hasModulePermission));
     };
 
     return !pageRoutes.dashboard.includes(pathname) && <Breadcrumb

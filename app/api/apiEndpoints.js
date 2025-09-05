@@ -126,7 +126,7 @@ const endpoints = {
     deleteCompany: `${environment.apiBaseUrl}/api/deleteCompany/:id`,
     getAllCompanies: `${environment.apiBaseUrl}/api/getAllCompanies`,
     getSingleCompany: `${environment.apiBaseUrl}/api/getSingleCompany/:id`,
-    generateJoinToken: `${environment.apiBaseUrl}/api/generateJoinToken`,
+    inviteUser: `${environment.apiBaseUrl}/api/inviteUser`,
     getCompanyByJoinToken: `${environment.apiBaseUrl}/api/getCompanyByJoinToken`,
     addUpdateRole: `${environment.apiBaseUrl}/api/addUpdateRole`,
     deleteRole: `${environment.apiBaseUrl}/api/deleteRole/:id`,
