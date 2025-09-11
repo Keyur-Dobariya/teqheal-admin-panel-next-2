@@ -137,6 +137,7 @@ const endpoints = {
     getAllActions: `${environment.apiBaseUrl}/api/getAllActions`,
     getRolePermission: `${environment.apiBaseUrl}/api/getRolePermission`,
     modifyRolePermission: `${environment.apiBaseUrl}/api/modifyRolePermission`,
+    updateRolePermissionForAll: `${environment.apiBaseUrl}/api/rolePermission/updateForAll`,
     rolePermissionUpdateAllCompany: `${environment.apiBaseUrl}/api/rolePermission/updateAllCompany`,
     rolePermissionUpdateSingleCompany: `${environment.apiBaseUrl}/api/rolePermission/updateCompany/:companyId`,
 };

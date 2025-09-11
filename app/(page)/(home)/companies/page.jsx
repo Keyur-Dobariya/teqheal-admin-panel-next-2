@@ -20,8 +20,14 @@ import {Package} from "../../../utils/icons";
 import {CompanyModal} from "./CompanyModal";
 import appString from "../../../utils/appString";
 import dayjs from "dayjs";
+import {useActionLoading} from "../../../hooks/useActionLoading";
+import {useRunOnce} from "../../../hooks/useRunOnce";
+import CommonActionButton from "../(panelCommonUtils)/CommonActionButton";
 
 export default function CompanyPage() {
+    const { withLoading } = useActionLoading();
+    const apiLoading = withLoading();
+
     const [modules, setModules] = useState([]);
     const [modulePermission, setModulePermission] = useState([]);
     const [companies, setCompanies] = useState([]);
@@ -30,26 +36,17 @@ export default function CompanyPage() {
     const [loading, setLoading] = useState(false);
     const [showToken, setShowToken] = useState({});
     const [loadingRecord, setLoadingRecord] = useState({});
-    const fetchTriggered = useRef(false);
-
-    useEffect(() => {
-        if (!fetchTriggered.current) {
-            fetchTriggered.current = true;
-            fetchRolePermission();
-            fetchModules();
-            fetchCompanies();
-        }
-    }, []);
 
     const fetchModules = async () => {
         await apiCall({
             method: HttpMethod.GET,
             url: endpoints.getAllModules,
-            setIsLoading: false,
             showSuccessMessage: false,
             successCallback: (data) => {
-                const filteredModules = (data?.data || []).filter(module => !module.isForSuperAdmin);
-                setModules(filteredModules);
+                if(data?.data) {
+                    const filteredModules = (data?.data || []).filter(module => !module.isForSuperAdmin);
+                    setModules(filteredModules);
+                }
             },
         });
     };
@@ -59,10 +56,11 @@ export default function CompanyPage() {
         await apiCall({
             method: HttpMethod.GET,
             url: endpoints.getAllCompanies,
-            setIsLoading: setLoading,
             showSuccessMessage: false,
             successCallback: (data) => {
-                setCompanies(data?.data || []);
+                if(data?.data) {
+                    setCompanies(data?.data || []);
+                }
             },
         });
     };
@@ -71,21 +69,22 @@ export default function CompanyPage() {
         await apiCall({
             method: HttpMethod.GET,
             url: endpoints.getRolePermission,
-            setIsLoading: false,
             showSuccessMessage: false,
             successCallback: (data) => {
-                if (data?.data) {
+                if(data?.data) {
                     setModulePermission(data?.data || []);
                 }
             },
         });
     };
 
-    const deleteCompany = async (id) => {
+    const { fetchLoading } = useRunOnce([fetchRolePermission, fetchModules, fetchCompanies]);
+
+    const deleteCompany = async (record) => {
         setLoading(true);
         await apiCall({
             method: HttpMethod.DELETE,
-            url: endpoints.deleteCompany.replace(":id", id),
+            url: endpoints.deleteCompany.replace(":id", record?._id),
             setIsLoading: setLoading,
             showSuccessMessage: true,
             successCallback: (data) => {
@@ -205,18 +204,24 @@ export default function CompanyPage() {
             dataIndex: "isActive",
             key: "isActive",
             width: 120,
-            render: (value, record) => (
-                <Switch
-                    checked={value}
-                    onChange={async (checked) => {
-                        const postData = {
-                            companyId: record._id,
-                            isActive: checked,
-                        };
-                        await updateRecord(postData);
-                    }}
-                />
-            ),
+            render: (value, record) => {
+                const rowLoading = withLoading(`isActive-${record._id}`);
+                return (
+                    <Switch
+                        checked={value}
+                        loading={rowLoading.loading}
+                        onChange={async (checked) => {
+                            await rowLoading.run(async () => {
+                                const postData = {
+                                    companyId: record._id,
+                                    isActive: checked,
+                                };
+                                await updateRecord(postData);
+                            });
+                        }}
+                    />
+                );
+            },
         },
         {
             title: "Operations",
@@ -224,17 +229,11 @@ export default function CompanyPage() {
             width: 150,
             fixed: "right",
             render: (_, record) => (
-                <div className="flex gap-2">
-                    <Button icon={<EditOutlined/>} type="text" onClick={() => handleEdit(record)}/>
-                    <Popconfirm
-                        title="Are you sure to delete this company?"
-                        onConfirm={() => deleteCompany(record._id)}
-                        okText="Yes"
-                        cancelText="No"
-                    >
-                        <Button danger type="text" icon={<DeleteOutlined/>}/>
-                    </Popconfirm>
-                </div>
+                <CommonActionButton
+                    record={record}
+                    handleEdit={handleEdit}
+                    handleDelete={deleteCompany}
+                />
             ),
         },
     ];
@@ -273,21 +272,17 @@ export default function CompanyPage() {
                     scroll={{x: "max-content"}}
                     title={() => (
                         <div className="flex justify-between items-center">
-                            <div className="text-lg font-semibold">Companies</div>
-                            <Button
-                                type="primary"
-                                icon={<PlusOutlined/>}
-                                onClick={() => {
+                            <div className="text-base font-semibold">Companies</div>
+                            <CommonActionButton
+                                addBtnName={appString.addCompany}
+                                handleAdd={() => {
                                     setSelectedRecord(null);
                                     setIsModelOpen(true);
                                 }}
-                            >
-                                Add Company
-                            </Button>
+                            />
                         </div>
                     )}
-                    loading={loading}
-                    pagination={{pageSize: 10}}
+                    loading={fetchLoading}
                 />
             </Card>
 

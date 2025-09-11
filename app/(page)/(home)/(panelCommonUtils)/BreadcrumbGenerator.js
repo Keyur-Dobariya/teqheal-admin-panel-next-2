@@ -5,9 +5,8 @@ import {pageRoutes} from "../../../utils/pageRoutes";
 import {HomeOutlined, UserOutlined} from "@ant-design/icons";
 import {capitalizeLastPathSegment} from "../../../utils/utils";
 import {Breadcrumb} from "antd";
-import {menuItems} from "./sideBarMenu";
 
-export default function BreadcrumbGenerator({pathname, hasModulePermission}) {
+export default function BreadcrumbGenerator({pathname, sidebarMenus}) {
     const [breadcrumbItems, setBreadcrumbItems] = useState([]);
 
     useEffect(() => {
@@ -69,7 +68,7 @@ export default function BreadcrumbGenerator({pathname, hasModulePermission}) {
             }
             return null;
         };
-        return findInItems(menuItems(hasModulePermission));
+        return findInItems(sidebarMenus);
     };
 
     return !pageRoutes.dashboard.includes(pathname) && <Breadcrumb

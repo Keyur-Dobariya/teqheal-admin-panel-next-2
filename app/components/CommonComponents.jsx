@@ -42,6 +42,15 @@ export const antTag = (value, color) => {
     ) : '-';
 }
 
+export const CustomTag = ({value, color}) => {
+    return value ? (
+        <div className="w-fit place-self-center px-2 text-center rounded-md text-[12px] text-white"
+             style={{backgroundColor: color || appColor.secondPrimary}}>
+            {value}
+        </div>
+    ) : '-';
+}
+
 export const timeTag = (value, color) => {
     return <Tag bordered={false} color={color} style={{
         width: 80,

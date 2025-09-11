@@ -17,13 +17,24 @@ import {
     ApartmentOutlined,
     DeleteOutlined,
     EditOutlined,
-    PlusOutlined, SendOutlined,
+    PlusOutlined, SendOutlined, UserAddOutlined,
 } from "@ant-design/icons";
 import {getLocalData} from "../../../dataStorage/DataPref";
 import appKeys from "../../../utils/appKeys";
 import {ModuleTreeModal} from "../companies/ModuleTreeModal";
+import {usePermission} from "../../../hooks/usePermission";
+import {routeConfig} from "../../../utils/pageRoutes";
+import {mActions} from "../../../utils/enum";
+import appString from "../../../utils/appString";
+import CommonActionButton from "../(panelCommonUtils)/CommonActionButton";
 
 export default function RolePage() {
+    const { hasPermission } = usePermission();
+    const canAdd = !!hasPermission(mActions.add, routeConfig.roles.key);
+    const canEdit = !!hasPermission(mActions.edit, routeConfig.roles.key);
+    const canDelete = !!hasPermission(mActions.delete, routeConfig.roles.key);
+    const canManageStatus = !!hasPermission(mActions.status, routeConfig.roles.key);
+
     const [roles, setRoles] = useState([]);
     const [modules, setModules] = useState([]);
     const [loading, setLoading] = useState(false);
@@ -76,19 +87,6 @@ export default function RolePage() {
         });
     };
 
-    const deleteRole = async (id) => {
-        setLoading(true);
-        await apiCall({
-            method: HttpMethod.DELETE,
-            url: endpoints.deleteRole.replace(":id", id),
-            setIsLoading: setLoading,
-            showSuccessMessage: true,
-            successCallback: (data) => {
-                fetchRoles();
-            },
-        });
-    };
-
     const handleEdit = (record, isOnlyPermissionEdit) => {
         setSelectedRole(record);
         if(isOnlyPermissionEdit) {
@@ -102,6 +100,19 @@ export default function RolePage() {
                 ...record,
             });
         }
+    };
+
+    const deleteRole = async (record) => {
+        setLoading(true);
+        await apiCall({
+            method: HttpMethod.DELETE,
+            url: endpoints.deleteRole.replace(":id", record?._id),
+            setIsLoading: setLoading,
+            showSuccessMessage: true,
+            successCallback: (data) => {
+                fetchRoles();
+            },
+        });
     };
 
     const handleAdd = () => {
@@ -193,10 +204,13 @@ export default function RolePage() {
             title: "Is Active",
             dataIndex: "isActive",
             key: "isActive",
+            align: "center",
+            hidden: !canManageStatus,
             width: 100,
             render: (value, record) => record?.isManageable ? (
                 <Switch
                     checked={value}
+                    size="small"
                     onChange={async (checked) => {
                         const postData = {
                             roleId: record._id,
@@ -219,19 +233,14 @@ export default function RolePage() {
             title: "Operations",
             key: "operations",
             width: 150,
-            fixed: "right",
+            align: "center",
+            hidden: !canEdit && !canDelete,
             render: (_, record) => record?.isManageable ? (
-                <div className="flex gap-2">
-                    <Button icon={<EditOutlined />} type="text" onClick={() => handleEdit(record, false)} />
-                    <Popconfirm
-                        title="Are you sure to delete this role?"
-                        onConfirm={() => deleteRole(record._id)}
-                        okText="Yes"
-                        cancelText="No"
-                    >
-                        <Button danger type="text" icon={<DeleteOutlined />} />
-                    </Popconfirm>
-                </div>
+                    <CommonActionButton
+                        record={record}
+                        handleEdit={canEdit && ((record) => handleEdit(record, false))}
+                        handleDelete={canDelete && deleteRole}
+                    />
             ) : "-",
         },
     ];
@@ -265,13 +274,13 @@ export default function RolePage() {
                     title={() => (
                         <div className="flex justify-between items-center">
                             <div className="text-lg font-semibold">Roles</div>
-                            <Button type="primary" icon={<PlusOutlined />} onClick={handleAdd}>
-                                Add Role
-                            </Button>
+                            {canAdd && <CommonActionButton
+                                addBtnName={appString.addRole}
+                                handleAdd={handleAdd}
+                            />}
                         </div>
                     )}
                     loading={loading}
-                    pagination={{ pageSize: 10 }}
                     scroll={{ x: "max-content" }}
                 />
             </Card>

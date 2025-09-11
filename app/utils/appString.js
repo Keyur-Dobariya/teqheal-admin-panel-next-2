@@ -115,6 +115,10 @@ const appString = {
     addRecord: 'Add Record',
     updateRecord: 'Update Record',
     addEmployee: 'Add Employee',
+    addCompany: 'Add Company',
+    addRole: 'Add Role',
+    addModule: 'Add Module',
+    addAction: 'Add Action',
     updateEmployee: 'Update Employee',
     addBasicSalary: 'Add Basic Salary',
     updateBasicSalary: 'Update Basic Salary',
@@ -243,6 +247,11 @@ const appString = {
     eventType: "Event Type",
     eventLeaveType: "Event LeaveType",
     eventDate: "Event Date",
+    moduleName: "Module Name",
+    actions: "Actions",
+    isForSuperAdmin: "Is For Super Admin",
+    operations: "Operations",
+    noActions: "No actions added",
 };
 
 export default appString;

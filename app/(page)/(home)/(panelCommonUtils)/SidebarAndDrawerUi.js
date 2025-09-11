@@ -3,7 +3,7 @@ import {Drawer, Layout} from "antd";
 import {pageRoutes} from "../../../utils/pageRoutes";
 import AnimatedDiv, {Direction} from "../../../components/AnimatedDiv";
 import imagePaths from "../../../utils/imagesPath";
-import {bottomItems, menuItems, SidebarMenu, topItems} from "./sideBarMenu";
+import {SidebarMenu} from "./sideBarMenu";
 
 const {Sider} = Layout;
 
@@ -13,11 +13,9 @@ export default function SidebarAndDrawerUi({
                                                drawerVisible,
                                                setDrawerVisible,
                                                pathname,
-                                               hasModulePermission,
+                                               sidebarMenus,
                                                menuClick,
                                            }) {
-
-    const sidebarMenus = menuItems(hasModulePermission);
 
     const topItems = sidebarMenus.filter(item => item.position !== 'bottom');
     const bottomItems = sidebarMenus.filter(item => item.position === 'bottom');

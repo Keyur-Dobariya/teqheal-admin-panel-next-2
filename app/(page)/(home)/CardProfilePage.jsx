@@ -78,7 +78,7 @@ export default function CardProfilePage({ profileData, handleEditSuccess }) {
                                         {profileData?.fullName} {profileData?._id === getLocalData(appKeys._id) ? "(You)" : ''}
                                     </div>
                                     <div className="text-sm text-gray-600">
-                                        {profileData?.role} | {profileData?.employeeCode}
+                                        {profileData?.role?.roleName} | {profileData?.employeeCode}
                                     </div>
                                 </div>}
                                 {!profileData && <div className="w-30"><Skeleton active title={false} paragraph={{rows: 2}}/></div>}
@@ -106,7 +106,7 @@ export default function CardProfilePage({ profileData, handleEditSuccess }) {
                             <CommonInfoBox title={appString.emergencyContactNo} value={profileData?.emergencyContactNo} />
                             <CommonInfoBox title={appString.gender} value={profileData?.gender} />
                             <CommonInfoBox title={appString.bloodGroup} value={profileData?.bloodGroup} />
-                            <CommonInfoBox title={appString.role} value={profileData?.role} />
+                            <CommonInfoBox title={appString.role} value={profileData?.role?.roleName} />
                             <CommonInfoBox title={appString.approvalStatus} value={capitalizeLastPathSegment(profileData?.approvalStatus)} isTag={true} tagColor={approvalStatusColor(profileData?.approvalStatus)} />
                             <CommonInfoBox title={appString.address} value={profileData?.address} />
                             <CommonInfoBox title={appString.pincode} value={profileData?.pincode} />

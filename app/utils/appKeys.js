@@ -143,6 +143,10 @@ const appKeys = {
     eventType: "eventType",
     eventLeaveType: "eventLeaveType",
     eventDate: "eventDate",
+    moduleName: "moduleName",
+    actions: "actions",
+    isForSuperAdmin: "isForSuperAdmin",
+    operations: "operations",
 };
 
 export default appKeys;

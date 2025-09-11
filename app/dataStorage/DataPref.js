@@ -10,8 +10,7 @@ export const storeLoginData = (data, isLoginData) => {
       localStorage.setItem(appKeys.jwtToken, data[appKeys.jwtToken]);
     }
   }
-  console.log("data=>", data)
-  localStorage.setItem(appKeys.companyId, userData[appKeys.companyId]['_id']);
+  localStorage.setItem(appKeys.companyId, userData[appKeys.companyId] ? userData[appKeys.companyId]['_id'] : null);
   localStorage.setItem(appKeys.employeeCode, userData[appKeys.employeeCode]);
   localStorage.setItem(appKeys.fullName, userData[appKeys.fullName]);
   localStorage.setItem(appKeys.emailAddress, userData[appKeys.emailAddress]);

@@ -364,7 +364,6 @@ export default function EmpAddUpdateModel({
                     technology: selectedRecord.technology ? selectedRecord.technology.filter(entry => entry !== '') : [],
                 };
 
-                console.log("selectedRecord.technology=>", selectedRecord.technology)
                 form.setFieldsValue(formData);
 
             } else {

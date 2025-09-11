@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useMemo, useState } from 'react';
+import {useEffect, useMemo, useState} from 'react';
 import {
     Avatar,
     Button, Card,
@@ -10,25 +10,45 @@ import {
     Switch,
     Table,
     Tooltip,
+    Tag,
 } from 'antd';
-import { AlertCircle, Box, Search } from '../../../utils/icons';
-import { UserPlus, Edit, Trash2, Eye, XCircle, CheckCircle } from '../../../utils/icons';
-import { useAppData, AppDataFields } from '../../../masterData/AppDataContext';
-import apiCall, { HttpMethod } from '../../../api/apiServiceProvider';
-import { endpoints } from '../../../api/apiEndpoints';
+import {AlertCircle, Box, Search} from '../../../utils/icons';
+import {UserPlus, Edit, Trash2, Eye, XCircle, CheckCircle} from '../../../utils/icons';
+import {useAppData, AppDataFields} from '../../../masterData/AppDataContext';
+import apiCall, {HttpMethod} from '../../../api/apiServiceProvider';
+import {endpoints} from '../../../api/apiEndpoints';
 import appString from '../../../utils/appString';
 import appKeys from '../../../utils/appKeys';
-import { ApprovalStatus, DateTimeFormat } from '../../../utils/enum';
-import { appColor, colorMap } from '../../../utils/appColor';
+import {ApprovalStatus, DateTimeFormat, mActions} from '../../../utils/enum';
+import {appColor, colorMap} from '../../../utils/appColor';
 import dayjs from 'dayjs';
 import EmpAddUpdateModel from "../../../models/EmpAddUpdateModel";
-import { LoadingOutlined } from "@ant-design/icons";
-import { pageRoutes } from "../../../utils/pageRoutes";
+import {
+    CheckCircleOutlined,
+    CloseCircleOutlined,
+    DeleteOutlined,
+    EditOutlined,
+    EyeOutlined,
+    LoadingOutlined, UserAddOutlined
+} from "@ant-design/icons";
+import {pageRoutes, routeConfig} from "../../../utils/pageRoutes";
 import SafeAvatar from "../../../components/SafeAvatar";
 import useHomePageLayout from "../../../hooks/useHomePageLayout";
+import {usePermission} from "../../../hooks/usePermission";
+import {CustomTag} from "../../../components/CommonComponents";
+import CommonActionButton from "../(panelCommonUtils)/CommonActionButton";
 
-export default function CardEmpList({ isDashboard }) {
-    const { usersData, updateAppDataField } = useAppData();
+export default function CardEmpList({isDashboard}) {
+    const {hasPermission} = usePermission();
+    const canAdd = !!hasPermission(mActions.add, routeConfig.employees.key);
+    const canEdit = !!hasPermission(mActions.edit, routeConfig.employees.key);
+    const canDelete = !!hasPermission(mActions.delete, routeConfig.employees.key);
+    const canViewDetail = !!hasPermission(mActions.viewDetail, routeConfig.employees.key);
+    const canManageStatus = !!hasPermission(mActions.status, routeConfig.employees.key);
+    const canReject = !!hasPermission(mActions.reject, routeConfig.employees.key);
+    const canApprove = !!hasPermission(mActions.approve, routeConfig.employees.key);
+
+    const {usersData, updateAppDataField} = useAppData();
     const {isMobile, push} = useHomePageLayout();
 
     const [allData, setAllData] = useState(usersData);
@@ -83,9 +103,9 @@ export default function CardEmpList({ isDashboard }) {
     };
 
     const toggleUserStatus = async (user, checked) => {
-        setLoadingRecord(prev => ({ ...prev, [user._id]: true }));
-        await updateRecord(user._id, { isActive: checked });
-        setLoadingRecord(prev => ({ ...prev, [user._id]: false }));
+        setLoadingRecord(prev => ({...prev, [user._id]: true}));
+        await updateRecord(user._id, {isActive: checked});
+        setLoadingRecord(prev => ({...prev, [user._id]: false}));
     };
 
     const openModalWithLoading = (isEditMode, record = null) => {
@@ -102,11 +122,12 @@ export default function CardEmpList({ isDashboard }) {
 
 
     const handleAddClick = () => {
-        openModalWithLoading(false);
+        setIsModelOpen(true);
     };
 
     const handleEditClick = (record) => {
-        openModalWithLoading(true, record);
+        setSelectedRecord(record);
+        setIsModelOpen(true);
     };
 
     const handleViewClick = (record) => {
@@ -156,10 +177,8 @@ export default function CardEmpList({ isDashboard }) {
         },
         {
             title: appString.role,
-            dataIndex: appKeys.role,
-            key: appKeys.role,
             align: 'center',
-            sorter: (a, b) => a.role?.localeCompare(b.role),
+            render: record => record?.role ? record?.role?.roleName : 'N/A',
         },
         {
             title: appString.status,
@@ -176,53 +195,52 @@ export default function CardEmpList({ isDashboard }) {
                 } else {
                     color = appColor.transparant;
                 }
-                return (
-                    <>
-                        {record.approvalStatus === ApprovalStatus.Approved ? (
-                            <Switch
-                                size="small"
-                                loading={!!loadingRecord[record._id]}
-                                checked={record.isActive}
-                                onChange={(checked) => toggleUserStatus(record, checked)}
-                            />
-                        ) : record.approvalStatus === ApprovalStatus.Pending ? (
-                            <div
-                                style={{
-                                    display: "flex",
-                                }}
-                            >
-                                <Popconfirm
+
+                if (record.approvalStatus === ApprovalStatus.Approved && canManageStatus) {
+                    return (
+                        <Switch
+                            size="small"
+                            loading={!!loadingRecord[record._id]}
+                            checked={record.isActive}
+                            onChange={(checked) => toggleUserStatus(record, checked)}
+                        />
+                    )
+                }
+
+                if (record.approvalStatus === ApprovalStatus.Pending && (canReject || canApprove)) {
+                    return (
+                        <div className="flex items-center justify-center">
+                            {
+                                canReject && <Popconfirm
                                     title={appString.rejectConfirmation}
                                     onConfirm={async () => {
-                                        await updateRecord(record._id, { approvalStatus: ApprovalStatus.Rejected });
-                                    }}
-                                    style={{ marginRight: 35 }}
-                                >
-                                    <div style={{ marginRight: 35, cursor: "pointer" }}>
-                                        <Tooltip title={appString.reject}>
-                                            <XCircle color={appColor.danger} />
-                                        </Tooltip>
-                                    </div>
+                                        await updateRecord(record._id, {approvalStatus: ApprovalStatus.Rejected});
+                                    }}>
+                                    <Button
+                                        title={appString.reject}
+                                        variant="text"
+                                        color="danger"
+                                        icon={<CloseCircleOutlined/>}/>
                                 </Popconfirm>
-                                <Popconfirm
+                            }
+                            {
+                                canApprove && <Popconfirm
                                     title={appString.approveConfirmation}
                                     onConfirm={async () => {
-                                        await updateRecord(record._id, { approvalStatus: ApprovalStatus.Approved });
-                                    }}
-                                    style={{ margin: 0 }}
-                                >
-                                    <div style={{ cursor: "pointer" }}>
-                                        <Tooltip title={appString.approve}>
-                                            <CheckCircle color={appColor.success} />
-                                        </Tooltip>
-                                    </div>
+                                        await updateRecord(record._id, {approvalStatus: ApprovalStatus.Approved});
+                                    }}>
+                                    <Button
+                                        title={appString.approve}
+                                        variant="text"
+                                        color="green"
+                                        icon={<CheckCircleOutlined/>}/>
                                 </Popconfirm>
-                            </div>
-                        ) : (
-                            <Tag color={color}>{record.approvalStatus.toUpperCase()}</Tag>
-                        )}
-                    </>
-                );
+                            }
+                        </div>
+                    )
+                }
+
+                return <CustomTag color={color} value={record.approvalStatus.toUpperCase()}/>;
             },
         },
         {
@@ -231,28 +249,14 @@ export default function CardEmpList({ isDashboard }) {
             align: 'center',
             fixed: 'right',
             width: 120,
+            hidden: (!canEdit && !canDelete && !canViewDetail),
             render: (_, record) => (
-                <div className="flex justify-center items-center gap-3">
-                    <Tooltip title={appString.edit}>
-                        {actionLoading === record._id ? (
-                            <LoadingOutlined />
-                        ) : (
-                            <div onClick={() => handleEditClick(record)} style={{ cursor: 'pointer' }}>
-                                <Edit color={appColor.secondPrimary} />
-                            </div>
-                        )}
-                    </Tooltip>
-                    <Popconfirm title={appString.deleteConfirmation} onConfirm={() => deleteRecord(record)}>
-                        <Tooltip title={appString.delete}>
-                            <Trash2 color={appColor.danger} style={{ cursor: 'pointer' }} />
-                        </Tooltip>
-                    </Popconfirm>
-                    <Tooltip title={appString.view}>
-                        <div onClick={() => handleViewClick(record)} style={{ cursor: 'pointer' }}>
-                            <Eye color={appColor.primary} />
-                        </div>
-                    </Tooltip>
-                </div>
+                <CommonActionButton
+                    record={record}
+                    handleEdit={canEdit && handleEditClick}
+                    handleDelete={canDelete && deleteRecord}
+                    handleDetailView={canViewDetail && handleViewClick}
+                />
             ),
         },
     ];
@@ -265,28 +269,34 @@ export default function CardEmpList({ isDashboard }) {
                     loading={isLoading}
                     columns={columns}
                     dataSource={filteredData}
+                    scroll={{x: "max-content"}}
                     title={() => isDashboard ? (
                         <div className="flex items-center gap-2">
-                            <AlertCircle color={appColor.warning} />
+                            <AlertCircle color={appColor.warning}/>
                             <div className="font-[550] text-[15px]">{appString.pendingEmp}</div>
                         </div>
                     ) : (
                         <div className="flex justify-between items-center gap-2 flex-wrap">
                             <Input
                                 placeholder={appString.empSearchHint}
-                                prefix={<Search />}
+                                prefix={<Search/>}
                                 value={searchText}
                                 onChange={e => setSearchText(e.target.value)}
                                 className="w-full flex-1 max-w-90"
                             />
-                            <Button
-                                type="primary"
-                                icon={<UserPlus />}
-                                onClick={handleAddClick}
-                                loading={actionLoading === 'add'}
-                            >
-                                {!isMobile && appString.addEmployee}
-                            </Button>
+                            {canAdd && <CommonActionButton
+                                addBtnName={appString.addEmployee}
+                                addBtnIcon={<UserAddOutlined />}
+                                handleAdd={handleAddClick}
+                            />}
+                            {/*{canAdd && <Button*/}
+                            {/*    type="primary"*/}
+                            {/*    icon={<UserPlus/>}*/}
+                            {/*    onClick={handleAddClick}*/}
+                            {/*    loading={actionLoading === 'add'}*/}
+                            {/*>*/}
+                            {/*    {!isMobile && appString.addEmployee}*/}
+                            {/*</Button>}*/}
                         </div>
                     )}
                 />

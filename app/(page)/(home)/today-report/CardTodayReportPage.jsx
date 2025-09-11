@@ -17,24 +17,32 @@ import {useAppData, AppDataFields} from '../../../masterData/AppDataContext';
 import apiCall, {HttpMethod} from '../../../api/apiServiceProvider';
 import {endpoints} from '../../../api/apiEndpoints';
 import appString from '../../../utils/appString';
-import {ApprovalStatus, DateTimeFormat} from '../../../utils/enum';
+import {ApprovalStatus, DateTimeFormat, mActions} from '../../../utils/enum';
 import {appColor} from '../../../utils/appColor';
 import dayjs from 'dayjs';
 import {formatMilliseconds} from "../../../utils/utils";
-import {LoadingOutlined} from "@ant-design/icons";
+import {DeleteOutlined, EditOutlined, EyeOutlined, LoadingOutlined, UserOutlined} from "@ant-design/icons";
 import {useRouter} from "next/navigation";
-import { pageRoutes } from "../../../utils/pageRoutes";
+import {pageRoutes, routeConfig} from "../../../utils/pageRoutes";
 import appKeys from "../../../utils/appKeys";
 import {timeTag} from "../../../components/CommonComponents";
 import EmpScreenshotModel from "../../../models/EmpScreenshotModel";
 import AttendanceDetailModel from "../../../models/AttendanceDetailModel";
 import SafeAvatar from "../../../components/SafeAvatar";
+import {usePermission} from "../../../hooks/usePermission";
+import CommonActionButton from "../(panelCommonUtils)/CommonActionButton";
 
 export default function CardTodayReportPage() {
+    const {hasPermission} = usePermission();
+    const canScreenshotView = !!hasPermission(mActions.screenshotView, routeConfig.todayReport.key);
+    const canMouseKeyboardEventView = !!hasPermission(mActions.mouseKeyboardEventView, routeConfig.todayReport.key);
+    const canViewDetail = !!hasPermission(mActions.viewDetail, routeConfig.todayReport.key);
+
     const {attendancesData} = useAppData();
 
     const router = useRouter();
 
+    const baseUrl = endpoints.getTodayAttendance;
     const [allData, setAllData] = useState(attendancesData);
     const [isSsModelOpen, setSsModelOpen] = useState(false);
     const [isAttendanceModelOpen, setIsAttendanceModelOpen] = useState(false);
@@ -43,13 +51,10 @@ export default function CardTodayReportPage() {
     const [selectedId, setSelectedId] = useState(null);
     const [searchText, setSearchText] = useState('');
     const [loading, setLoading] = useState(false);
-    const [actionLoading, setActionLoading] = useState(null);
-    const [loadingUsers, setLoadingUsers] = useState({});
-    const [selectedEmp, setSelectedEmp] = useState(null);
 
     useEffect(() => {
-        setAllData(attendancesData);
-    }, [attendancesData]);
+        fetchData()
+    }, []);
 
     const filteredData = useMemo(() => {
         if (!allData) return [];
@@ -130,6 +135,7 @@ export default function CardTodayReportPage() {
         {
             title: appString.screenshots,
             key: appKeys.screenshots,
+            hidden: !canScreenshotView,
             render: (_, record) => {
                 let screenshots = record?.screenshots;
                 let attendanceID = record?._id;
@@ -169,6 +175,7 @@ export default function CardTodayReportPage() {
             title: appString.eventCount,
             dataIndex: appKeys.keyPressCount,
             key: appKeys.keyPressCount,
+            hidden: !canMouseKeyboardEventView,
             render: (_, record) => {
                 return (
                     <div className="min-w-40 font-medium text-blue-900">
@@ -179,29 +186,16 @@ export default function CardTodayReportPage() {
         },
         {
             title: appString.view,
-            dataIndex: appKeys.keyPressCount,
-            key: appKeys.keyPressCount,
+            align: "center",
+            hidden: !canViewDetail,
             fixed: 'right',
-            render: (_, record) => {
-                return (
-                    <div className="flex justify-center items-center gap-7">
-                        <Tooltip title={appString.attendanceDetail}>
-                            <div className="cursor-pointer" onClick={() => handleAttendViewClick(record)}>
-                                <Eye color={appColor.primary} />
-                            </div>
-                        </Tooltip>
-                        <Tooltip title={appString.userDetail}>
-                            {actionLoading === record._id ? (
-                                <LoadingOutlined />
-                            ) : (
-                                <div className="cursor-pointer" onClick={() => handleEmpViewClick(record)}>
-                                    <User color={appColor.secondPrimary} />
-                                </div>
-                            )}
-                        </Tooltip>
-                    </div>
-                );
-            },
+            render: (_, record) => (
+                <CommonActionButton
+                    record={record}
+                    handleDetailView={handleAttendViewClick}
+                    handleUserDetailView={handleEmpViewClick}
+                />
+            ),
         },
     ];
 
@@ -228,7 +222,6 @@ export default function CardTodayReportPage() {
     };
 
     const onChange = async (date, dateString) => {
-        const baseUrl = endpoints.getTodayAttendance;
         let queryParams = [];
 
         if (dateString) {
@@ -239,10 +232,15 @@ export default function CardTodayReportPage() {
             queryParams.length > 0
                 ? `${baseUrl}?${queryParams.join("&")}`
                 : baseUrl;
+
+        await fetchData(finalUrl);
+    };
+
+    const fetchData = async (finalUrl = null) => {
         try {
             await apiCall({
                 method: HttpMethod.GET,
-                url: finalUrl,
+                url: finalUrl ? finalUrl : baseUrl,
                 setIsLoading: setLoading,
                 showSuccessMessage: false,
                 successCallback: (data) => {
@@ -252,7 +250,7 @@ export default function CardTodayReportPage() {
         } catch (error) {
             console.error("API Call Failed:", error);
         }
-    };
+    }
 
     return (
         <>
@@ -266,21 +264,24 @@ export default function CardTodayReportPage() {
                     loading={loading}
                     columns={columns}
                     dataSource={filteredData}
+                    scroll={{ x: "max-content" }}
                     title={() => (
                         <div className="flex justify-between items-center gap-2 flex-wrap">
-                            <DatePicker
-                                rootClassName="w-31"
-                                onChange={onChange}
-                                disabledDate={(current) => {
-                                    return current && current > dayjs().endOf('day');
-                                }}
-                            />
                             <Input
                                 placeholder={appString.attReportSearchHint}
                                 prefix={<Search/>}
                                 value={searchText}
                                 onChange={e => setSearchText(e.target.value)}
                                 className="w-full flex-1 max-w-90"
+                            />
+                            <DatePicker
+                                rootClassName="w-31"
+                                onChange={onChange}
+                                defaultValue={dayjs()}
+                                allowClear={false}
+                                disabledDate={(current) => {
+                                    return current && current > dayjs().endOf('day');
+                                }}
                             />
                         </div>
                     )}

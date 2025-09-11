@@ -23,8 +23,16 @@ import appColor from "../../../utils/appColor";
 import BasicSalaryModel from "../../../models/BasicSalaryModel";
 import SafeAvatar from "../../../components/SafeAvatar";
 import useHomePageLayout from "../../../hooks/useHomePageLayout";
+import {usePermission} from "../../../hooks/usePermission";
+import {mActions} from "../../../utils/enum";
+import {routeConfig} from "../../../utils/pageRoutes";
 
 export default function Page() {
+    const {hasPermission} = usePermission();
+    const canAdd = !!hasPermission(mActions.add, routeConfig.basicSalary.key);
+    const canEdit = !!hasPermission(mActions.edit, routeConfig.basicSalary.key);
+    const canDelete = !!hasPermission(mActions.delete, routeConfig.basicSalary.key);
+
     const {activeUsersData, basicSalaryData, updateAppDataField} = useAppData();
     const {isMobile} = useHomePageLayout();
 
@@ -133,6 +141,7 @@ export default function Page() {
             dataIndex: appKeys.operation,
             fixed: "right",
             width: 50,
+            hidden: !canEdit && !canDelete,
             render: (_, record) => (
                 <div className="flex justify-center items-center gap-5">
                     <Tooltip title={appString.edit}>

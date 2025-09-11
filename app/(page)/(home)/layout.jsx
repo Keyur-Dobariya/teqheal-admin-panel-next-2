@@ -16,8 +16,8 @@ import HeaderUi from "./(panelCommonUtils)/HeaderUi";
 import SidebarAndDrawerUi from "./(panelCommonUtils)/SidebarAndDrawerUi";
 import FooterUi from "./(panelCommonUtils)/FooterUi";
 import {useAppData} from "../../masterData/AppDataContext";
-import {jwtDecode} from "jwt-decode";
-import {useModulePermissions} from "../../hooks/useModulePermissions";
+import {usePermission} from "../../hooks/usePermission";
+import {menuItems} from "./(panelCommonUtils)/sideBarMenu";
 
 export default function HomePage({children}) {
     const {
@@ -31,12 +31,14 @@ export default function HomePage({children}) {
     } = useHomePageLayout({mobileBreakpoint: 'lg'});
 
     const { loginUserData } = useAppData();
-    const { hasModulePermission, hasActionPermission } = useModulePermissions();
+    const { hasPermission } = usePermission();
 
     const [isLogoutModalOpen, setIsLogoutModalOpen] = useState(false);
     const [isCodeModalOpen, setIsCodeModalOpen] = useState(false);
 
     const containerRef = useRef(null);
+
+    const sidebarMenus = menuItems(hasPermission);
 
     useEffect(() => {
         if (getLocalData(appKeys.jwtToken) === null) {
@@ -79,7 +81,7 @@ export default function HomePage({children}) {
                     drawerVisible={drawerVisible}
                     setDrawerVisible={setDrawerVisible}
                     pathname={pathname}
-                    hasModulePermission={hasModulePermission}
+                    sidebarMenus={sidebarMenus}
                     menuClick={menuClick}
                 />
 
@@ -94,7 +96,7 @@ export default function HomePage({children}) {
                         menuClick={menuClick}
                     />
 
-                    <BreadcrumbGenerator pathname={pathname} hasModulePermission={hasModulePermission}/>
+                    <BreadcrumbGenerator pathname={pathname} sidebarMenus={sidebarMenus}/>
 
                     <div className="flex-1 overflow-y-auto" ref={containerRef} style={{scrollbarWidth: "thin"}}>
                         <div className="h-full flex flex-col gap-4">

@@ -8,7 +8,7 @@ import {endpoints} from "../api/apiEndpoints";
 import {useAppData} from "../masterData/AppDataContext";
 
 export default function ClientOnly({children, fallback = null}) {
-    const appDataContext = useAppData();
+    const {setAllMasterData, loginUserData} = useAppData();
     const [hasMounted, setHasMounted] = useState(false);
     const isApiCalledRef = useRef(false);
 
@@ -32,7 +32,7 @@ export default function ClientOnly({children, fallback = null}) {
             setIsLoading: setHasMounted,
             successCallback: (data) => {
                 if(data?.data) {
-                    appDataContext.setAllMasterData(data.data);
+                    setAllMasterData(data.data);
                     storeLoginData(data?.data?.loginUserData, false);
                     setHasMounted(true);
                 } else {
@@ -46,7 +46,7 @@ export default function ClientOnly({children, fallback = null}) {
         });
     };
 
-    if (hasMounted && getLocalData(appKeys.jwtToken) !== null) {
+    if (loginUserData && hasMounted && getLocalData(appKeys.jwtToken) !== null) {
         return children;
     }
 

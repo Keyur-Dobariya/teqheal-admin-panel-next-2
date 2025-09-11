@@ -1,6 +1,28 @@
 import appColor from "./appColor";
 import imagePaths from "./imagesPath";
 
+export const mActions = {
+    add: 'add',
+    edit: 'edit',
+    delete: 'delete',
+    read: 'read',
+    viewAll: 'viewAll',
+    viewOnlyMentioned: 'viewOnlyMentioned',
+    approve: 'approve',
+    reject: 'reject',
+    status: 'status',
+    upload: 'upload',
+    download: 'download',
+    manage: 'manage',
+    publish: 'publish',
+    lock: 'lock',
+    unlock: 'unlock',
+    screenshotView: 'screenshotView',
+    mouseKeyboardEventView: 'mouseKeyboardEventView',
+    viewModule: 'viewModule',
+    viewDetail: 'viewDetail',
+};
+
 export const uploadType = {
     chatting: "chatting",
 };

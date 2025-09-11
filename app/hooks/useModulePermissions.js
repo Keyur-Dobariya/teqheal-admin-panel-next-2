@@ -15,7 +15,6 @@ export function useModulePermissions() {
             const moduleName = (typeof mod.moduleName === "string")
                 ? mod.moduleName.toLowerCase()
                 : mod.moduleId?.moduleName?.toLowerCase() || "";
-            console.log("moduleName=>", moduleName, modulePath)
             // return !mod.isForSuperAdmin && moduleName.includes(modulePath);
             return moduleName.includes(modulePath);
         });
@@ -33,8 +32,8 @@ export function useModulePermissions() {
 
         return matchedModule.permissions.some(permission => {
             if (byName) {
-                const actionName = (typeof permission === 'string') ? null : permission.actionName;
-                return actionName === permissionAction;
+                const actionName = (typeof permission === 'string') ? null : permission.actionName.toLowerCase();
+                return actionName === permissionAction.toLowerCase();
             } else {
                 const actionId = (typeof permission === 'string') ? permission : permission._id;
                 return actionId === permissionAction;

@@ -1,49 +1,54 @@
 "use client";
-import React, { useState, useEffect, useRef } from "react";
-import {Card, Button, Spin, Divider} from "antd";
+import React, { useState } from "react";
+import { Card, Button, Spin, Divider } from "antd";
 import { SaveOutlined } from "@ant-design/icons";
 import apiCall, { HttpMethod } from "../../../api/apiServiceProvider";
 import { endpoints } from "../../../api/apiEndpoints";
-import {ManagePermissionTree} from "./ManagePermissionTree";
+import { ManagePermissionTree } from "./ManagePermissionTree";
+import { useActionLoading } from "../../../hooks/useActionLoading";
+import { useRunOnce } from "../../../hooks/useRunOnce";
+
+function PermissionPanel({ title, assignedPermission, modules, onChange }) {
+    return (
+        <div className="flex-1 rounded-xl border-1 border-gray-200">
+            <div className="px-4 pt-4 pb-2 text-[15px] font-medium">{title}</div>
+            <Divider size="small" />
+            <ManagePermissionTree
+                assignedPermission={assignedPermission}
+                modules={modules}
+                onSubmit={onChange}
+            />
+        </div>
+    );
+}
 
 export default function Page() {
-    const [modules, setModules] = useState([]);
-    const [isApiError, setIsApiError] = useState(null);
-    const [adminPermissions, setAdminPermissions] = useState([]);
-    const [userPermissions, setUserPermissions] = useState([]);
-    const [adminUpdatedPermissions, setAdminUpdatedPermissions] = useState([]);
-    const [userUpdatedPermissions, setUserUpdatedPermissions] = useState([]);
-    const [loading, setLoading] = useState(false);
-    const fetchTriggered = useRef(false);
+    const { withLoading } = useActionLoading();
+    const apiLoading = withLoading();
 
-    useEffect(() => {
-        if (!fetchTriggered.current) {
-            fetchTriggered.current = true;
-            fetchModules();
-        }
-    }, []);
+    const [modules, setModules] = useState([]);
+    const [isApiError, setIsApiError] = useState(false);
+
+    const [permissions, setPermissions] = useState({
+        superAdmin: [],
+        admin: [],
+        user: [],
+    });
 
     const fetchModules = async () => {
-        setLoading(true);
         await apiCall({
             method: HttpMethod.GET,
             url: endpoints.getAllModules,
-            setIsLoading: false,
             showSuccessMessage: false,
             successCallback: (data) => {
-                if(data?.data) {
-                    const filteredModules = (data?.data || []).filter(module => !module.isForSuperAdmin);
-                    setModules(filteredModules);
-                    fetchRolePermission(filteredModules);
+                if (data?.data) {
+                    setModules(data.data);
+                    fetchRolePermission();
                 } else {
                     setIsApiError(true);
-                    setLoading(false);
                 }
             },
-            errorCallback: () => {
-                setIsApiError(true);
-                setLoading(false);
-            }
+            errorCallback: () => setIsApiError(true),
         });
     };
 
@@ -51,74 +56,81 @@ export default function Page() {
         await apiCall({
             method: HttpMethod.GET,
             url: endpoints.getRolePermission,
-            setIsLoading: false,
             showSuccessMessage: false,
             successCallback: (data) => {
                 if (data?.data) {
-                    setAdminPermissions(data.data.adminPermissions || []);
-                    setUserPermissions(data.data.userPermissions || []);
+                    setPermissions({
+                        superAdmin: data.data.superAdminPermissions || [],
+                        admin: data.data.adminPermissions || [],
+                        user: data.data.userPermissions || [],
+                    });
                 }
-                setLoading(false);
             },
-            errorCallback: () => {
-                setIsApiError(true);
-                setLoading(false);
-            }
+            errorCallback: () => setIsApiError(true),
         });
     };
+
+    const { fetchLoading } = useRunOnce(fetchModules);
 
     const handleSaveRecord = async () => {
-        setLoading(true);
-        await apiCall({
-            method: HttpMethod.POST,
-            url: endpoints.modifyRolePermission,
-            data: {
-                adminPermissions: adminUpdatedPermissions,
-                userPermissions: userUpdatedPermissions,
-            },
-            setIsLoading: setLoading,
-            showSuccessMessage: true,
-            successCallback: () => {
-                fetchRolePermission();
-            },
+        await apiLoading.run(async () => {
+            await apiCall({
+                method: HttpMethod.POST,
+                url: endpoints.modifyRolePermission,
+                data: {
+                    superAdminPermissions: permissions.superAdmin,
+                    adminPermissions: permissions.admin,
+                    userPermissions: permissions.user,
+                },
+                showSuccessMessage: true,
+                successCallback: fetchRolePermission,
+            });
         });
     };
 
+    const panels = [
+        { key: "superAdmin", title: "Super Admin Permission" },
+        { key: "admin", title: "Admin Permission" },
+        { key: "user", title: "User Permission" },
+    ];
+
     return (
-        <Card title={(
-            <div className="flex items-center gap-4 justify-between">
-                <div>Manage Role Permission</div>
-                <Button type="primary" icon={<SaveOutlined />} onClick={handleSaveRecord}>Save</Button>
-            </div>
-        )}>
-            <Spin size="default" spinning={loading}>
-                {isApiError ?
-                    <div className='px-7 py-25'>Currently unable to getting role-permission data.</div> :
+        <Card
+            title={
+                <div className="flex items-center gap-4 justify-between">
+                    <div>Manage Role Permission</div>
+                    <Button
+                        type="primary"
+                        icon={<SaveOutlined />}
+                        onClick={handleSaveRecord}
+                        loading={apiLoading.loading}
+                    >
+                        Save
+                    </Button>
+                </div>
+            }
+        >
+            <Spin size="default" spinning={fetchLoading}>
+                {isApiError ? (
+                    <div className="px-7 py-25">
+                        Currently unable to get role-permission data.
+                    </div>
+                ) : (
                     <div className="p-6 h-full w-full flex gap-5">
-                    <Card>
-                        <div className='px-4 pt-4 pb-2 text-[15px] font-medium'>Admin Permission</div>
-                        <Divider size="small"/>
-                        <ManagePermissionTree
-                            assignedPermission={adminPermissions}
-                            modules={modules}
-                            onSubmit={(result) => {
-                                setAdminUpdatedPermissions(result);
-                            }}
-                        />
-                    </Card>
-                    <Card>
-                        <div className='px-4 pt-4 pb-2 text-[15px] font-medium'>User Permission</div>
-                        <Divider size="small"/>
-                        <ManagePermissionTree
-                            assignedPermission={userPermissions}
-                            modules={modules}
-                            onSubmit={(result) => {
-                                setUserUpdatedPermissions(result);
-                            }}
-                        />
-                    </Card>
-                </div>}
+                        {panels.map(({ key, title }) => (
+                            <PermissionPanel
+                                key={key}
+                                title={title}
+                                assignedPermission={permissions[key]}
+                                modules={modules}
+                                onChange={(result) =>
+                                    setPermissions((prev) => ({ ...prev, [key]: result }))
+                                }
+                            />
+                        ))}
+                    </div>
+                )}
             </Spin>
         </Card>
     );
-};
+}

@@ -41,6 +41,16 @@ const routeConfig = {
     modules: { path: '/modules', type: enumRouteType.admin, key: 'modules' },
 };
 
+export function getKeyFromRoutePath(pathname) {
+    const normalizedPath = pathname === '/' ? '/' : pathname.replace(/\/$/, '');
+    for (const configKey in routeConfig) {
+        if (routeConfig[configKey].path === normalizedPath) {
+            return routeConfig[configKey].key;
+        }
+    }
+    return null;
+}
+
 const pageRoutes = new Proxy(routeConfig, {
     get(target, prop) {
         const route = target[prop];
