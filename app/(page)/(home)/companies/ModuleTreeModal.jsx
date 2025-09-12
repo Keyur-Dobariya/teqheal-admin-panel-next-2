@@ -12,6 +12,7 @@ export const ModuleTreeModal = ({
                                     adminPermissions = [],
                                     userPermissions = [],
                                     modules,
+                                    loading = false,
                                     onTabSubmit,
                                     onSubmit
                                 }) => {
@@ -33,8 +34,6 @@ export const ModuleTreeModal = ({
         } else {
             onSubmit(moduleUpdatedPermission);
         }
-
-        handleModelClose();
     };
 
     const AdminTabContent = () => {
@@ -102,6 +101,7 @@ export const ModuleTreeModal = ({
             open={isModuleModelOpen}
             onCancel={handleModelClose}
             onOk={handleTreeSubmit}
+            confirmLoading={loading}
             okText={"Save"}
             width={400}
         >

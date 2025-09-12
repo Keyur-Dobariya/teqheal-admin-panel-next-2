@@ -48,7 +48,7 @@ export default function Page() {
         await apiLoading.run(async () => {
             await apiCall({
                 method: HttpMethod.DELETE,
-                url: endpoints.deleteModule.replace(':id', record?._id),
+                url: endpoints.deleteModule(record?._id),
                 showSuccessMessage: true,
                 successCallback: (data) => {
                     setModules(data?.data);
@@ -57,11 +57,11 @@ export default function Page() {
         });
     };
 
-    const handleAddOrUpdate = async (postData) => {
+    const handleAddOrUpdate = async (moduleId, postData) => {
         await apiLoading.run(async () => {
             await apiCall({
                 method: HttpMethod.POST,
-                url: endpoints.addUpdateModule,
+                url: endpoints.addUpdateModule(moduleId),
                 data: postData,
                 showSuccessMessage: true,
                 successCallback: () => {
@@ -114,10 +114,10 @@ export default function Page() {
                         onChange={async (checked) => {
                             await rowLoading.run(async () => {
                                 const postData = {
-                                    moduleId: record._id,
+                                    ...record,
                                     isForSuperAdmin: checked,
                                 };
-                                await handleAddOrUpdate(postData);
+                                await handleAddOrUpdate(record._id, postData);
                             });
                         }}
                     />
@@ -138,10 +138,10 @@ export default function Page() {
                         onChange={async (checked) => {
                             await rowLoading.run(async () => {
                                 const postData = {
-                                    moduleId: record._id,
+                                    ...record,
                                     isActive: checked,
                                 };
-                                await handleAddOrUpdate(postData);
+                                await handleAddOrUpdate(record._id, postData);
                             });
                         }}
                     />

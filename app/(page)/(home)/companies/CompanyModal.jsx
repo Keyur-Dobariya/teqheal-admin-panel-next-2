@@ -7,7 +7,7 @@ import {
     Input,
     Switch,
     Row,
-    Col, DatePicker, Upload
+    Col, DatePicker, Upload, InputNumber
 } from "antd";
 import {
     ApartmentOutlined,
@@ -15,6 +15,7 @@ import {
 } from "@ant-design/icons";
 import dayjs from "dayjs";
 import {ModuleTreeModal} from "./ModuleTreeModal";
+import CommonActionButton from "../(panelCommonUtils)/CommonActionButton";
 
 export const CompanyModal = ({
                                  isModelOpen,
@@ -71,7 +72,7 @@ export const CompanyModal = ({
             companyIcon: companyIcon,
             adminPermissions,
             userPermissions,
-            ...(selectedRecord ? {companyId: selectedRecord._id, oldCompanyIcon: selectedRecord.companyIcon} : {}),
+            ...(selectedRecord ? {oldCompanyIcon: selectedRecord.companyIcon} : {}),
         };
 
         onSubmit(postData);
@@ -185,16 +186,25 @@ export const CompanyModal = ({
 
                         <Row gutter={16} align="middle">
                             <Col xs={24} sm={12}>
-                                <Form.Item name="isActive" label="Is Active" valuePropName="checked"
-                                           initialValue={true}>
-                                    <Switch/>
-                                </Form.Item>
+                                <Row gutter={16} align="middle">
+                                    <Col span={16}>
+                                        <Form.Item name="maxUsers" label="Max Users">
+                                            <InputNumber min={0} style={{ width: "100%" }} placeholder="Enter max users" />
+                                        </Form.Item>
+                                    </Col>
+                                    <Col span={8}>
+                                        <Form.Item name="isActive" label="Is Active" valuePropName="checked" initialValue={true}>
+                                            <Switch />
+                                        </Form.Item>
+                                    </Col>
+                                </Row>
                             </Col>
-                            <Col xs={24} sm={12}>
-                                <Button type="primary" style={{width: '100%'}} icon={<ApartmentOutlined/>}
-                                        iconPosition='end' onClick={() => setIsModuleModelOpen(true)}>
-                                    Set Module Permission
-                                </Button>
+                            <Col xs={24} sm={12} style={{ display: "flex", justifyContent: "flex-end" }}>
+                                <CommonActionButton
+                                    addBtnName="Set Module Permission"
+                                    addBtnIcon={<ApartmentOutlined />}
+                                    handleAdd={() => setIsModuleModelOpen(true)}
+                                />
                             </Col>
                         </Row>
 
@@ -215,6 +225,7 @@ export const CompanyModal = ({
                 onTabSubmit={(adminUpdatedPermissions, userUpdatedPermissions) => {
                     setAdminPermissions(adminUpdatedPermissions);
                     setUserPermissions(userUpdatedPermissions);
+                    setIsModuleModelOpen(false);
                 }}
             />}
         </>

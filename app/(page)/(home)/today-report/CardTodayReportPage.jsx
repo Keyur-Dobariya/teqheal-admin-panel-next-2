@@ -7,7 +7,7 @@ import {
     Grid,
     Input,
     Popconfirm,
-    Switch,
+    Space ,
     Table,
     Tooltip,
 } from 'antd';
@@ -274,15 +274,16 @@ export default function CardTodayReportPage() {
                                 onChange={e => setSearchText(e.target.value)}
                                 className="w-full flex-1 max-w-90"
                             />
-                            <DatePicker
-                                rootClassName="w-31"
-                                onChange={onChange}
-                                defaultValue={dayjs()}
-                                allowClear={false}
-                                disabledDate={(current) => {
-                                    return current && current > dayjs().endOf('day');
-                                }}
-                            />
+                            <Space direction="vertical">
+                                <DatePicker
+                                    onChange={onChange}
+                                    defaultValue={dayjs()}
+                                    allowClear={false}
+                                    disabledDate={(current) => {
+                                        return current && current > dayjs().endOf('day');
+                                    }}
+                                />
+                            </Space>
                         </div>
                     )}
                 />

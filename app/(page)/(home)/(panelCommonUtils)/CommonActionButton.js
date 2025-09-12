@@ -39,7 +39,7 @@ export default function CommonActionButton({
                 onClick={() => addLoading.run(() => handleAdd())}
                 loading={addLoading.loading}
             >
-                {!isMobile && (addBtnName || appString.addRecord)}
+                {!isMobile && addBtnName}
             </Button>
         );
     }

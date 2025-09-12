@@ -62,8 +62,8 @@ const endpoints = {
     updateLeave: `${environment.apiBaseUrl}/api/updateLeave/`,
     leaveStatusChange: `${environment.apiBaseUrl}/api/leaveStatusChange/`,
     basicSalaryList: `${environment.apiBaseUrl}/api/basicSalaryList`,
-    addUpdateBasicSalary: `${environment.apiBaseUrl}/api/addUpdateBasicSalary/`,
-    deleteBasicSalary: `${environment.apiBaseUrl}/api/deleteBasicSalary/`,
+    addUpdateBasicSalary: (id) => `${environment.apiBaseUrl}/api/addUpdateBasicSalary/${id}`,
+    deleteBasicSalary: (id) => `${environment.apiBaseUrl}/api/deleteBasicSalary/${id}`,
     generateSalaryReports: `${environment.apiBaseUrl}/api/generateSalaryReports?`,
     updateSalaryReport: `${environment.apiBaseUrl}/api/updateSalaryReport`,
     // punchSheetUploadAndGetData: `${environment.apiBaseUrl}/api/punchSheetUploadAndGetData`,
@@ -117,23 +117,21 @@ const endpoints = {
     isUpdateAvailable: `${environment.apiBaseUrl}/api/isUpdateAvailable`,
     companies: `${environment.apiBaseUrl}/api/companies`,
     roles: `${environment.apiBaseUrl}/api/roles`,
-    companyRoles: (companyId) => `${environment.apiBaseUrl}/api/companies/${companyId}/roles`,
-    companyModules: (companyId) => `${environment.apiBaseUrl}/api/companies/${companyId}/modules`,
-    addUpdateModule: `${environment.apiBaseUrl}/api/addUpdateModule`,
-    deleteModule: `${environment.apiBaseUrl}/api/deleteModule/:id`,
+    addUpdateModule: (id) => `${environment.apiBaseUrl}/api/addUpdateModule/${checkId(id)}`,
+    deleteModule: (id) => `${environment.apiBaseUrl}/api/deleteModule/${id}`,
     getAllModules: `${environment.apiBaseUrl}/api/getAllModules`,
-    addUpdateCompany: `${environment.apiBaseUrl}/api/addUpdateCompany`,
-    deleteCompany: `${environment.apiBaseUrl}/api/deleteCompany/:id`,
+    addUpdateCompany: (id) => `${environment.apiBaseUrl}/api/addUpdateCompany/${checkId(id)}`,
+    deleteCompany: (id) => `${environment.apiBaseUrl}/api/deleteCompany/${id}`,
     getAllCompanies: `${environment.apiBaseUrl}/api/getAllCompanies`,
     getSingleCompany: `${environment.apiBaseUrl}/api/getSingleCompany/:id`,
     inviteUser: `${environment.apiBaseUrl}/api/inviteUser`,
     getCompanyByJoinToken: `${environment.apiBaseUrl}/api/getCompanyByJoinToken`,
-    addUpdateRole: `${environment.apiBaseUrl}/api/addUpdateRole`,
-    deleteRole: `${environment.apiBaseUrl}/api/deleteRole/:id`,
+    addUpdateRole: (id) => `${environment.apiBaseUrl}/api/addUpdateRole/${checkId(id)}`,
+    deleteRole: (id) => `${environment.apiBaseUrl}/api/deleteRole/${id}`,
     assignRole: `${environment.apiBaseUrl}/api/assignRole`,
-    getRolesByCompany: `${environment.apiBaseUrl}/api/getRolesByCompany`,
-    addUpdateAction: `${environment.apiBaseUrl}/api/addUpdateAction`,
-    deleteAction: `${environment.apiBaseUrl}/api/deleteAction/:id`,
+    getAllRoles: `${environment.apiBaseUrl}/api/getAllRoles`,
+    addUpdateAction: (id) => `${environment.apiBaseUrl}/api/addUpdateAction/${checkId(id)}`,
+    deleteAction: (id) => `${environment.apiBaseUrl}/api/deleteAction/${id}`,
     getAllActions: `${environment.apiBaseUrl}/api/getAllActions`,
     getRolePermission: `${environment.apiBaseUrl}/api/getRolePermission`,
     modifyRolePermission: `${environment.apiBaseUrl}/api/modifyRolePermission`,
@@ -141,5 +139,9 @@ const endpoints = {
     rolePermissionUpdateAllCompany: `${environment.apiBaseUrl}/api/rolePermission/updateAllCompany`,
     rolePermissionUpdateSingleCompany: `${environment.apiBaseUrl}/api/rolePermission/updateCompany/:companyId`,
 };
+
+const checkId = (id) => {
+    return id || '';
+}
 
 export {environment, endpoints};

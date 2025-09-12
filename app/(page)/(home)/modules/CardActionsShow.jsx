@@ -68,9 +68,8 @@ export default function CardActionsShow({onActionChange}) {
         await apiLoading.run(async () => {
             await apiCall({
                 method: HttpMethod.POST,
-                url: endpoints.addUpdateAction,
+                url: endpoints.addUpdateAction(selectedActionId),
                 data: {
-                    ...(selectedActionId ? { actionId: selectedActionId } : {}),
                     ...values,
                     actionName: convertLowerCaseKey(values.actionName),
                     actionColor: values.actionColor,
@@ -99,7 +98,7 @@ export default function CardActionsShow({onActionChange}) {
         await apiLoading.run(async () => {
             await apiCall({
                 method: HttpMethod.DELETE,
-                url: endpoints.deleteAction.replace(":id", actionId),
+                url: endpoints.deleteAction(actionId),
                 showSuccessMessage: true,
                 successCallback: () => {
                     fetchActions();

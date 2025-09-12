@@ -26,8 +26,12 @@ import useHomePageLayout from "../../../hooks/useHomePageLayout";
 import {usePermission} from "../../../hooks/usePermission";
 import {mActions} from "../../../utils/enum";
 import {routeConfig} from "../../../utils/pageRoutes";
+import {useActionLoading} from "../../../hooks/useActionLoading";
 
 export default function Page() {
+    const {withLoading} = useActionLoading();
+    const apiLoading = withLoading();
+
     const {hasPermission} = usePermission();
     const canAdd = !!hasPermission(mActions.add, routeConfig.basicSalary.key);
     const canEdit = !!hasPermission(mActions.edit, routeConfig.basicSalary.key);
@@ -65,11 +69,12 @@ export default function Page() {
     }, [allData, searchText]);
 
     const deleteRecord = async (record) => {
-        await apiCall({
-            method: HttpMethod.DELETE,
-            url: `${endpoints.deleteBasicSalary}${record._id}`,
-            setIsLoading,
-            successCallback: handleUpdatedData,
+        await apiLoading.run(async () => {
+            await apiCall({
+                method: HttpMethod.DELETE,
+                url: endpoints.deleteBasicSalary(record?._id),
+                successCallback: handleUpdatedData,
+            });
         });
     };
 
@@ -116,7 +121,6 @@ export default function Page() {
             dataIndex: appKeys.basicSalary,
             key: appKeys.basicSalary,
             render: (basicSalary) => {
-                console.log("dxfgdsfgd", basicSalary)
                 return antTag(!isShowAmounts ? "***" : decryptValue(basicSalary), "green");
             },
         },

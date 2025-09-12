@@ -60,7 +60,7 @@ export default function BasicSalaryModel({
 
             await apiCall({
                 method: HttpMethod.POST,
-                url: `${endpoints.addUpdateBasicSalary}${selectedRecord._id}`,
+                url: endpoints.addUpdateBasicSalary(selectedRecord._id),
                 data: formValues,
                 setIsLoading,
                 successCallback: (data) => {

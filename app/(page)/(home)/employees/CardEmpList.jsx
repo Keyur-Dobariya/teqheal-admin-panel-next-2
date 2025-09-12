@@ -289,14 +289,6 @@ export default function CardEmpList({isDashboard}) {
                                 addBtnIcon={<UserAddOutlined />}
                                 handleAdd={handleAddClick}
                             />}
-                            {/*{canAdd && <Button*/}
-                            {/*    type="primary"*/}
-                            {/*    icon={<UserPlus/>}*/}
-                            {/*    onClick={handleAddClick}*/}
-                            {/*    loading={actionLoading === 'add'}*/}
-                            {/*>*/}
-                            {/*    {!isMobile && appString.addEmployee}*/}
-                            {/*</Button>}*/}
                         </div>
                     )}
                 />

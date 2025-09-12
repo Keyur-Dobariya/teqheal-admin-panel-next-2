@@ -63,12 +63,11 @@ export default function ModuleModel({
                 moduleName: convertLowerCaseKey(values.moduleName.trim()),
                 description: values.description,
                 actions: actions,
-                ...(selectedRecord ? {moduleId: selectedRecord} : {}),
             };
 
             await apiCall({
                 method: HttpMethod.POST,
-                url: endpoints.addUpdateModule,
+                url: endpoints.addUpdateModule(selectedRecord?._id),
                 data: postData,
                 showSuccessMessage: true,
                 successCallback: (data) => {

@@ -1,5 +1,5 @@
 "use client";
-import React, { useState, useEffect, useRef } from "react";
+import React, {useState, useEffect, useRef} from "react";
 import {
     Table,
     Button,
@@ -11,8 +11,8 @@ import {
     Input,
     Select, Row, Col,
 } from "antd";
-import apiCall, { HttpMethod } from "../../../api/apiServiceProvider";
-import { endpoints } from "../../../api/apiEndpoints";
+import apiCall, {HttpMethod} from "../../../api/apiServiceProvider";
+import {endpoints} from "../../../api/apiEndpoints";
 import {
     ApartmentOutlined,
     DeleteOutlined,
@@ -27,9 +27,15 @@ import {routeConfig} from "../../../utils/pageRoutes";
 import {mActions} from "../../../utils/enum";
 import appString from "../../../utils/appString";
 import CommonActionButton from "../(panelCommonUtils)/CommonActionButton";
+import {useActionLoading} from "../../../hooks/useActionLoading";
+import {useRunOnce} from "../../../hooks/useRunOnce";
+import {showToast} from "../../../components/CommonComponents";
 
 export default function RolePage() {
-    const { hasPermission } = usePermission();
+    const {withLoading} = useActionLoading();
+    const apiLoading = withLoading();
+
+    const {hasPermission} = usePermission();
     const canAdd = !!hasPermission(mActions.add, routeConfig.roles.key);
     const canEdit = !!hasPermission(mActions.edit, routeConfig.roles.key);
     const canDelete = !!hasPermission(mActions.delete, routeConfig.roles.key);
@@ -42,54 +48,45 @@ export default function RolePage() {
     const [selectedRole, setSelectedRole] = useState(null);
     const [isOnlyPermissionEdit, setIsOnlyPermissionEdit] = useState(null);
     const [form] = Form.useForm();
-    const fetchTriggered = useRef(false);
     const [isModuleModelOpen, setIsModuleModelOpen] = useState(false);
     const [modulePermissions, setModulePermissions] = useState([]);
 
     const [inviteEmails, setInviteEmails] = useState({});
 
-    useEffect(() => {
-        if (!fetchTriggered.current) {
-            fetchTriggered.current = true;
-            fetchModules();
-            fetchRoles();
-        }
-    }, []);
-
     const fetchModules = async () => {
         await apiCall({
             method: HttpMethod.GET,
             url: endpoints.getAllModules,
-            setIsLoading: false,
             showSuccessMessage: false,
             successCallback: (data) => {
-                const filteredModules = (data?.data || []).filter(
-                    (module) => !module.isForSuperAdmin
-                );
-                setModules(filteredModules);
+                if(data?.data) {
+                    const filteredModules = (data?.data || []).filter(
+                        (module) => !module.isForSuperAdmin
+                    );
+                    setModules(filteredModules);
+                }
             },
         });
     };
 
     const fetchRoles = async () => {
-        setLoading(true);
-        const companyId = getLocalData(appKeys.companyId);
         await apiCall({
             method: HttpMethod.GET,
-            url: `${endpoints.getRolesByCompany}?companyId=${companyId}`,
-            setIsLoading: setLoading,
+            url: endpoints.getAllRoles,
             showSuccessMessage: false,
             successCallback: (data) => {
-                if(data?.data) {
+                if (data?.data) {
                     setRoles(data?.data || []);
                 }
             },
         });
     };
 
+    const {fetchLoading} = useRunOnce([fetchModules, fetchRoles]);
+
     const handleEdit = (record, isOnlyPermissionEdit) => {
         setSelectedRole(record);
-        if(isOnlyPermissionEdit) {
+        if (isOnlyPermissionEdit) {
             setModulePermissions(record.modulePermissions || []);
             setIsOnlyPermissionEdit(true);
             setIsModuleModelOpen(true);
@@ -103,15 +100,32 @@ export default function RolePage() {
     };
 
     const deleteRole = async (record) => {
-        setLoading(true);
-        await apiCall({
-            method: HttpMethod.DELETE,
-            url: endpoints.deleteRole.replace(":id", record?._id),
-            setIsLoading: setLoading,
-            showSuccessMessage: true,
-            successCallback: (data) => {
-                fetchRoles();
-            },
+        await apiLoading.run(async () => {
+            await apiCall({
+                method: HttpMethod.DELETE,
+                url: endpoints.deleteRole(record?._id),
+                showSuccessMessage: true,
+                successCallback: (data) => {
+                    fetchRoles();
+                },
+            });
+        });
+    };
+
+    const addUpdateRole = async (roleId, postData) => {
+        await apiLoading.run(async () => {
+            await apiCall({
+                method: HttpMethod.POST,
+                url: endpoints.addUpdateRole(roleId),
+                data: postData,
+                showSuccessMessage: true,
+                successCallback: () => {
+                    fetchRoles();
+                    setIsModalOpen(false);
+                    setSelectedRole(null);
+                    form.resetFields();
+                },
+            });
         });
     };
 
@@ -121,43 +135,13 @@ export default function RolePage() {
         setIsModalOpen(true);
     };
 
-    const handleModalOk = async (permissionData = []) => {
-        try {
-            let postData;
-            if(isOnlyPermissionEdit) {
-                postData = {
-                    ...selectedRole,
-                    companyId: getLocalData(appKeys.companyId),
-                    modulePermissions: permissionData,
-                    ...(selectedRole ? { roleId: selectedRole?._id } : {}),
-                };
-            } else {
-                const values = await form.validateFields();
-                postData = {
-                    ...values,
-                    companyId: getLocalData(appKeys.companyId),
-                    modulePermissions: modulePermissions,
-                    ...(selectedRole ? { roleId: selectedRole?._id } : {}),
-                };
-            }
-
-            setLoading(true);
-            await apiCall({
-                method: HttpMethod.POST,
-                url: endpoints.addUpdateRole,
-                data: postData,
-                setIsLoading: setLoading,
-                showSuccessMessage: true,
-                successCallback: () => {
-                    fetchRoles();
-                    setIsModalOpen(false);
-                    setSelectedRole(null);
-                    form.resetFields();
-                },
-            });
-        } catch (error) {
-            // Validation failed, do nothing
-        }
+    const handleSubmit = async () => {
+        const values = await form.validateFields();
+        const postData = {
+            ...values,
+            modulePermissions: modulePermissions,
+        };
+        await addUpdateRole(selectedRole?._id, postData);
     };
 
     const columns = [
@@ -181,8 +165,9 @@ export default function RolePage() {
                     />
                     <Button
                         type="primary"
-                        icon={<SendOutlined />}
+                        icon={<SendOutlined/>}
                         size="middle"
+                        loading={withLoading(record._id).loading}
                         onClick={() => handleSendInvitation(record._id)}
                         disabled={!inviteEmails[record._id] || inviteEmails[record._id].trim() === ""}
                     />
@@ -195,9 +180,10 @@ export default function RolePage() {
             width: 180,
             align: "center",
             render: (_, record) => (
-                <div className="flex justify-center items-center">
-                    <Button icon={<ApartmentOutlined />} type="primary" onClick={() => handleEdit(record, true)} />
-                </div>
+                <CommonActionButton
+                    addBtnIcon={<ApartmentOutlined/>}
+                    handleAdd={() => handleEdit(record, true)}
+                />
             ),
         },
         {
@@ -207,27 +193,28 @@ export default function RolePage() {
             align: "center",
             hidden: !canManageStatus,
             width: 100,
-            render: (value, record) => record?.isManageable ? (
-                <Switch
-                    checked={value}
-                    size="small"
-                    onChange={async (checked) => {
-                        const postData = {
-                            roleId: record._id,
-                            isActive: checked,
-                        };
-                        setLoading(true);
-                        await apiCall({
-                            method: HttpMethod.POST,
-                            url: endpoints.addUpdateRole,
-                            data: postData,
-                            setIsLoading: setLoading,
-                            showSuccessMessage: true,
-                            successCallback: () => fetchRoles(),
-                        });
-                    }}
-                />
-            ) : "-",
+            render: (value, record) => {
+                if (!record?.isManageable) {
+                    return '-';
+                }
+                const rowLoading = withLoading(`isActive-${record._id}`);
+                return (
+                    <Switch
+                        size="small"
+                        checked={value}
+                        loading={rowLoading.loading}
+                        onChange={async (checked) => {
+                            await rowLoading.run(async () => {
+                                const postData = {
+                                    ...record,
+                                    isActive: checked,
+                                };
+                                await addUpdateRole(record._id, postData);
+                            });
+                        }}
+                    />
+                );
+            },
         },
         {
             title: "Operations",
@@ -236,32 +223,39 @@ export default function RolePage() {
             align: "center",
             hidden: !canEdit && !canDelete,
             render: (_, record) => record?.isManageable ? (
-                    <CommonActionButton
-                        record={record}
-                        handleEdit={canEdit && ((record) => handleEdit(record, false))}
-                        handleDelete={canDelete && deleteRole}
-                    />
+                <CommonActionButton
+                    record={record}
+                    handleEdit={canEdit && ((record) => handleEdit(record, false))}
+                    handleDelete={canDelete && deleteRole}
+                />
             ) : "-",
         },
     ];
 
     const handleInviteEmailChange = (roleId, value) => {
-        setInviteEmails(prev => ({ ...prev, [roleId]: value }));
+        setInviteEmails(prev => ({...prev, [roleId]: value}));
     };
 
     const handleSendInvitation = async (roleId) => {
-        const email = inviteEmails[roleId];
-        if (!email) return;
-
-        // await apiCall({
-        //     method: HttpMethod.POST,
-        //     url: endpoints.sendInvitation,
-        //     data: { roleId, email },
-        //     showSuccessMessage: true,
-        //     successCallback: () => {
-        //         setInviteEmails(prev => ({ ...prev, [roleId]: "" })); // Clear input after send
-        //     },
-        // });
+        const emailAddress = inviteEmails[roleId];
+        if (emailAddress) {
+            await withLoading(roleId).run(async () => {
+                await apiCall({
+                    method: HttpMethod.POST,
+                    url: endpoints.inviteUser,
+                    data: {
+                        roleId: roleId,
+                        emailAddress: emailAddress,
+                    },
+                    showSuccessMessage: true,
+                    successCallback: () => {
+                        setInviteEmails(prev => ({ ...prev, [roleId]: "" }));
+                    },
+                });
+            });
+        } else {
+            showToast('error', 'Please Enter Email Address');
+        }
     };
 
     return (
@@ -280,8 +274,8 @@ export default function RolePage() {
                             />}
                         </div>
                     )}
-                    loading={loading}
-                    scroll={{ x: "max-content" }}
+                    loading={fetchLoading}
+                    scroll={{x: "max-content"}}
                 />
             </Card>
 
@@ -289,18 +283,22 @@ export default function RolePage() {
                 title={selectedRole ? "Update Role" : "Add Role"}
                 open={isModalOpen}
                 onCancel={() => setIsModalOpen(false)}
-                onOk={handleModalOk}
+                onOk={handleSubmit}
                 width={500}
                 confirmLoading={loading}
                 maskClosable={false}
             >
-                <Form form={form} layout="vertical" preserve={false}>
+                <Form form={form} layout="vertical"
+                      onValuesChange={(changedValues, allValues) => {
+                          form.setFieldsValue(allValues);
+                      }}
+                >
                     <Form.Item
                         name="roleName"
                         label="Role Name"
-                        rules={[{ required: true, message: "Please enter role name!" }]}
+                        rules={[{required: true, message: "Please enter role name!"}]}
                     >
-                        <Input placeholder="Enter role name" />
+                        <Input placeholder="Enter role name"/>
                     </Form.Item>
 
                     <Row gutter={16} align="middle">
@@ -310,11 +308,12 @@ export default function RolePage() {
                                 <Switch/>
                             </Form.Item>
                         </Col>
-                        <Col xs={24} sm={12}>
-                            <Button type="primary" style={{width: '100%'}} icon={<ApartmentOutlined/>}
-                                    iconPosition='end' onClick={() => setIsModuleModelOpen(true)}>
-                                Set Module Permission
-                            </Button>
+                        <Col xs={24} sm={12} style={{ display: "flex", justifyContent: "flex-end" }}>
+                            <CommonActionButton
+                                addBtnName="Set Role Permission"
+                                addBtnIcon={<ApartmentOutlined />}
+                                handleAdd={() => setIsModuleModelOpen(true)}
+                            />
                         </Col>
                     </Row>
                 </Form>
@@ -328,9 +327,14 @@ export default function RolePage() {
                 isTabMode={false}
                 onSubmit={async (modulePermissions) => {
                     setModulePermissions(modulePermissions);
-                    if(isOnlyPermissionEdit) {
-                        await handleModalOk(modulePermissions);
+                    if (isOnlyPermissionEdit) {
+                        const postData = {
+                            ...selectedRole,
+                            modulePermissions: modulePermissions,
+                        };
+                        await addUpdateRole(selectedRole?._id, postData);
                     }
+                    setIsModuleModelOpen(false);
                 }}
             />}
         </div>
