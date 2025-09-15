@@ -22,9 +22,9 @@ export default function BasicSalaryModel({
                                              setIsModelOpen,
                                              activeUsersData,
                                              selectedRecord,
-                                             onSuccessCallback,
+                                             loading,
+                                             onSubmit,
                                          }) {
-    const [isLoading, setIsLoading] = useState(false);
     const [form] = Form.useForm();
     const containerRef = useRef(null);
     const isEditing = !!selectedRecord;
@@ -52,22 +52,11 @@ export default function BasicSalaryModel({
         }
     };
 
-    const handleAddUpdateRecord = async () => {
+    const handleSubmit = async () => {
         try {
             await form.validateFields();
-
             const formValues = form.getFieldsValue(true);
-
-            await apiCall({
-                method: HttpMethod.POST,
-                url: endpoints.addUpdateBasicSalary(selectedRecord._id),
-                data: formValues,
-                setIsLoading,
-                successCallback: (data) => {
-                    onSuccessCallback(data.data);
-                    setIsModelOpen(false);
-                },
-            });
+            onSubmit(formValues);
         } catch (error) {
             console.error("Form validation/API call failed:", error);
         }
@@ -80,9 +69,9 @@ export default function BasicSalaryModel({
             centered
             open={isModelOpen}
             width={400}
-            onOk={handleAddUpdateRecord}
+            onOk={handleSubmit}
             onCancel={handleCancel}
-            confirmLoading={isLoading}
+            confirmLoading={loading}
             okText={modelTitle}
         >
             <div

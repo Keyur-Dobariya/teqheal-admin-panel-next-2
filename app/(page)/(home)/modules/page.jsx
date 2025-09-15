@@ -17,10 +17,13 @@ import {CustomTag} from "../../../components/CommonComponents";
 import apiCall, {HttpMethod} from "../../../api/apiServiceProvider";
 import {useActionLoading} from "../../../hooks/useActionLoading";
 import ModuleModel from "./ModuleModel";
+import {useApiServices} from "../../../api/useApiServices";
 
 export default function Page() {
     const { withLoading } = useActionLoading();
     const apiLoading = withLoading();
+
+    const { isLoading, modules: callApi } = useApiServices();
 
     const [modules, setModules] = useState([]);
     const [actions, setActions] = useState([]);
@@ -28,46 +31,24 @@ export default function Page() {
     const [selectedRecord, setSelectedRecord] = useState(null);
 
     const fetchModules = async () => {
-        await apiLoading.run(async () => {
-            await apiCall({
-                method: HttpMethod.GET,
-                url: endpoints.getAllModules,
-                showSuccessMessage: false,
-                successCallback: (data) => {
-                    if(data?.data) {
-                        setModules(data?.data);
-                    }
-                },
-            });
-        });
+        const data = await callApi.getAllModules();
+        if (data?.data) setModules(data.data);
     };
 
     const {fetchLoading} = useRunOnce(fetchModules);
 
     const deleteModule = async (record) => {
-        await apiLoading.run(async () => {
-            await apiCall({
-                method: HttpMethod.DELETE,
-                url: endpoints.deleteModule(record?._id),
-                showSuccessMessage: true,
-                successCallback: (data) => {
-                    setModules(data?.data);
-                },
-            });
-        });
+        const data = await callApi.deleteModule(record?._id);
+        if (data?.data) setModules(data.data);
     };
 
     const handleAddOrUpdate = async (moduleId, postData) => {
-        await apiLoading.run(async () => {
-            await apiCall({
-                method: HttpMethod.POST,
-                url: endpoints.addUpdateModule(moduleId),
-                data: postData,
-                showSuccessMessage: true,
-                successCallback: () => {
-                    fetchModules();
-                },
-            });
+        await callApi.addUpdateModule(moduleId, postData, async (data) => {
+            setIsModelOpen(false);
+            setSelectedRecord(null);
+
+            const refreshed = await callApi.getAllModules();
+            if (refreshed?.data) setModules(refreshed.data);
         });
     };
 

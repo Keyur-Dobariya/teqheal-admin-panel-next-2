@@ -62,7 +62,7 @@ const endpoints = {
     updateLeave: `${environment.apiBaseUrl}/api/updateLeave/`,
     leaveStatusChange: `${environment.apiBaseUrl}/api/leaveStatusChange/`,
     basicSalaryList: `${environment.apiBaseUrl}/api/basicSalaryList`,
-    addUpdateBasicSalary: (id) => `${environment.apiBaseUrl}/api/addUpdateBasicSalary/${id}`,
+    addUpdateBasicSalary: (id) => `${environment.apiBaseUrl}/api/addUpdateBasicSalary/${checkId(id)}`,
     deleteBasicSalary: (id) => `${environment.apiBaseUrl}/api/deleteBasicSalary/${id}`,
     generateSalaryReports: `${environment.apiBaseUrl}/api/generateSalaryReports?`,
     updateSalaryReport: `${environment.apiBaseUrl}/api/updateSalaryReport`,
@@ -141,7 +141,7 @@ const endpoints = {
 };
 
 const checkId = (id) => {
-    return id || '';
+    return id ?? '';
 }
 
 export {environment, endpoints};

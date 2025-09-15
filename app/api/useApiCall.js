@@ -6,10 +6,11 @@ import appKeys from "../utils/appKeys";
 import { useActionLoading } from "../hooks/useActionLoading";
 
 export function useApiCall() {
-    const { runWithLoading, isLoading } = useActionLoading();
+    const {withLoading} = useActionLoading();
+    const apiLoading = withLoading();
 
     const apiCall = async ({
-                               method = httpMethode.GET,
+                               method,
                                url,
                                data,
                                isMultipart = false,
@@ -20,18 +21,14 @@ export function useApiCall() {
                                headers = {},
                            }) => {
 
-        return runWithLoading(url, async () => {
-            const token =
-                typeof window !== "undefined"
-                    ? localStorage.getItem(appKeys.jwtToken) ?? ""
-                    : "";
+        const token = localStorage.getItem(appKeys.jwtToken) ?? "";
+        const defaultHeaders = {
+            Authorization: `Bearer ${token}`,
+            'Content-Type': isMultipart ? 'multipart/form-data' : 'application/json',
+            ...headers,
+        };
 
-            const defaultHeaders = {
-                Authorization: token ? `Bearer ${token}` : "",
-                "Content-Type": isMultipart ? "multipart/form-data" : "application/json",
-                ...headers,
-            };
-
+        return await apiLoading.run(async () => {
             try {
                 const response = await axios({
                     method,
@@ -43,15 +40,12 @@ export function useApiCall() {
                 successCallback?.(response.data);
 
                 if (showSuccessMessage) {
-                    showToast("success", response.data?.message || "Request successful");
+                    showToast("success", response.data?.message || "Request was successful");
                 }
 
                 return response.data;
             } catch (error) {
-                const errorMessage =
-                    error.response?.data?.message ||
-                    error.message ||
-                    "Something went wrong";
+                const errorMessage = error.response?.data?.message || error.message || "Something went wrong";
 
                 errorCallback?.(error.response?.data);
 
@@ -63,13 +57,13 @@ export function useApiCall() {
                     redirect(pageRoutes.loginPage);
                 }
 
-                console.error("API Call Error:", errorMessage, error);
+                console.error("API Call Error:", error);
                 throw error;
             }
         });
     };
 
-    const httpMethode = {
+    const HttpMethod = {
         GET: "GET",
         POST: "POST",
         PUT: "PUT",
@@ -79,5 +73,5 @@ export function useApiCall() {
         OPTIONS: "OPTIONS",
     };
 
-    return { apiCall, isLoading, httpMethode };
+    return { apiCall, isLoading: apiLoading.loading, HttpMethod };
 }

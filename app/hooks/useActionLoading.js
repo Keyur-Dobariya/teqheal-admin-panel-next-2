@@ -1,4 +1,4 @@
-import { useState, useCallback } from "react";
+import {useCallback, useState} from "react";
 
 export function useActionLoading() {
     const [loadingMap, setLoadingMap] = useState({});
@@ -20,7 +20,7 @@ export function useActionLoading() {
             try {
                 startLoading(key);
                 await new Promise((resolve) => setTimeout(resolve, 100));
-                await action();
+                return await action();
             } finally {
                 stopLoading(key);
             }

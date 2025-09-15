@@ -27,6 +27,7 @@ import {usePermission} from "../../../hooks/usePermission";
 import {mActions} from "../../../utils/enum";
 import {routeConfig} from "../../../utils/pageRoutes";
 import {useActionLoading} from "../../../hooks/useActionLoading";
+import CommonActionButton from "../(panelCommonUtils)/CommonActionButton";
 
 export default function Page() {
     const {withLoading} = useActionLoading();
@@ -44,8 +45,6 @@ export default function Page() {
     const [isModelOpen, setIsModelOpen] = useState(false);
     const [searchText, setSearchText] = useState('');
     const [selectedRecord, setSelectedRecord] = useState(null);
-    const [isLoading, setIsLoading] = useState(false);
-    const [actionLoading, setActionLoading] = useState(null);
 
     const [isShowAmounts, setIsShowAmounts] = useState(false);
 
@@ -78,24 +77,27 @@ export default function Page() {
         });
     };
 
-    const openModalWithLoading = (isEditMode, record = null) => {
-        const loadingId = isEditMode ? record._id : 'add';
-        setActionLoading(loadingId);
-
-        setSelectedRecord(record);
-
-        setTimeout(() => {
-            setIsModelOpen(true);
-            setActionLoading(null);
-        }, 100);
+    const handleAddUpdateRecord = async (formValues) => {
+        await apiLoading.run(async () => {
+            await apiCall({
+                method: HttpMethod.POST,
+                url: endpoints.addUpdateBasicSalary(selectedRecord?._id),
+                data: formValues,
+                successCallback: (data) => {
+                    handleUpdatedData(data);
+                    setIsModelOpen(false);
+                },
+            });
+        });
     };
 
     const handleAddClick = () => {
-        openModalWithLoading(false);
+        setIsModelOpen(true);
     };
 
     const handleEditClick = (record) => {
-        openModalWithLoading(true, record);
+        setSelectedRecord(record);
+        setIsModelOpen(true);
     };
 
     const columns = [
@@ -145,24 +147,13 @@ export default function Page() {
             dataIndex: appKeys.operation,
             fixed: "right",
             width: 50,
-            hidden: !canEdit && !canDelete,
+            hidden: (!canEdit && !canDelete),
             render: (_, record) => (
-                <div className="flex justify-center items-center gap-5">
-                    <Tooltip title={appString.edit}>
-                        {actionLoading === record._id ? (
-                            <LoadingOutlined />
-                        ) : (
-                            <div onClick={() => handleEditClick(record)} style={{cursor: 'pointer'}}>
-                                <Edit color={appColor.secondPrimary} />
-                            </div>
-                        )}
-                    </Tooltip>
-                    <Popconfirm title={appString.deleteConfirmation} onConfirm={() => deleteRecord(record)}>
-                        <Tooltip title={appString.delete}>
-                            <Trash2 color={appColor.danger} style={{cursor: 'pointer'}}/>
-                        </Tooltip>
-                    </Popconfirm>
-                </div>
+                <CommonActionButton
+                    record={record}
+                    handleEdit={canEdit && handleEditClick}
+                    handleDelete={canDelete && deleteRecord}
+                />
             ),
         },
     ];
@@ -172,7 +163,6 @@ export default function Page() {
             <Card>
                 <Table
                     rowKey={(record) => record._id}
-                    loading={isLoading}
                     columns={columns}
                     dataSource={filteredData}
                     title={() => (
@@ -192,14 +182,11 @@ export default function Page() {
                                 >
                                     {!isMobile && (isShowAmounts ? appString.hideAmount : appString.showAmount)}
                                 </Button>
-                                <Button
-                                    type="primary"
-                                    icon={<FilePlus/>}
-                                    onClick={handleAddClick}
-                                    loading={actionLoading === 'add'}
-                                >
-                                    {!isMobile && appString.addBasicSalary}
-                                </Button>
+                                {canAdd && <CommonActionButton
+                                    addBtnName={appString.addBasicSalary}
+                                    addBtnIcon={<FilePlus/>}
+                                    handleAdd={handleAddClick}
+                                />}
                             </div>
                         </div>
                     )}
@@ -211,7 +198,8 @@ export default function Page() {
                     setIsModelOpen={setIsModelOpen}
                     activeUsersData={activeUsersData}
                     selectedRecord={selectedRecord}
-                    onSuccessCallback={handleUpdatedData}
+                    loading={apiLoading.loading}
+                    onSubmit={handleAddUpdateRecord}
                 />
             )}
         </>

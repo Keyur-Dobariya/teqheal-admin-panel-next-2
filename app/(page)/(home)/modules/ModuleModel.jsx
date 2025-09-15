@@ -21,7 +21,8 @@ export default function ModuleModel({
                                              modules,
                                              actions,
                                              selectedRecord,
-                                             onSuccessCallback,
+                                        isLoading,
+                                             onSubmit,
                                          }) {
     const {withLoading} = useActionLoading();
     const apiLoading = withLoading();
@@ -52,18 +53,21 @@ export default function ModuleModel({
     };
 
     const handleAddOrUpdate = async (values) => {
-        await apiLoading.run(async () => {
-            let actions = [];
-            values?.actions.map(action => {
-                actions.push({
-                    _id: action?.value || action,
-                })
+        let actions = [];
+        values?.actions.map(action => {
+            actions.push({
+                _id: action?.value || action,
             })
-            const postData = {
-                moduleName: convertLowerCaseKey(values.moduleName.trim()),
-                description: values.description,
-                actions: actions,
-            };
+        })
+        const postData = {
+            moduleName: convertLowerCaseKey(values.moduleName.trim()),
+            description: values.description,
+            actions: actions,
+        };
+
+        onSubmit(postData);
+        await apiLoading.run(async () => {
+
 
             await apiCall({
                 method: HttpMethod.POST,
@@ -97,7 +101,7 @@ export default function ModuleModel({
             maskClosable={false}
             onCancel={handleCancel}
             onOk={() => form.submit()}
-            confirmLoading={apiLoading.loading}
+            confirmLoading={isLoading}
             okText={modelTitle}
             width={450}
         >
