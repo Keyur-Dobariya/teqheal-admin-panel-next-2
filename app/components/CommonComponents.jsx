@@ -1,9 +1,10 @@
-import {Avatar, message, Select, Tag} from "antd";
+import {Avatar, message, Select, Tag, Upload} from "antd";
 import {formatMilliseconds} from "../utils/utils";
 import appColor from "../utils/appColor";
 import appString from "../utils/appString";
 import SafeAvatar from "./SafeAvatar";
 import React from "react";
+import {PlusOutlined} from "@ant-design/icons";
 
 const {Option} = Select;
 
@@ -49,6 +50,38 @@ export const CustomTag = ({value, color}) => {
             {value}
         </div>
     ) : '-';
+}
+
+export const UploadSinglePhoto = ({field, photo, onSelect}) => {
+    return (
+        <Upload
+            name={field}
+            listType="picture-circle"
+            className="avatar-uploader"
+            showUploadList={false}
+            beforeUpload={(file) => {
+                onSelect(file);
+                return false;
+            }}
+        >
+            {photo ? (
+                <img
+                    className="rounded-full"
+                    src={typeof photo === 'string' && photo.startsWith('http')
+                        ? photo
+                        : URL.createObjectURL(photo)
+                    }
+                    alt="avatar"
+                    style={{width: '100%'}}
+                />
+            ) : (
+                <button style={{border: 0, background: 'none'}} type="button">
+                    <PlusOutlined/>
+                    <div style={{marginTop: 8}}>Upload</div>
+                </button>
+            )}
+        </Upload>
+    );
 }
 
 export const timeTag = (value, color) => {

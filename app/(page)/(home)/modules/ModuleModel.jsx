@@ -9,23 +9,18 @@ import {
     Select, Switch,
 } from "antd";
 
-import apiCall, {HttpMethod} from "../../../api/apiServiceProvider";
-import {useActionLoading} from "../../../hooks/useActionLoading";
 import {routeConfig} from "../../../utils/pageRoutes";
 import {convertCamelCase, convertLowerCaseKey} from "../../../utils/utils";
-import {endpoints} from "../../../api/apiEndpoints";
 
 export default function ModuleModel({
-                                             isModelOpen,
-                                             setIsModelOpen,
-                                             modules,
-                                             actions,
-                                             selectedRecord,
+                                        isModelOpen,
+                                        setIsModelOpen,
+                                        modules,
+                                        actions,
+                                        selectedRecord,
                                         isLoading,
-                                             onSubmit,
-                                         }) {
-    const {withLoading} = useActionLoading();
-    const apiLoading = withLoading();
+                                        onSubmit,
+                                    }) {
     const [form] = Form.useForm();
     const isAllPermission = Form.useWatch("isAllPermission", form);
     const isEditing = !!selectedRecord;
@@ -59,6 +54,7 @@ export default function ModuleModel({
                 _id: action?.value || action,
             })
         })
+
         const postData = {
             moduleName: convertLowerCaseKey(values.moduleName.trim()),
             description: values.description,
@@ -66,20 +62,6 @@ export default function ModuleModel({
         };
 
         onSubmit(postData);
-        await apiLoading.run(async () => {
-
-
-            await apiCall({
-                method: HttpMethod.POST,
-                url: endpoints.addUpdateModule(selectedRecord?._id),
-                data: postData,
-                showSuccessMessage: true,
-                successCallback: (data) => {
-                    onSuccessCallback(data);
-                    handleCancel();
-                },
-            });
-        });
     };
 
     const addedModulePaths = modules.map(module => module.moduleName);

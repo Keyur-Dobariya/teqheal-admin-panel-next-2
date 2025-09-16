@@ -1,6 +1,6 @@
 'use client'
 
-import React, {useState, useEffect} from "react";
+import React, {useState, useEffect, useMemo} from "react";
 import {Tree} from "antd";
 import {DownOutlined} from "@ant-design/icons";
 import {convertCamelCase} from "../../../utils/utils";
@@ -21,12 +21,15 @@ export const ManagePermissionTree = ({
         }
     }, [assignedPermission, modules]);
 
+    // const treeData = useMemo(() => getTreeData(modules), [modules]);
+
     return (
         <Tree
             checkable
             showLine
             switcherIcon={<DownOutlined/>}
             selectable={false}
+            // treeData={treeData}
             treeData={getTreeData(modules)}
             checkedKeys={checkedKeys}
             onCheck={(keysValue) => {

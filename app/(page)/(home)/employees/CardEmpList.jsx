@@ -2,73 +2,75 @@
 
 import {useEffect, useMemo, useState} from 'react';
 import {
-    Avatar,
     Button, Card,
-    Grid,
     Input,
     Popconfirm,
     Switch,
     Table,
-    Tooltip,
-    Tag,
 } from 'antd';
-import {AlertCircle, Box, Search} from '../../../utils/icons';
-import {UserPlus, Edit, Trash2, Eye, XCircle, CheckCircle} from '../../../utils/icons';
+import {AlertCircle, Search} from '../../../utils/icons';
 import {useAppData, AppDataFields} from '../../../masterData/AppDataContext';
-import apiCall, {HttpMethod} from '../../../api/apiServiceProvider';
-import {endpoints} from '../../../api/apiEndpoints';
 import appString from '../../../utils/appString';
 import appKeys from '../../../utils/appKeys';
 import {ApprovalStatus, DateTimeFormat, mActions} from '../../../utils/enum';
-import {appColor, colorMap} from '../../../utils/appColor';
+import {appColor} from '../../../utils/appColor';
 import dayjs from 'dayjs';
 import EmpAddUpdateModel from "../../../models/EmpAddUpdateModel";
 import {
     CheckCircleOutlined,
     CloseCircleOutlined,
-    DeleteOutlined,
-    EditOutlined,
-    EyeOutlined,
-    LoadingOutlined, UserAddOutlined
+    UserAddOutlined
 } from "@ant-design/icons";
 import {pageRoutes, routeConfig} from "../../../utils/pageRoutes";
 import SafeAvatar from "../../../components/SafeAvatar";
 import useHomePageLayout from "../../../hooks/useHomePageLayout";
 import {usePermission} from "../../../hooks/usePermission";
 import {CustomTag} from "../../../components/CommonComponents";
-import CommonActionButton from "../(panelCommonUtils)/CommonActionButton";
+import {CommonActionButton} from "../(panelCommonUtils)/CommonAction";
+import {useActionLoading} from "../../../hooks/useActionLoading";
+import {useApiServices} from "../../../api/useApiServices";
+import {useRunOnce} from "../../../hooks/useRunOnce";
 
 export default function CardEmpList({isDashboard}) {
+    const { isLoading, roles: {getAllRoles}, users: {addUpdateUser, deleteUser} } = useApiServices();
+    const {withLoading} = useActionLoading();
     const {hasPermission} = usePermission();
     const canAdd = !!hasPermission(mActions.add, routeConfig.employees.key);
     const canEdit = !!hasPermission(mActions.edit, routeConfig.employees.key);
     const canDelete = !!hasPermission(mActions.delete, routeConfig.employees.key);
     const canViewDetail = !!hasPermission(mActions.viewDetail, routeConfig.employees.key);
+    const canManageDetail = !!hasPermission(mActions.manage, routeConfig.employees.key);
     const canManageStatus = !!hasPermission(mActions.status, routeConfig.employees.key);
     const canReject = !!hasPermission(mActions.reject, routeConfig.employees.key);
     const canApprove = !!hasPermission(mActions.approve, routeConfig.employees.key);
 
     const {usersData, updateAppDataField} = useAppData();
-    const {isMobile, push} = useHomePageLayout();
+    const {push} = useHomePageLayout();
 
     const [allData, setAllData] = useState(usersData);
     const [isModelOpen, setIsModelOpen] = useState(false);
     const [searchText, setSearchText] = useState('');
     const [selectedRecord, setSelectedRecord] = useState(null);
-    const [isLoading, setIsLoading] = useState(false);
-    const [actionLoading, setActionLoading] = useState(null);
-    const [loadingRecord, setLoadingRecord] = useState({});
+    const [roles, setRoles] = useState([]);
+
+    const fetchRoles = async () => {
+        const data = await getAllRoles();
+        setRoles(data || []);
+    };
+
+    const {fetchLoading} = useRunOnce(fetchRoles);
 
     useEffect(() => {
         setAllData(usersData);
     }, [usersData]);
 
     const handleUpdatedData = (data) => {
-        updateAppDataField(AppDataFields.usersData, data?.data);
+        updateAppDataField(AppDataFields.usersData, data);
     };
 
     const filteredData = useMemo(() => {
         if (!allData) return [];
+        console.log("allData=>", allData)
         const query = searchText.toLowerCase();
         return allData.filter(
             data =>
@@ -77,49 +79,29 @@ export default function CardEmpList({isDashboard}) {
                         data.fullName?.toLowerCase().includes(query) ||
                         data.emailAddress?.toLowerCase().includes(query) ||
                         data.mobileNumber?.includes(query) ||
-                        data.role?.toLowerCase().includes(query) ||
                         data.employeeCode?.toLowerCase().includes(query)
                     )
         );
     }, [allData, searchText]);
 
-    const updateRecord = async (id, data) => {
-        await apiCall({
-            method: HttpMethod.POST,
-            url: `${endpoints.addUpdateUser}${id}`,
-            data,
-            setIsLoading,
-            successCallback: handleUpdatedData,
+    const updateRecord = async (id, postData) => {
+        await addUpdateUser(id, postData, async (data) => {
+            setIsModelOpen(false);
+            setSelectedRecord(null);
+            handleUpdatedData(data || []);
         });
     };
 
     const deleteRecord = async (record) => {
-        await apiCall({
-            method: HttpMethod.DELETE,
-            url: `${endpoints.deleteUser}${record._id}`,
-            setIsLoading,
-            successCallback: handleUpdatedData,
-        });
+        const data = await deleteUser(record?._id);
+        handleUpdatedData(data || []);
     };
 
     const toggleUserStatus = async (user, checked) => {
-        setLoadingRecord(prev => ({...prev, [user._id]: true}));
-        await updateRecord(user._id, {isActive: checked});
-        setLoadingRecord(prev => ({...prev, [user._id]: false}));
+        await withLoading(user._id).run(async () => {
+            await updateRecord(user._id, {isActive: checked});
+        });
     };
-
-    const openModalWithLoading = (isEditMode, record = null) => {
-        const loadingId = isEditMode ? record._id : 'add';
-        setActionLoading(loadingId);
-
-        setSelectedRecord(record);
-
-        setTimeout(() => {
-            setIsModelOpen(true);
-            setActionLoading(null);
-        }, 100);
-    };
-
 
     const handleAddClick = () => {
         setIsModelOpen(true);
@@ -200,7 +182,7 @@ export default function CardEmpList({isDashboard}) {
                     return (
                         <Switch
                             size="small"
-                            loading={!!loadingRecord[record._id]}
+                            loading={withLoading(record._id).loading}
                             checked={record.isActive}
                             onChange={(checked) => toggleUserStatus(record, checked)}
                         />
@@ -245,10 +227,8 @@ export default function CardEmpList({isDashboard}) {
         },
         {
             title: appString.action,
-            key: 'actions',
             align: 'center',
             fixed: 'right',
-            width: 120,
             hidden: (!canEdit && !canDelete && !canViewDetail),
             render: (_, record) => (
                 <CommonActionButton
@@ -266,7 +246,7 @@ export default function CardEmpList({isDashboard}) {
             <Card>
                 <Table
                     rowKey={(record) => record._id}
-                    loading={isLoading}
+                    loading={fetchLoading}
                     columns={columns}
                     dataSource={filteredData}
                     scroll={{x: "max-content"}}
@@ -295,10 +275,15 @@ export default function CardEmpList({isDashboard}) {
             </Card>
             {isModelOpen && (
                 <EmpAddUpdateModel
+                    roles={roles}
                     isModelOpen={isModelOpen}
                     setIsModelOpen={setIsModelOpen}
                     selectedRecord={selectedRecord}
-                    onSuccessCallback={handleUpdatedData}
+                    isLoading={isLoading}
+                    canManageDetail={canManageDetail}
+                    onSubmit={async (formData) => {
+                        await updateRecord(selectedRecord._id, formData);
+                    }}
                 />
             )}
         </>

@@ -30,7 +30,7 @@ import EmpScreenshotModel from "../../../models/EmpScreenshotModel";
 import AttendanceDetailModel from "../../../models/AttendanceDetailModel";
 import SafeAvatar from "../../../components/SafeAvatar";
 import {usePermission} from "../../../hooks/usePermission";
-import CommonActionButton from "../(panelCommonUtils)/CommonActionButton";
+import { CommonActionButton } from "../(panelCommonUtils)/CommonAction";
 
 export default function CardTodayReportPage() {
     const {hasPermission} = usePermission();

@@ -2,27 +2,23 @@
 import React, {useState} from "react";
 import {
     Table,
-    Form,
     Card,
-    Switch,
 } from "antd";
-import {endpoints} from "../../../api/apiEndpoints";
 import appKeys from "../../../utils/appKeys";
-import {convertCamelCase, convertLowerCaseKey} from "../../../utils/utils";
+import {convertCamelCase} from "../../../utils/utils";
 import CardActionsShow from "./CardActionsShow";
 import {useRunOnce} from "../../../hooks/useRunOnce";
-import CommonActionButton from "../(panelCommonUtils)/CommonActionButton";
+import {
+    CommonActionButton,
+    getActionColumn,
+    getSwitchColumn, TableTitle
+} from "../(panelCommonUtils)/CommonAction";
 import appString from "../../../utils/appString";
 import {CustomTag} from "../../../components/CommonComponents";
-import apiCall, {HttpMethod} from "../../../api/apiServiceProvider";
-import {useActionLoading} from "../../../hooks/useActionLoading";
 import ModuleModel from "./ModuleModel";
 import {useApiServices} from "../../../api/useApiServices";
 
 export default function Page() {
-    const { withLoading } = useActionLoading();
-    const apiLoading = withLoading();
-
     const { isLoading, modules: callApi } = useApiServices();
 
     const [modules, setModules] = useState([]);
@@ -32,23 +28,21 @@ export default function Page() {
 
     const fetchModules = async () => {
         const data = await callApi.getAllModules();
-        if (data?.data) setModules(data.data);
+        setModules(data || []);
     };
 
     const {fetchLoading} = useRunOnce(fetchModules);
 
     const deleteModule = async (record) => {
         const data = await callApi.deleteModule(record?._id);
-        if (data?.data) setModules(data.data);
+        setModules(data || []);
     };
 
     const handleAddOrUpdate = async (moduleId, postData) => {
         await callApi.addUpdateModule(moduleId, postData, async (data) => {
             setIsModelOpen(false);
             setSelectedRecord(null);
-
-            const refreshed = await callApi.getAllModules();
-            if (refreshed?.data) setModules(refreshed.data);
+            setModules(data || []);
         });
     };
 
@@ -81,67 +75,12 @@ export default function Page() {
                 </div>
             )
         },
-        {
-            title: appString.isForSuperAdmin,
-            dataIndex: appKeys.isForSuperAdmin,
-            key: appKeys.isForSuperAdmin,
-            width: 140,
-            render: (value, record) => {
-                const rowLoading = withLoading(`isForSuperAdmin-${record._id}`);
-                return (
-                    <Switch
-                        checked={value}
-                        loading={rowLoading.loading}
-                        onChange={async (checked) => {
-                            await rowLoading.run(async () => {
-                                const postData = {
-                                    ...record,
-                                    isForSuperAdmin: checked,
-                                };
-                                await handleAddOrUpdate(record._id, postData);
-                            });
-                        }}
-                    />
-                );
-            },
-        },
-        {
-            title: appString.isActive,
-            dataIndex: appKeys.isActive,
-            key: appKeys.isActive,
-            width: 100,
-            render: (value, record) => {
-                const rowLoading = withLoading(`isActive-${record._id}`);
-                return (
-                    <Switch
-                        checked={value}
-                        loading={rowLoading.loading}
-                        onChange={async (checked) => {
-                            await rowLoading.run(async () => {
-                                const postData = {
-                                    ...record,
-                                    isActive: checked,
-                                };
-                                await handleAddOrUpdate(record._id, postData);
-                            });
-                        }}
-                    />
-                );
-            },
-        },
-        {
-            title: appString.operations,
-            key: appKeys.operations,
-            width: 150,
-            fixed: 'right',
-            render: (_, record) => (
-                <CommonActionButton
-                    record={record}
-                    handleEdit={handleEdit}
-                    handleDelete={deleteModule}
-                />
-            ),
-        }
+        getSwitchColumn(appKeys.isForSuperAdmin, handleAddOrUpdate),
+        getSwitchColumn(appKeys.isActive, handleAddOrUpdate),
+        getActionColumn({
+            handleEdit: handleEdit,
+            handleDelete: deleteModule,
+        })
     ];
 
     return (
@@ -161,7 +100,7 @@ export default function Page() {
                     rowKey={appKeys._id}
                     title={() => (
                         <div className="flex justify-between items-center">
-                            <div className="text-base font-semibold">Modules</div>
+                            <TableTitle title={appString.modules} />
                             <CommonActionButton
                                 addBtnName={appString.addModule}
                                 handleAdd={() => {
@@ -182,9 +121,9 @@ export default function Page() {
                 modules={modules}
                 actions={actions}
                 selectedRecord={selectedRecord}
-                onSuccessCallback={async (data) => {
-                    await fetchModules();
-                    setSelectedRecord(null);
+                isLoading={isLoading}
+                onSubmit={async (postData) => {
+                    await handleAddOrUpdate(selectedRecord?._id, postData);
                 }}
             />
         </div>

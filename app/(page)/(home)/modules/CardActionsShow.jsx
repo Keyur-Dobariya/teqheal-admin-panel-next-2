@@ -1,36 +1,26 @@
 "use client";
-import React, {useState, useEffect, useRef} from "react";
+import React, {useState} from "react";
 import {
-    Table,
-    Button,
     Modal,
     Form,
     Input,
-    Select,
-    Tag,
     Popconfirm,
     Card,
-    Switch,
     Row,
     Col,
     Empty,
     ColorPicker, Spin
 } from "antd";
-import apiCall, { HttpMethod } from "../../../api/apiServiceProvider";
-import { endpoints } from "../../../api/apiEndpoints";
-import appKeys from "../../../utils/appKeys";
-import {DeleteOutlined, EditOutlined, PlusOutlined} from "@ant-design/icons";
+import {DeleteOutlined, EditOutlined} from "@ant-design/icons";
 import {convertCamelCase, convertLowerCaseKey} from "../../../utils/utils";
-import {routeConfig} from "../../../utils/pageRoutes";
 import appColor from "../../../utils/appColor";
-import {useActionLoading} from "../../../hooks/useActionLoading";
 import {useRunOnce} from "../../../hooks/useRunOnce";
 import appString from "../../../utils/appString";
-import CommonActionButton from "../(panelCommonUtils)/CommonActionButton";
+import {CommonActionButton, TableTitle} from "../(panelCommonUtils)/CommonAction";
+import {useApiServices} from "../../../api/useApiServices";
 
 export default function CardActionsShow({onActionChange}) {
-    const { withLoading } = useActionLoading();
-    const apiLoading = withLoading();
+    const { isLoading, actions: callApi } = useApiServices();
     const [actions, setActions] = useState([]);
     const [actionModalOpen, setActionModalOpen] = useState(false);
     const [form] = Form.useForm();
@@ -46,42 +36,29 @@ export default function CardActionsShow({onActionChange}) {
         "#F59E42", "#FBBF24", "#6B7280", "#06B6D4"
     ];
 
+    const saveRecord = (data = []) => {
+        setActions(data || []);
+        onActionChange(data || []);
+    };
+
     const fetchActions = async () => {
-        await apiLoading.run(async () => {
-            await apiCall({
-                method: HttpMethod.GET,
-                url: endpoints.getAllActions,
-                showSuccessMessage: false,
-                successCallback: (data) => {
-                    if(data?.data) {
-                        setActions(data?.data || []);
-                        onActionChange(data?.data || [])
-                    }
-                },
-            });
-        });
+        const data = await callApi.getAllActions();
+        saveRecord(data);
     };
 
     const {fetchLoading} = useRunOnce(fetchActions);
 
     const handleAddOrUpdateAction = async (values) => {
-        await apiLoading.run(async () => {
-            await apiCall({
-                method: HttpMethod.POST,
-                url: endpoints.addUpdateAction(selectedActionId),
-                data: {
-                    ...values,
-                    actionName: convertLowerCaseKey(values.actionName),
-                    actionColor: values.actionColor,
-                },
-                showSuccessMessage: true,
-                successCallback: () => {
-                    setActionModalOpen(false);
-                    setSelectedActionId(null);
-                    form.resetFields();
-                    fetchActions();
-                },
-            });
+        const postData = {
+            ...values,
+            actionName: convertLowerCaseKey(values.actionName),
+            actionColor: values.actionColor,
+        }
+        await callApi.addUpdateAction(selectedActionId, postData, async (data) => {
+            setActionModalOpen(false);
+            setSelectedActionId(null);
+            form.resetFields();
+            saveRecord(data);
         });
     };
 
@@ -95,16 +72,8 @@ export default function CardActionsShow({onActionChange}) {
     };
 
     const handleDeleteAction = async (actionId) => {
-        await apiLoading.run(async () => {
-            await apiCall({
-                method: HttpMethod.DELETE,
-                url: endpoints.deleteAction(actionId),
-                showSuccessMessage: true,
-                successCallback: () => {
-                    fetchActions();
-                },
-            });
-        });
+        const data = await callApi.deleteAction(actionId);
+        saveRecord(data);
     };
 
     return (
@@ -112,7 +81,7 @@ export default function CardActionsShow({onActionChange}) {
             <Card
                 title={
                     <div className="flex justify-between items-center gap-4">
-                        <div className="text-base font-semibold">Actions</div>
+                        <TableTitle title={appString.actions} />
                         <CommonActionButton
                             addBtnName={appString.addAction}
                             handleAdd={() => {
@@ -162,6 +131,7 @@ export default function CardActionsShow({onActionChange}) {
                 onCancel={() => { setActionModalOpen(false); form.resetFields(); setSelectedActionId(null); }}
                 onOk={() => form.submit()}
                 okText={selectedActionId ? "Update" : "Add"}
+                confirmLoading={isLoading}
                 width={400}
             >
                 <Form form={form} onFinish={handleAddOrUpdateAction} layout="vertical" onValuesChange={(changedValues, allValues) => {

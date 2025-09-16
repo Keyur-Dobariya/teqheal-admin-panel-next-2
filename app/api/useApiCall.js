@@ -37,13 +37,13 @@ export function useApiCall() {
                     headers: defaultHeaders,
                 });
 
-                successCallback?.(response.data);
+                successCallback?.(response.data?.data);
 
                 if (showSuccessMessage) {
                     showToast("success", response.data?.message || "Request was successful");
                 }
 
-                return response.data;
+                return response.data?.data;
             } catch (error) {
                 const errorMessage = error.response?.data?.message || error.message || "Something went wrong";
 

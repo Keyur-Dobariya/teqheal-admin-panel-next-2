@@ -27,7 +27,7 @@ import {usePermission} from "../../../hooks/usePermission";
 import {mActions} from "../../../utils/enum";
 import {routeConfig} from "../../../utils/pageRoutes";
 import {useActionLoading} from "../../../hooks/useActionLoading";
-import CommonActionButton from "../(panelCommonUtils)/CommonActionButton";
+import { CommonActionButton } from "../(panelCommonUtils)/CommonAction";
 
 export default function Page() {
     const {withLoading} = useActionLoading();

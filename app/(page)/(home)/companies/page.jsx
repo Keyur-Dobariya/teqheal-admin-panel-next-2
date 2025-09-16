@@ -22,110 +22,63 @@ import appString from "../../../utils/appString";
 import dayjs from "dayjs";
 import {useActionLoading} from "../../../hooks/useActionLoading";
 import {useRunOnce} from "../../../hooks/useRunOnce";
-import CommonActionButton from "../(panelCommonUtils)/CommonActionButton";
+import {CommonActionButton, getActionColumn, getSwitchColumn, TableTitle} from "../(panelCommonUtils)/CommonAction";
 import SafeAvatar from "../../../components/SafeAvatar";
 import {ModuleTreeModal} from "./ModuleTreeModal";
+import {useApiServices} from "../../../api/useApiServices";
 
 export default function CompanyPage() {
+    const { isLoading, companies: callApi, modules: {getAllModules}, rolePermission: {getRolePermission}, invite: {inviteUser} } = useApiServices();
     const {withLoading} = useActionLoading();
-    const apiLoading = withLoading();
 
     const [modules, setModules] = useState([]);
-    const [modulePermission, setModulePermission] = useState([]);
+    const [modulePermission, setModulePermission] = useState(null);
     const [companies, setCompanies] = useState([]);
     const [isModelOpen, setIsModelOpen] = useState(false);
     const [isModuleModelOpen, setIsModuleModelOpen] = useState(false);
     const [selectedRecord, setSelectedRecord] = useState(null);
 
     const fetchModules = async () => {
-        await apiCall({
-            method: HttpMethod.GET,
-            url: endpoints.getAllModules,
-            showSuccessMessage: false,
-            successCallback: (data) => {
-                if (data?.data) {
-                    const filteredModules = (data?.data || []).filter(module => !module.isForSuperAdmin);
-                    setModules(filteredModules);
-                }
-            },
-        });
+        const data = await getAllModules();
+        if (data) {
+            const filteredModules = (data || []).filter(module => !module.isForSuperAdmin);
+            setModules(filteredModules);
+        }
     };
 
     const fetchCompanies = async () => {
-        await apiCall({
-            method: HttpMethod.GET,
-            url: endpoints.getAllCompanies,
-            showSuccessMessage: false,
-            successCallback: (data) => {
-                if (data?.data) {
-                    setCompanies(data?.data || []);
-                }
-            },
-        });
+        const data = await callApi.getAllCompanies();
+        setCompanies(data || []);
     };
 
     const fetchRolePermission = async () => {
-        await apiCall({
-            method: HttpMethod.GET,
-            url: endpoints.getRolePermission,
-            showSuccessMessage: false,
-            successCallback: (data) => {
-                if (data?.data) {
-                    setModulePermission(data?.data || []);
-                }
-            },
-        });
+        const data = await getRolePermission();
+        setModulePermission(data || null);
     };
 
     const {fetchLoading} = useRunOnce([fetchRolePermission, fetchModules, fetchCompanies]);
 
     const deleteCompany = async (record) => {
-        await apiLoading.run(async () => {
-            await apiCall({
-                method: HttpMethod.DELETE,
-                url: endpoints.deleteCompany(record?._id),
-                showSuccessMessage: true,
-                successCallback: (data) => {
-                    if (data?.data) {
-                        setCompanies(data?.data || []);
-                    }
-                },
-            });
-        });
+        const data = await callApi.deleteCompany(record?._id);
+        setCompanies(data || []);
     };
 
     const updateRecord = async (companyId, postData) => {
-        await apiLoading.run(async () => {
-            await apiCall({
-                method: HttpMethod.POST,
-                url: endpoints.addUpdateCompany(companyId),
-                data: postData,
-                isMultipart: true,
-                showSuccessMessage: true,
-                successCallback: () => {
-                    fetchCompanies();
-                    setIsModelOpen(false);
-                    setSelectedRecord(null);
-                },
-            });
+        await callApi.addUpdateCompany(companyId, postData, async (data) => {
+            setIsModelOpen(false);
+            setSelectedRecord(null);
+            setCompanies(data || []);
         });
     };
 
     const generateJoinToken = async (record) => {
         await withLoading(record._id).run(async () => {
-            await apiCall({
-                method: HttpMethod.POST,
-                url: endpoints.inviteUser,
-                data: {
-                    companyId: record._id,
-                    roleId: record?.adminRoleId,
-                    emailAddress: record?.adminEmail,
-                },
-                showSuccessMessage: true,
-                successCallback: () => {
-                    fetchCompanies();
-                },
-            });
+            const postData = {
+                companyId: record._id,
+                roleId: record?.adminRoleId,
+                emailAddress: record?.adminEmail,
+            };
+            await inviteUser(postData, fetchCompanies);
         });
     };
 
@@ -234,44 +187,11 @@ export default function CompanyPage() {
                 />
             ),
         },
-        {
-            title: "Is Active",
-            dataIndex: "isActive",
-            key: "isActive",
-            align: 'center',
-            render: (value, record) => {
-                const rowLoading = withLoading(`isActive-${record._id}`);
-                return (
-                    <Switch
-                        size="small"
-                        checked={value}
-                        loading={rowLoading.loading}
-                        onChange={async (checked) => {
-                            await rowLoading.run(async () => {
-                                const postData = {
-                                    ...record,
-                                    isActive: checked,
-                                };
-                                await updateRecord(record._id, postData);
-                            });
-                        }}
-                    />
-                );
-            },
-        },
-        {
-            title: "Operations",
-            key: "operations",
-            width: 150,
-            fixed: "right",
-            render: (_, record) => (
-                <CommonActionButton
-                    record={record}
-                    handleEdit={handleEdit}
-                    handleDelete={deleteCompany}
-                />
-            ),
-        },
+        getSwitchColumn(appKeys.isActive, updateRecord),
+        getActionColumn({
+            handleEdit: handleEdit,
+            handleDelete: deleteCompany,
+        })
     ];
 
     const extraFieldCommon = (title, value) => {
@@ -310,7 +230,7 @@ export default function CompanyPage() {
                     scroll={{x: "max-content"}}
                     title={() => (
                         <div className="flex justify-between items-center">
-                            <div className="text-base font-semibold">Companies</div>
+                            <TableTitle title={appString.companies} />
                             <CommonActionButton
                                 addBtnName={appString.addCompany}
                                 handleAdd={() => {
@@ -331,7 +251,7 @@ export default function CompanyPage() {
                 setSelectedRecord={setSelectedRecord}
                 modules={modules}
                 modulePermission={modulePermission}
-                loading={apiLoading.loading}
+                loading={isLoading}
                 onSubmit={async (postData) => {
                     await updateRecord(selectedRecord?._id, postData);
                 }}
@@ -343,7 +263,7 @@ export default function CompanyPage() {
                 modules={modules}
                 adminPermissions={selectedRecord?.adminPermissions}
                 userPermissions={selectedRecord?.userPermissions}
-                loading={apiLoading.loading}
+                loading={isLoading}
                 onTabSubmit={async (adminUpdatedPermissions, userUpdatedPermissions) => {
                     const postData = {
                         adminPermissions: adminUpdatedPermissions,

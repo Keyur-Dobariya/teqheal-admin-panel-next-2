@@ -205,6 +205,15 @@ export const profilePhotoManager = ({ url, gender = Gender.Male }) => {
     }
 }
 
+const checkImageExists = (url) =>
+    new Promise((resolve) => {
+        if (!url) return resolve(false);
+        const img = new Image();
+        img.onload = () => resolve(true);
+        img.onerror = () => resolve(false);
+        img.src = url;
+    });
+
 export function detectPlatform(userAgent) {
     const platform = {
         isElectron: false,

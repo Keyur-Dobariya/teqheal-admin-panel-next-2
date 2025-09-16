@@ -21,10 +21,9 @@ const endpoints = {
     forgetPassVerifyOtp: `${environment.apiBaseUrl}/auth/forgetPassVerifyOtp`,
     forgetPassword: `${environment.apiBaseUrl}/auth/forgetPassword`,
     changePassword: `${environment.apiBaseUrl}/auth/changePassword/`,
-    getAllUsers: `${environment.apiBaseUrl}/api/getAllUsers`,// For full detail
-    getUsersList: `${environment.apiBaseUrl}/api/getUsersList`,// For small detail
-    addUpdateUser: `${environment.apiBaseUrl}/api/addUpdateUser/`,
-    deleteUser: `${environment.apiBaseUrl}/api/deleteUser/`,
+    getAllUsers: `${environment.apiBaseUrl}/api/getAllUsers`,
+    addUpdateUser: (id) => `${environment.apiBaseUrl}/api/addUpdateUser/${checkId(id)}`,
+    deleteUser: (id) => `${environment.apiBaseUrl}/api/deleteUser/${id}`,
     uploadSingleFile: `${environment.apiBaseUrl}/api/upload`,
     addAttendance: `${environment.apiBaseUrl}/api/addAttendance`,
     empDashboard: `${environment.apiBaseUrl}/api/empDashboard/`,

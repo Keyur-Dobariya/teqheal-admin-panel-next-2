@@ -15,7 +15,9 @@ import {
 } from "@ant-design/icons";
 import dayjs from "dayjs";
 import {ModuleTreeModal} from "./ModuleTreeModal";
-import CommonActionButton from "../(panelCommonUtils)/CommonActionButton";
+import { CommonActionButton } from "../(panelCommonUtils)/CommonAction";
+import appKeys from "../../../utils/appKeys";
+import {UploadSinglePhoto} from "../../../components/CommonComponents";
 
 export const CompanyModal = ({
                                  isModelOpen,
@@ -67,27 +69,24 @@ export const CompanyModal = ({
         await form.validateFields();
         const formValues = form.getFieldsValue(true);
 
-        const postData = {
-            ...formValues,
-            companyIcon: companyIcon,
-            adminPermissions,
-            userPermissions,
-            ...(selectedRecord ? {oldCompanyIcon: selectedRecord.companyIcon} : {}),
-        };
+        const formData = new FormData();
 
-        onSubmit(postData);
-    };
+        Object.entries(formValues).forEach(([key, value]) => {
+            if (value == null) return;
+            Array.isArray(value)
+                ? value.forEach(item => formData.append(key, item))
+                : formData.append(key, value);
+        });
 
-    const uploadButton = (
-        <button style={{border: 0, background: 'none'}} type="button">
-            <PlusOutlined/>
-            <div style={{marginTop: 8}}>Upload</div>
-        </button>
-    );
+        [
+            ["companyIcon", companyIcon],
+            ["adminPermissions", adminPermissions],
+            ["userPermissions", userPermissions],
+        ].forEach(([key, value]) => {
+            if (value) formData.append(key, value);
+        });
 
-    const beforeUpload = (file) => {
-        setCompanyIcon(file);
-        return false;
+        onSubmit(formData);
     };
 
     const handleModelClose = () => {
@@ -123,27 +122,11 @@ export const CompanyModal = ({
                     >
 
                         <div className="flex justify-center mb-3">
-                            <Upload
-                                name="companyIcon"
-                                listType="picture-circle"
-                                className="avatar-uploader"
-                                showUploadList={false}
-                                beforeUpload={beforeUpload}
-                            >
-                                {companyIcon ? (
-                                    <img
-                                        className="rounded-full"
-                                        src={typeof companyIcon === 'string' && companyIcon.startsWith('http')
-                                            ? companyIcon
-                                            : URL.createObjectURL(companyIcon)
-                                        }
-                                        alt="avatar"
-                                        style={{width: '100%'}}
-                                    />
-                                ) : (
-                                    uploadButton
-                                )}
-                            </Upload>
+                            <UploadSinglePhoto
+                                field="companyIcon"
+                                photo={companyIcon}
+                                onSelect={(file) => setCompanyIcon(file)}
+                            />
                         </div>
 
                         <Form.Item
