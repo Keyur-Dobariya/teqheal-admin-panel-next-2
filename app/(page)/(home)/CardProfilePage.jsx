@@ -18,7 +18,7 @@ import {
 } from "../../utils/enum";
 import { format } from 'date-fns';
 import { getLocalData } from "../../dataStorage/DataPref";
-import { capitalizeLastPathSegment } from "../../utils/utils";
+import {approvalStatusColor, capitalizeLastPathSegment} from "../../utils/utils";
 import appKeys from "../../utils/appKeys";
 import { CreditCard, Facebook, Instagram, Linkedin, User } from "../../utils/icons";
 import appColor from "../../utils/appColor";
@@ -46,10 +46,6 @@ export default function CardProfilePage({ profileData, handleEditSuccess }) {
         setIsModelOpen(false);
     };
 
-    const approvalStatusColor = (status) => {
-        return status === ApprovalStatus.Approved ? 'green' : status === ApprovalStatus.Rejected ? 'red' : 'orange';
-    }
-
     const CommonInfoBox = ({ title, value, isTag = false, tagColor = 'blue' }) => {
         return <Col xs={24} sm={12} md={8} >
             <div className="text-[13px] font-normal text-gray-500">{title}</div>
@@ -75,7 +71,7 @@ export default function CardProfilePage({ profileData, handleEditSuccess }) {
                                 />
                                 {profileData && <div className="flex flex-col gap-2 mt-2 md:mt-0">
                                     <div className="font-semibold text-lg md:text-base">
-                                        {profileData?.fullName} {profileData?._id === getLocalData(appKeys._id) ? "(You)" : ''}
+                                        {profileData?.userName} {profileData?._id === getLocalData(appKeys._id) ? "(You)" : ''}
                                     </div>
                                     <div className="text-sm text-gray-600">
                                         {profileData?.role?.roleName} | {profileData?.employeeCode}

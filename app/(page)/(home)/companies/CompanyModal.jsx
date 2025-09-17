@@ -86,6 +86,10 @@ export const CompanyModal = ({
             if (value) formData.append(key, value);
         });
 
+        if(isEditing) {
+            formData.append('oldCompanyIcon', selectedRecord?.companyIcon);
+        }
+
         onSubmit(formData);
     };
 

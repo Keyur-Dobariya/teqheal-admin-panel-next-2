@@ -53,12 +53,12 @@ export default function HeaderUi({
             <div className="flex items-center gap-4">
                 <Dropdown overlayStyle={{minWidth: 200}} menu={menuProps} trigger={["click"]}>
                     <div className="flex items-center gap-2 cursor-pointer">
-                        <Tooltip title={getLocalData(appKeys.fullName)}>
+                        <Tooltip title={loginUserData?.userName}>
                             <SafeAvatar
                                 userData={loginUserData}
                             />
                         </Tooltip>
-                        {!isMobile && <div className="text-[15px] font-medium">{getLocalData(appKeys.fullName)}</div>}
+                        {!isMobile && <div className="text-[15px] font-medium">{loginUserData?.userName}</div>}
                         {!isMobile && <ChevronDown/>}
                     </div>
                 </Dropdown>

@@ -1,4 +1,4 @@
-import { Gender } from "./enum";
+import {ApprovalStatus, Gender} from "./enum";
 import imagePaths from "./imagesPath";
 import CryptoJS from 'crypto-js';
 import { showToast } from "../components/CommonComponents";
@@ -205,7 +205,11 @@ export const profilePhotoManager = ({ url, gender = Gender.Male }) => {
     }
 }
 
-const checkImageExists = (url) =>
+export const approvalStatusColor = (status) => {
+    return status === ApprovalStatus.Approved ? 'green' : status === ApprovalStatus.Rejected ? 'red' : 'orange';
+}
+
+export const checkImageExists = (url) =>
     new Promise((resolve) => {
         if (!url) return resolve(false);
         const img = new Image();

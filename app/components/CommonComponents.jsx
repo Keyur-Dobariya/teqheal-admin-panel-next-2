@@ -1,4 +1,4 @@
-import {Avatar, message, Select, Tag, Upload} from "antd";
+import {Avatar, Col, message, Select, Skeleton, Tag, Upload} from "antd";
 import {formatMilliseconds} from "../utils/utils";
 import appColor from "../utils/appColor";
 import appString from "../utils/appString";
@@ -50,6 +50,14 @@ export const CustomTag = ({value, color}) => {
             {value}
         </div>
     ) : '-';
+}
+
+export const TableExtraData = ({ title, value, isTag = false, tagColor = 'blue' }) => {
+    return <Col xs={24} sm={12} md={8} >
+        <div className="text-[13px] font-normal text-gray-500">{title}</div>
+        <div className="text-[14px] font-medium text-gray-900 mt-1">{value ? isTag ?
+            <div className="flex justify-start"><CustomTag value={value} color={tagColor} /></div> : value : '-'}</div>
+    </Col>;
 }
 
 export const UploadSinglePhoto = ({field, photo, onSelect}) => {

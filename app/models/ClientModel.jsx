@@ -2,19 +2,15 @@
 
 import React, {useState, useEffect, useRef} from "react";
 import {
-    Avatar, Col,
-    DatePicker,
     Form,
     Input,
-    Modal, Row,
-    Select,
+    Modal,
 } from "antd";
 
 import appString from "../utils/appString";
 import {endpoints} from "../api/apiEndpoints";
 import apiCall, {HttpMethod} from "../api/apiServiceProvider";
 import appKeys from "../utils/appKeys";
-import dayjs from "dayjs";
 
 export default function ClientModel({
                                              isModelOpen,

@@ -129,6 +129,14 @@ export function useApiServices() {
             successCallback,
         });
 
+    const changeUserStatus = async (id, data, successCallback) =>
+        apiCall({
+            method: HttpMethod.POST,
+            url: endpoints.changeUserStatus(id),
+            data,
+            successCallback,
+        });
+
     const deleteUser = (id) =>
         apiCall({
             method: HttpMethod.DELETE,
@@ -149,6 +157,7 @@ export function useApiServices() {
         users: {
             getAllUsers,
             addUpdateUser,
+            changeUserStatus,
             deleteUser,
         },
         modules: {

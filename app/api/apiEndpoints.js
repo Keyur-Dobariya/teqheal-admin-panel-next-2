@@ -23,6 +23,7 @@ const endpoints = {
     changePassword: `${environment.apiBaseUrl}/auth/changePassword/`,
     getAllUsers: `${environment.apiBaseUrl}/api/getAllUsers`,
     addUpdateUser: (id) => `${environment.apiBaseUrl}/api/addUpdateUser/${checkId(id)}`,
+    changeUserStatus: (id) => `${environment.apiBaseUrl}/api/changeUserStatus/${checkId(id)}`,
     deleteUser: (id) => `${environment.apiBaseUrl}/api/deleteUser/${id}`,
     uploadSingleFile: `${environment.apiBaseUrl}/api/upload`,
     addAttendance: `${environment.apiBaseUrl}/api/addAttendance`,

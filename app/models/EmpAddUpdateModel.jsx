@@ -11,14 +11,10 @@ import {
     Row,
     Select,
     Switch,
-    Image,
-    Upload
 } from "antd";
 
-import {LoadingOutlined, PlusOutlined, XOutlined} from "@ant-design/icons";
+import {XOutlined} from "@ant-design/icons";
 import appString from "../utils/appString";
-import {endpoints} from "../api/apiEndpoints";
-import apiCall, {HttpMethod} from "../api/apiServiceProvider";
 import {
     ApprovalStatus,
     BloodGroup,
@@ -26,14 +22,13 @@ import {
     Technology,
     UserRole,
 } from "../utils/enum";
-import {isAdmin} from "../dataStorage/DataPref";
-import {profilePhotoManager} from "../utils/utils";
 import dayjs from "dayjs";
 import appKeys from "../utils/appKeys";
 import validationRules from "../utils/validationRules";
-import {CreditCard, Facebook, Globe, Instagram, Key, Linkedin, ToggleLeft, User} from "../utils/icons";
+import {CreditCard, Facebook, Globe, Instagram, Linkedin, ToggleLeft, User} from "../utils/icons";
 import appColor from "../utils/appColor";
 import {UploadSinglePhoto} from "../components/CommonComponents";
+import omit from "lodash/omit";
 
 const {TextArea} = Input;
 
@@ -58,13 +53,16 @@ export default function EmpAddUpdateModel({
 
             if (isEditing && selectedRecord) {
                 const formData = {
-                    ...selectedRecord,
+                    ...omit(selectedRecord, ["modulePermissions", "attendancesData"]),
+                    role: selectedRecord?.role?._id,
+                    companyId: selectedRecord?.companyId?._id,
                     dateOfBirth: selectedRecord.dateOfBirth ? dayjs(selectedRecord.dateOfBirth) : null,
                     dateOfJoining: selectedRecord.dateOfJoining ? dayjs(selectedRecord.dateOfJoining) : null,
                     dateOfLeaving: selectedRecord.dateOfLeaving ? dayjs(selectedRecord.dateOfLeaving) : null,
                     technology: selectedRecord.technology ? selectedRecord.technology.filter(entry => entry !== '') : [],
                 };
                 form.setFieldsValue(formData);
+                setProfilePhoto(selectedRecord?.profilePhoto)
             } else {
                 const defaultValues = {
                     approvalStatus: ApprovalStatus.Pending,
@@ -91,15 +89,11 @@ export default function EmpAddUpdateModel({
             const formValues = form.getFieldsValue(true);
             const formData = new FormData();
 
-            if (formValues.dateOfBirth) {
-                formValues.dateOfBirth = dayjs(formValues.dateOfBirth);
-            }
-            if (formValues.dateOfJoining) {
-                formValues.dateOfJoining = dayjs(formValues.dateOfJoining);
-            }
-            if (formValues.dateOfLeaving) {
-                formValues.dateOfLeaving = dayjs(formValues.dateOfLeaving);
-            }
+            formValues.dateOfBirth = formValues.dateOfBirth ? dayjs(formValues.dateOfBirth) : null;
+            formValues.dateOfJoining = formValues.dateOfJoining ? dayjs(formValues.dateOfJoining) : null;
+            formValues.dateOfLeaving = formValues.dateOfLeaving ? dayjs(formValues.dateOfLeaving) : null;
+            formValues.profilePhoto = profilePhoto;
+            if (isEditing) formValues.oldProfilePhoto = selectedRecord?.profilePhoto;
 
             for (const key in formValues) {
                 if (formValues[key] !== undefined && formValues[key] !== null) {
@@ -109,14 +103,6 @@ export default function EmpAddUpdateModel({
                         formData.append(key, formValues[key]);
                     }
                 }
-            }
-
-            if (formValues.profilePhoto && formValues.profilePhoto.originFileObj) {
-                formData.append(appKeys.profilePhoto, formValues.profilePhoto.originFileObj);
-            }
-
-            if (formValues.role) {
-                formData.append(appKeys.role, formValues.role?._id);
             }
 
             onSubmit(formData);
@@ -155,9 +141,6 @@ export default function EmpAddUpdateModel({
                     layout="vertical"
                     onValuesChange={(changedValues, allValues) => {
                         form.setFieldsValue(allValues);
-                        if (allValues.password) {
-                            form.validateFields(["confirmPassword"]);
-                        }
                     }}
                 >
                     <div className="flex flex-col gap-5 py-3">
@@ -204,7 +187,7 @@ export default function EmpAddUpdateModel({
                             <Card
                                 title={(
                                     <div className="flex items-center gap-2">
-                                        <ToggleLeft color={appColor.warning} />
+                                        <ToggleLeft color={appColor.warning}/>
                                         <div>{appString.empStatus}</div>
                                     </div>
                                 )} styles={{body: {padding: 15}}}>
@@ -216,26 +199,22 @@ export default function EmpAddUpdateModel({
                                             />
                                         </Form.Item>
                                     </Col>
-                                    <Col xs={24} sm={12}>
-                                        <Row gutter={16}>
-                                            <Col xs={12}>
-                                                <Form.Item name={appKeys.role} label={appString.role}>
-                                                    <Select
-                                                        placeholder="Select role"
-                                                        options={roles?.map(role => ({
-                                                            label: role.roleName,
-                                                            value: role._id,
-                                                        }))}
-                                                    />
-                                                </Form.Item>
-                                            </Col>
-                                            <Col xs={12}>
-                                                <Form.Item name={appKeys.isActive} label={appString.active}
-                                                           valuePropName="checked">
-                                                    <Switch/>
-                                                </Form.Item>
-                                            </Col>
-                                        </Row>
+                                    <Col span={12}>
+                                        <Form.Item name={appKeys.role} label={appString.role}>
+                                            <Select
+                                                placeholder="Select role"
+                                                options={roles?.map(role => ({
+                                                    label: role.roleName,
+                                                    value: role._id,
+                                                }))}
+                                            />
+                                        </Form.Item>
+                                    </Col>
+                                    <Col span={12}>
+                                        <Form.Item name={appKeys.isActive} label={appString.active}
+                                                   valuePropName="checked">
+                                            <Switch/>
+                                        </Form.Item>
                                     </Col>
                                 </Row>
                             </Card>
@@ -243,96 +222,81 @@ export default function EmpAddUpdateModel({
                         <Card
                             title={(
                                 <div className="flex items-center gap-2">
-                                    <User color={appColor.danger} />
+                                    <User color={appColor.danger}/>
                                     <div>{appString.personalDetails}</div>
                                 </div>
                             )} styles={{body: {padding: 15}}}>
                             <Row gutter={16}>
-                                <Col xs={24} sm={12}>
-                                    <Form.Item name={appKeys.fullName} label={appString.fullName}
-                                               rules={[{required: true, message: 'Full name is required'}]}>
+
+                                <Col xs={24} sm={8}>
+                                    <Form.Item name={appKeys.firstName} label={appString.firstName}
+                                               rules={[{required: true, message: 'First name is required'}]}>
                                         <Input
-                                            placeholder={`Enter ${appString.fullName.toLowerCase()}`}/>
+                                            placeholder={`Enter ${appString.firstName.toLowerCase()}`}/>
                                     </Form.Item>
                                 </Col>
 
-                                <Col xs={24} sm={12}>
-                                    <Row gutter={16}>
-                                        <Col xs={12}>
-                                            <Form.Item name={appKeys.dateOfBirth} label={appString.dateOfBirth}
-                                                       rules={[{required: true, message: 'Date of birth is required'}]}>
-                                                <DatePicker
-                                                    placeholder={`Select ${appString.dateOfBirth.toLowerCase()}`}
-                                                />
-                                            </Form.Item>
-                                        </Col>
-                                        <Col xs={12}>
-                                            <Form.Item name={appKeys.gender} label={appString.gender}
-                                                       rules={[{required: true, message: 'Gender is required'}]}>
-                                                <Select
-                                                    options={Object.values(Gender).map(g => ({label: g, value: g}))}
-                                                    placeholder={`Select ${appString.gender.toLowerCase()}`}
-                                                />
-                                            </Form.Item>
-                                        </Col>
-                                    </Row>
+                                <Col xs={24} sm={8}>
+                                    <Form.Item name={appKeys.middleName} label={appString.middleName}
+                                               rules={[{required: true, message: 'Middle name is required'}]}>
+                                        <Input
+                                            placeholder={`Enter ${appString.middleName.toLowerCase()}`}/>
+                                    </Form.Item>
                                 </Col>
 
-                                {[
-                                    {key: appKeys.mobileNumber, label: appString.mobileNumber, required: true, maxLength: 10, type: 'tel'},
-                                    {key: appKeys.emergencyContactNo, label: appString.emergencyContactNo, required: true, maxLength: 10, type: 'tel'},
-                                    {key: appKeys.emailAddress, label: appString.emailAddress, required: true, type: 'email'},
-                                    {key: appKeys.pincode, label: appString.pincode, required: false, maxLength: 6, type: 'tel'}
-                                ].map(({key, label, required, type, maxLength}) => (
-                                    <Col xs={24} sm={12} key={key}>
-                                        <Form.Item name={key} label={label}
-                                                   rules={[{required, message: `${label} is required`}, {
-                                                       type,
-                                                       message: `Enter a valid ${label.toLowerCase()}`
-                                                   }]}>
-                                            <Input
-                                                maxLength={maxLength}
-                                                type={type || "text"}
-                                                placeholder={`Enter ${label.toLowerCase()}`}
-                                            />
-                                        </Form.Item>
-                                    </Col>
-                                ))}
+                                <Col xs={24} sm={8}>
+                                    <Form.Item name={appKeys.lastName} label={appString.lastName}
+                                               rules={[{required: true, message: 'Last name is required'}]}>
+                                        <Input
+                                            placeholder={`Enter ${appString.lastName.toLowerCase()}`}/>
+                                    </Form.Item>
+                                </Col>
 
-                                {[
-                                    {
-                                        key: appKeys.bloodGroup,
-                                        label: appString.bloodGroup,
-                                        options: selectOptions(BloodGroup)
-                                    },
-                                    {
-                                        key: appKeys.technology,
-                                        label: appString.technology,
-                                        options: Technology,
-                                        isMulti: true
-                                    }
-                                ].map(({key, label, options, isMulti}) => (
-                                    <Col xs={24} sm={12} key={key}>
-                                        <Form.Item name={key} label={label}>
-                                            <Select
-                                                options={options}
-                                                mode={isMulti ? "multiple" : undefined}
-                                                placeholder={`Select ${label.toLowerCase()}`}
-                                            />
-                                        </Form.Item>
-                                    </Col>
-                                ))}
+                                <Col xs={24} sm={7}>
+                                    <Form.Item name={appKeys.mobileNumber} label={appString.mobileNumber}
+                                        rules={[
+                                            { required: true, message: `${appString.mobileNumber} is required` },
+                                            { type: "tel", message: `Enter a valid ${appString.mobileNumber.toLowerCase()}` },
+                                        ]}
+                                    >
+                                        <Input maxLength={10} type="tel"
+                                            placeholder={`Enter ${appString.mobileNumber.toLowerCase()}`}
+                                        />
+                                    </Form.Item>
+                                </Col>
 
-                                {[appKeys.address, appKeys.skills].map((key) => (
-                                    <Col xs={24} sm={12} key={key}>
-                                        <Form.Item name={key} label={appString[key]}>
-                                            <TextArea
-                                                autoSize={{minRows: 2, maxRows: 3}}
-                                                placeholder={`Enter ${appString[key].toLowerCase()}`}
-                                            />
-                                        </Form.Item>
-                                    </Col>
-                                ))}
+                                <Col xs={24} sm={7}>
+                                    <Form.Item
+                                        name={appKeys.emergencyContactNo}
+                                        label={appString.emergencyContactNo}
+                                        rules={[
+                                            { required: true, message: `${appString.emergencyContactNo} is required` },
+                                            { type: "tel", message: `Enter a valid ${appString.emergencyContactNo.toLowerCase()}` },
+                                        ]}
+                                    >
+                                        <Input
+                                            maxLength={10}
+                                            type="tel"
+                                            placeholder={`Enter ${appString.emergencyContactNo.toLowerCase()}`}
+                                        />
+                                    </Form.Item>
+                                </Col>
+
+                                <Col xs={24} sm={10}>
+                                    <Form.Item
+                                        name={appKeys.emailAddress}
+                                        label={appString.emailAddress}
+                                        rules={[
+                                            { required: true, message: `${appString.emailAddress} is required` },
+                                            { type: "email", message: `Enter a valid ${appString.emailAddress.toLowerCase()}` },
+                                        ]}
+                                    >
+                                        <Input
+                                            type="email"
+                                            placeholder={`Enter ${appString.emailAddress.toLowerCase()}`}
+                                        />
+                                    </Form.Item>
+                                </Col>
 
                                 {!isEditing && (
                                     <>
@@ -359,37 +323,143 @@ export default function EmpAddUpdateModel({
                                         </Col>
                                     </>
                                 )}
+
+                                <Col xs={12} sm={6}>
+                                    <Form.Item name={appKeys.dateOfBirth} label={appString.dateOfBirth}
+                                               rules={[{required: true, message: 'Date of birth is required'}]}>
+                                        <DatePicker
+                                            placeholder={`Select ${appString.dateOfBirth.toLowerCase()}`}
+                                            rootClassName="w-full"
+                                        />
+                                    </Form.Item>
+                                </Col>
+
+                                <Col xs={12} sm={6}>
+                                    <Form.Item name={appKeys.gender} label={appString.gender}
+                                               rules={[{required: true, message: 'Gender is required'}]}>
+                                        <Select
+                                            options={Object.values(Gender).map(g => ({label: g, value: g}))}
+                                            placeholder={`Select ${appString.gender.toLowerCase()}`}
+                                        />
+                                    </Form.Item>
+                                </Col>
+
+                                <Col xs={12} sm={6}>
+                                    <Form.Item name={appKeys.bloodGroup} label={appString.bloodGroup}>
+                                        <Select
+                                            options={selectOptions(BloodGroup)}
+                                            placeholder={`Select ${appString.bloodGroup.toLowerCase()}`}
+                                        />
+                                    </Form.Item>
+                                </Col>
+
+                                <Col xs={12} sm={6}>
+                                    <Form.Item
+                                        name={appKeys.pincode}
+                                        label={appString.pincode}
+                                        rules={[
+                                            { required: false, message: `${appString.pincode} is required` },
+                                            { type: "tel", message: `Enter a valid ${appString.pincode.toLowerCase()}` },
+                                        ]}
+                                    >
+                                        <Input
+                                            maxLength={6}
+                                            type="tel"
+                                            placeholder={`Enter ${appString.pincode.toLowerCase()}`}
+                                        />
+                                    </Form.Item>
+                                </Col>
+
+                                <Col xs={24} sm={12}>
+                                    <Form.Item name={appKeys.address} label={appString.address}>
+                                        <TextArea
+                                            autoSize={{ minRows: 2, maxRows: 3 }}
+                                            placeholder={`Enter ${appString.address.toLowerCase()}`}
+                                        />
+                                    </Form.Item>
+                                </Col>
+
+                                <Col xs={24} sm={12}>
+                                    <Form.Item name={appKeys.skills} label={appString.skills}>
+                                        <TextArea
+                                            autoSize={{ minRows: 2, maxRows: 3 }}
+                                            placeholder={`Enter ${appString.skills.toLowerCase()}`}
+                                        />
+                                    </Form.Item>
+                                </Col>
+
+                                <Col span={24}>
+                                    <Form.Item name={appKeys.technology} label={appString.technology}>
+                                        <Select
+                                            options={Technology}
+                                            mode="multiple"
+                                            placeholder={`Select ${appString.technology.toLowerCase()}`}
+                                        />
+                                    </Form.Item>
+                                </Col>
                             </Row>
                         </Card>
                         <Card
                             title={(
                                 <div className="flex items-center gap-2">
-                                    <CreditCard color={appColor.success} />
+                                    <CreditCard color={appColor.success}/>
                                     <div>{appString.financialDetails}</div>
                                 </div>
                             )} styles={{body: {padding: 15}}}>
                             <Row gutter={16}>
-                                {[appKeys.aadharNumber, appKeys.panNumber, appKeys.bankAccountNumber, appKeys.ifscCode].map(key => (
-                                    <Col xs={24} sm={12} key={key}>
-                                        <Form.Item name={key} label={appString[key]}>
-                                            <Input
-                                                maxLength={key === appKeys.aadharNumber ? 12 : key === appKeys.panNumber ? 10 : undefined}
-                                                placeholder={`Enter ${appString[key].toLowerCase()}`}
-                                            />
-                                        </Form.Item>
-                                    </Col>
-                                ))}
+                                <Col xs={24} sm={12}>
+                                    <Form.Item name={appKeys.aadharNumber} label={appString.aadharNumber}>
+                                        <Input
+                                            maxLength={12}
+                                            placeholder={`Enter ${appString.aadharNumber.toLowerCase()}`}
+                                        />
+                                    </Form.Item>
+                                </Col>
 
-                                {[appKeys.dateOfJoining, canManageDetail && appKeys.dateOfLeaving].filter(Boolean).map(key => (
-                                    <Col xs={24} sm={12} key={key}>
-                                        <Form.Item name={key} label={appString[key]}>
+                                <Col xs={24} sm={12}>
+                                    <Form.Item name={appKeys.panNumber} label={appString.panNumber}>
+                                        <Input
+                                            maxLength={10}
+                                            placeholder={`Enter ${appString.panNumber.toLowerCase()}`}
+                                        />
+                                    </Form.Item>
+                                </Col>
+
+                                <Col xs={24} sm={12}>
+                                    <Form.Item name={appKeys.bankAccountNumber} label={appString.bankAccountNumber}>
+                                        <Input
+                                            placeholder={`Enter ${appString.bankAccountNumber.toLowerCase()}`}
+                                        />
+                                    </Form.Item>
+                                </Col>
+
+                                <Col xs={24} sm={12}>
+                                    <Form.Item name={appKeys.ifscCode} label={appString.ifscCode}>
+                                        <Input
+                                            placeholder={`Enter ${appString.ifscCode.toLowerCase()}`}
+                                        />
+                                    </Form.Item>
+                                </Col>
+
+                                <Col xs={24} sm={12}>
+                                    <Form.Item name={appKeys.dateOfJoining} label={appString.dateOfJoining}>
+                                        <DatePicker
+                                            rootClassName="w-full"
+                                            placeholder={`Select ${appString.dateOfJoining.toLowerCase()}`}
+                                        />
+                                    </Form.Item>
+                                </Col>
+
+                                {canManageDetail && (
+                                    <Col xs={24} sm={12}>
+                                        <Form.Item name={appKeys.dateOfLeaving} label={appString.dateOfLeaving}>
                                             <DatePicker
-                                                style={{width: '100%'}}
-                                                placeholder={`Select ${appString[key].toLowerCase()}`}
+                                                rootClassName="w-full"
+                                                placeholder={`Select ${appString.dateOfLeaving.toLowerCase()}`}
                                             />
                                         </Form.Item>
                                     </Col>
-                                ))}
+                                )}
                             </Row>
                         </Card>
                     </div>
