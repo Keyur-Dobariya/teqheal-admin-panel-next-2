@@ -1,11 +1,8 @@
 import {useApiCall} from "./useApiCall";
 import {endpoints} from "./apiEndpoints";
-import {useActionLoading} from "../hooks/useActionLoading";
-import apiCall, {HttpMethod} from "./apiServiceProvider";
 
 export function useApiServices() {
     const {apiCall, HttpMethod, isLoading} = useApiCall();
-    const {withLoading} = useActionLoading();
 
     // 🔹 Module APIs
     const getAllModules = () =>
@@ -149,8 +146,45 @@ export function useApiServices() {
             method: HttpMethod.POST,
             url: endpoints.inviteUser,
             data,
-            showSuccessMessage: true,
             successCallback,
+        });
+
+    // 🔹 Attendance APIs
+    const getTodayAttendance = async (query) =>
+        await apiCall({
+            method: HttpMethod.GET,
+            url: endpoints.getTodayAttendance(query),
+            showSuccessMessage: false,
+        });
+
+    const deleteScreenshot = async (data, successCallback) =>
+        apiCall({
+            method: HttpMethod.POST,
+            url: endpoints.deleteScreenshot,
+            data,
+            successCallback,
+        });
+
+    // 🔹 Basic Salary APIs
+    const getBasicSalary = () =>
+        apiCall({
+            method: HttpMethod.GET,
+            url: endpoints.getBasicSalary,
+            showSuccessMessage: false,
+        });
+
+    const addUpdateBasicSalary = async (id, data, successCallback) =>
+        apiCall({
+            method: HttpMethod.POST,
+            url: endpoints.addUpdateBasicSalary(id),
+            data,
+            successCallback,
+        });
+
+    const deleteBasicSalary = (id) =>
+        apiCall({
+            method: HttpMethod.DELETE,
+            url: endpoints.deleteBasicSalary(id),
         });
 
     return {
@@ -159,6 +193,10 @@ export function useApiServices() {
             addUpdateUser,
             changeUserStatus,
             deleteUser,
+        },
+        attendance: {
+            getTodayAttendance,
+            deleteScreenshot,
         },
         modules: {
             getAllModules,
@@ -186,6 +224,11 @@ export function useApiServices() {
         },
         invite: {
             inviteUser,
+        },
+        basicSalary: {
+            getBasicSalary,
+            addUpdateBasicSalary,
+            deleteBasicSalary,
         },
         isLoading,
     };

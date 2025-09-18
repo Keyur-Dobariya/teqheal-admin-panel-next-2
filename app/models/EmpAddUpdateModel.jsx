@@ -18,7 +18,7 @@ import appString from "../utils/appString";
 import {
     ApprovalStatus,
     BloodGroup,
-    Gender, selectOptions,
+    Gender, mActions, selectOptions,
     Technology,
     UserRole,
 } from "../utils/enum";
@@ -29,18 +29,20 @@ import {CreditCard, Facebook, Globe, Instagram, Linkedin, ToggleLeft, User} from
 import appColor from "../utils/appColor";
 import {UploadSinglePhoto} from "../components/CommonComponents";
 import omit from "lodash/omit";
+import {AppDataFields, useAppData} from "../masterData/AppDataContext";
+import {useApiServices} from "../api/useApiServices";
 
 const {TextArea} = Input;
 
 export default function EmpAddUpdateModel({
-                                              roles,
                                               isModelOpen,
                                               setIsModelOpen,
                                               selectedRecord,
-                                              isLoading,
                                               canManageDetail,
-                                              onSubmit,
                                           }) {
+    const {rolesData, updateAppDataField} = useAppData();
+    const { isLoading, users: {addUpdateUser} } = useApiServices();
+
     const [form] = Form.useForm();
     const [profilePhoto, setProfilePhoto] = useState(null);
     const containerRef = useRef(null);
@@ -105,7 +107,10 @@ export default function EmpAddUpdateModel({
                 }
             }
 
-            onSubmit(formData);
+            await addUpdateUser(selectedRecord._id, formData, async (data) => {
+                setIsModelOpen(false);
+                updateAppDataField(AppDataFields.usersData, data);
+            });
 
         } catch (error) {
             console.error("Form validation/API call failed:", error);
@@ -158,6 +163,7 @@ export default function EmpAddUpdateModel({
                                             field={appKeys.profilePhoto}
                                             photo={profilePhoto}
                                             onSelect={(file) => setProfilePhoto(file)}
+                                            onShowError={() => setProfilePhoto(null)}
                                         />
                                     </div>
                                 </Col>
@@ -199,18 +205,18 @@ export default function EmpAddUpdateModel({
                                             />
                                         </Form.Item>
                                     </Col>
-                                    <Col span={12}>
+                                    <Col span={6}>
                                         <Form.Item name={appKeys.role} label={appString.role}>
                                             <Select
                                                 placeholder="Select role"
-                                                options={roles?.map(role => ({
+                                                options={rolesData?.map(role => ({
                                                     label: role.roleName,
                                                     value: role._id,
                                                 }))}
                                             />
                                         </Form.Item>
                                     </Col>
-                                    <Col span={12}>
+                                    <Col span={6}>
                                         <Form.Item name={appKeys.isActive} label={appString.active}
                                                    valuePropName="checked">
                                             <Switch/>

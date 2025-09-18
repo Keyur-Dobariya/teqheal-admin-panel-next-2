@@ -49,7 +49,7 @@ export default function ClientModel({
 
             await apiCall({
                 method: HttpMethod.POST,
-                url: isEditing ? `${endpoints.updateClient}${selectedRecord._id}` : endpoints.addClient,
+                url: endpoints.addUpdateClient(selectedRecord._id),
                 data: formValues,
                 setIsLoading,
                 successCallback: (data) => {

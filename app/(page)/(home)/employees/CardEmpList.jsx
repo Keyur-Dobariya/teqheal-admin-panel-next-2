@@ -15,6 +15,7 @@ import appKeys from '../../../utils/appKeys';
 import {ApprovalStatus, DateTimeFormat, mActions} from '../../../utils/enum';
 import {appColor} from '../../../utils/appColor';
 import dayjs from 'dayjs';
+import EmpAddUpdateModel from "../../../models/EmpAddUpdateModel";
 import {
     CheckCircleOutlined,
     CloseCircleOutlined,
@@ -28,12 +29,10 @@ import {CustomTag, TableExtraData} from "../../../components/CommonComponents";
 import {CommonActionButton} from "../(panelCommonUtils)/CommonAction";
 import {useActionLoading} from "../../../hooks/useActionLoading";
 import {useApiServices} from "../../../api/useApiServices";
-import {useRunOnce} from "../../../hooks/useRunOnce";
 import {approvalStatusColor, capitalizeLastPathSegment} from "../../../utils/utils";
-import {useEmpManageModel} from "../../../models/useEmpManageModel";
 
 export default function CardEmpList({isDashboard}) {
-    const {isLoading, roles: {getAllRoles}, users: {addUpdateUser, deleteUser, changeUserStatus}} = useApiServices();
+    const { users: {deleteUser, changeUserStatus} } = useApiServices();
     const {withLoading} = useActionLoading();
     const {hasPermission} = usePermission();
     const canAdd = !!hasPermission(mActions.add, routeConfig.employees.key);
@@ -49,23 +48,9 @@ export default function CardEmpList({isDashboard}) {
     const {push} = useHomePageLayout();
 
     const [allData, setAllData] = useState(usersData);
+    const [isModelOpen, setIsModelOpen] = useState(false);
     const [searchText, setSearchText] = useState('');
     const [selectedRecord, setSelectedRecord] = useState(null);
-    const [roles, setRoles] = useState([]);
-
-    const {showModel, hideModel, UserManageModel} = useEmpManageModel({
-        roles, canManageDetail, selectedRecord, onSuccess: async (data) => {
-            setSelectedRecord(null);
-            handleUpdatedData(data);
-        }
-    });
-
-    const fetchRoles = async () => {
-        const data = await getAllRoles();
-        setRoles(data || []);
-    };
-
-    const {fetchLoading} = useRunOnce(fetchRoles);
 
     useEffect(() => {
         setAllData(usersData);
@@ -90,14 +75,6 @@ export default function CardEmpList({isDashboard}) {
         );
     }, [allData, searchText]);
 
-    const updateRecord = async (id, postData) => {
-        await addUpdateUser(id, postData, async (data) => {
-            hideModel();
-            setSelectedRecord(null);
-            handleUpdatedData(data || []);
-        });
-    };
-
     const updateStatus = async (id, postData) => {
         await changeUserStatus(id, postData, async (data) => {
             handleUpdatedData(data || []);
@@ -117,12 +94,12 @@ export default function CardEmpList({isDashboard}) {
 
     const handleAddClick = () => {
         setSelectedRecord(null);
-        showModel();
+        setIsModelOpen(true);
     };
 
     const handleEditClick = (record) => {
         setSelectedRecord(record);
-        showModel();
+        setIsModelOpen(true);
     };
 
     const handleViewClick = (record) => {
@@ -240,16 +217,12 @@ export default function CardEmpList({isDashboard}) {
     const tableExpandRows = (record) => {
         return (
             <Row gutter={[16, 25]}>
-                <TableExtraData title={appString.empCode} value={record?.employeeCode}/>
-                <TableExtraData title={appString.role} value={record?.role?.roleName} isTag={true}
-                                tagColor={appColor.secondPrimary}/>
-                <TableExtraData title={appString.dateOfBirth}
-                                value={record?.dateOfBirth ? dayjs(record?.dateOfBirth).format(DateTimeFormat.DDMMMMYYYY) : null}/>
-                <TableExtraData title={appString.gender} value={record?.gender}/>
-                <TableExtraData title={appString.bloodGroup} value={record?.bloodGroup}/>
-                <TableExtraData title={appString.approvalStatus}
-                                value={capitalizeLastPathSegment(record?.approvalStatus)} isTag={true}
-                                tagColor={approvalStatusColor(record?.approvalStatus)}/>
+                <TableExtraData title={appString.empCode} value={record?.employeeCode} />
+                <TableExtraData title={appString.role} value={record?.role?.roleName} isTag={true} tagColor={appColor.secondPrimary} />
+                <TableExtraData title={appString.dateOfBirth} value={record?.dateOfBirth ? dayjs(record?.dateOfBirth).format(DateTimeFormat.DDMMMMYYYY) : null} />
+                <TableExtraData title={appString.gender} value={record?.gender} />
+                <TableExtraData title={appString.bloodGroup} value={record?.bloodGroup} />
+                <TableExtraData title={appString.approvalStatus} value={capitalizeLastPathSegment(record?.approvalStatus)} isTag={true} tagColor={approvalStatusColor(record?.approvalStatus)} />
             </Row>
         );
     }
@@ -259,7 +232,6 @@ export default function CardEmpList({isDashboard}) {
             <Card>
                 <Table
                     rowKey={(record) => record._id}
-                    loading={fetchLoading}
                     columns={columns}
                     dataSource={filteredData}
                     scroll={{x: "max-content"}}
@@ -279,7 +251,7 @@ export default function CardEmpList({isDashboard}) {
                             />
                             {canAdd && <CommonActionButton
                                 addBtnName={appString.addEmployee}
-                                addBtnIcon={<UserAddOutlined/>}
+                                addBtnIcon={<UserAddOutlined />}
                                 handleAdd={handleAddClick}
                             />}
                         </div>
@@ -291,20 +263,14 @@ export default function CardEmpList({isDashboard}) {
                     }}
                 />
             </Card>
-            <UserManageModel/>
-            {/*{isModelOpen && (*/}
-            {/*    <EmpAddUpdateModel*/}
-            {/*        roles={roles}*/}
-            {/*        isModelOpen={isModelOpen}*/}
-            {/*        setIsModelOpen={setIsModelOpen}*/}
-            {/*        selectedRecord={selectedRecord}*/}
-            {/*        isLoading={isLoading}*/}
-            {/*        canManageDetail={canManageDetail}*/}
-            {/*        onSubmit={async (formData) => {*/}
-            {/*            await updateRecord(selectedRecord._id, formData);*/}
-            {/*        }}*/}
-            {/*    />*/}
-            {/*)}*/}
+            {isModelOpen && (
+                <EmpAddUpdateModel
+                    isModelOpen={isModelOpen}
+                    setIsModelOpen={setIsModelOpen}
+                    selectedRecord={selectedRecord}
+                    canManageDetail={canManageDetail}
+                />
+            )}
         </>
     );
 }

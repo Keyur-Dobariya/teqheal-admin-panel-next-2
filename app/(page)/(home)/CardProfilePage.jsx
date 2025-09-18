@@ -130,7 +130,7 @@ export default function CardProfilePage({ profileData, handleEditSuccess }) {
                     isModelOpen={isModelOpen}
                     setIsModelOpen={setIsModelOpen}
                     selectedRecord={profileData}
-                    onSuccessCallback={handleSuccess}
+                    canManageDetail={false}
                 />
             )}
         </>

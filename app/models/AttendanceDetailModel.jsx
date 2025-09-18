@@ -18,16 +18,18 @@ import {timeTag} from "../components/CommonComponents";
 import {format} from 'date-fns';
 import {convertToTimeline} from "../utils/reportTimelineGenerate";
 import {DeleteOutlined} from "@ant-design/icons";
-import {deleteScreenShot} from "../api/apiUtils";
+import {useApiServices} from "../api/useApiServices";
 
 const {useBreakpoint} = Grid;
 
 export default function AttendanceDetailModel({
                                                   isModelOpen,
                                                   setIsModelOpen,
-                                                  selectedAttendance,
+                                                  selectedRecord,
                                               }) {
-    const [screenshots, setScreenshots] = useState(selectedAttendance?.screenshots);
+    const { attendance: callApi } = useApiServices();
+
+    const [screenshots, setScreenshots] = useState(selectedRecord?.screenshots);
 
     const containerRef = useRef(null);
 
@@ -36,7 +38,6 @@ export default function AttendanceDetailModel({
     const boxHeight = '[345px]';
     const contentHeight = screens.md ? boxHeight : 'auto';
     const smDevice = screens.sm;
-    const [loading, setLoading] = useState(false);
 
     const handleCancel = () => {
         setIsModelOpen(false);
@@ -45,11 +46,16 @@ export default function AttendanceDetailModel({
         }
     };
 
+    const handleDeleteScreenshot = async (payload) => {
+        const data = await callApi.deleteScreenshot(payload);
+        setScreenshots(data?.screenshots || selectedRecord?.screenshots)
+    };
+
     const timeFormater = (time) => {
         return time ? formatMilliseconds(time) : "00:00:00";
     }
 
-    const timelineData = convertToTimeline(selectedAttendance, appColor);
+    const timelineData = convertToTimeline(selectedRecord, appColor);
 
     return (
         <Modal
@@ -77,7 +83,7 @@ export default function AttendanceDetailModel({
                                     <div className="w-full flex items-center justify-between gap-2">
                                         <div className="text-[15px] font-medium">{appString.profileDetails}</div>
                                         <div
-                                            className="text-[13px] text-gray-600 font-medium">{format(new Date(selectedAttendance.createdAt), 'dd MMMM, yyyy')}</div>
+                                            className="text-[13px] text-gray-600 font-medium">{format(new Date(selectedRecord.createdAt), 'dd MMMM, yyyy')}</div>
                                     </div>
                                 </div>
                             )}
@@ -87,27 +93,27 @@ export default function AttendanceDetailModel({
                                     dataSource={[
                                         {
                                             label: appString.punchInAt,
-                                            value: selectedAttendance.punchInAt,
+                                            value: selectedRecord.punchInAt,
                                             color: 'purple',
                                             isTime: true
                                         },
                                         {
                                             label: appString.totalHours,
-                                            value: selectedAttendance.totalHours,
+                                            value: selectedRecord.totalHours,
                                             color: 'geekblue'
                                         },
                                         {
                                             label: appString.workingHours,
-                                            value: selectedAttendance.workingHours,
+                                            value: selectedRecord.workingHours,
                                             color: 'green'
                                         },
-                                        {label: appString.breakHours, value: selectedAttendance.breakHours, color: 'red'},
+                                        {label: appString.breakHours, value: selectedRecord.breakHours, color: 'red'},
                                         {
                                             label: appString.lateArrival,
-                                            value: selectedAttendance.lateArrival,
+                                            value: selectedRecord.lateArrival,
                                             color: 'orange'
                                         },
-                                        {label: appString.overtime, value: selectedAttendance.overtime, color: 'purple'},
+                                        {label: appString.overtime, value: selectedRecord.overtime, color: 'purple'},
                                     ]}
                                     renderItem={(item) => (
                                         <List.Item className="flex justify-between items-center">
@@ -148,7 +154,7 @@ export default function AttendanceDetailModel({
                             <div className={`w-full flex justify-between items-center gap-2`}>
                                 <div className="text-[15px] font-medium">{appString.screenshots}</div>
                                 {smDevice && <div className="text-[13px] text-blue-800 font-medium">
-                                    {`${selectedAttendance?.keyPressCount ?? 0} keyboard hits  •  ${selectedAttendance?.mouseEventCount ?? 0} mouse clicks`}
+                                    {`${selectedRecord?.keyPressCount ?? 0} keyboard hits  •  ${selectedRecord?.mouseEventCount ?? 0} mouse clicks`}
                                 </div>}
                             </div>
                         </div>
@@ -158,13 +164,14 @@ export default function AttendanceDetailModel({
                         {!smDevice &&
                             <Card style={{borderColor: appColor.secondPrimary, backgroundColor: appColor.blueCardBg}}>
                                 <div className="text-[13px] text-blue-800 font-medium text-center p-1">
-                                    {`${selectedAttendance?.keyPressCount ?? 0} keyboard hits  •  ${selectedAttendance?.mouseEventCount ?? 0} mouse clicks`}
+                                    {`${selectedRecord?.keyPressCount ?? 0} keyboard hits  •  ${selectedRecord?.mouseEventCount ?? 0} mouse clicks`}
                                 </div>
                             </Card>}
                         <Row gutter={[16, 16]}>
                             {screenshots?.map((screenshot) => (
                                 <Col xs={24} sm={12} md={8} key={screenshot._id}>
                                     <Card
+                                        hoverable
                                         style={{position: 'relative', overflow: 'hidden'}}
                                         styles={{body: {padding: 10}}}
                                     >
@@ -181,12 +188,13 @@ export default function AttendanceDetailModel({
                                             </div>
                                             <Popconfirm
                                                 title={appString.deleteConfirmation}
-                                                onConfirm={() => deleteScreenShot(selectedAttendance._id, screenshot._id, setLoading, (data) => {
-                                                    const updatedScreenshotsData = screenshots.filter(
-                                                        (item) => item._id !== screenshot._id
-                                                    );
-                                                    setScreenshots(updatedScreenshotsData);
-                                                })}
+                                                onConfirm={async () => {
+                                                    const payload = {
+                                                        attendanceId: selectedRecord._id,
+                                                        screenshotId: screenshot._id,
+                                                    };
+                                                    await handleDeleteScreenshot(payload);
+                                                }}
                                             >
                                                 <Button
                                                     icon={<DeleteOutlined/>}

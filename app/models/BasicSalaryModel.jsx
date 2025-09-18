@@ -16,6 +16,7 @@ import apiCall, {HttpMethod} from "../api/apiServiceProvider";
 import appKeys from "../utils/appKeys";
 import dayjs from "dayjs";
 import {UserSelect} from "../components/CommonComponents";
+import {decryptValue} from "../utils/utils";
 
 export default function BasicSalaryModel({
                                              isModelOpen,
@@ -37,6 +38,7 @@ export default function BasicSalaryModel({
                 const formData = {
                     ...selectedRecord,
                     user: selectedRecord.user ? selectedRecord.user._id : null,
+                    basicSalary: selectedRecord.basicSalary ? decryptValue(selectedRecord.basicSalary) : null,
                     startDate: selectedRecord.startDate ? dayjs(selectedRecord.startDate) : null,
                 };
                 form.setFieldsValue(formData);

@@ -4,34 +4,26 @@ import React, {useEffect, useMemo, useState} from 'react';
 import {
     Button, Card,
     Input,
-    Popconfirm,
     Table,
-    Tooltip,
 } from 'antd';
 import {Eye, EyeOff, FilePlus, Search} from '../../../utils/icons';
-import {Edit, Trash2} from '../../../utils/icons';
 import {useAppData, AppDataFields} from '../../../masterData/AppDataContext';
-import apiCall, {HttpMethod} from '../../../api/apiServiceProvider';
-import {endpoints} from '../../../api/apiEndpoints';
 import appString from '../../../utils/appString';
 import appKeys from '../../../utils/appKeys';
 import dayjs from 'dayjs';
 import {decryptValue} from "../../../utils/utils";
 import {antTag} from "../../../components/CommonComponents";
-import {LoadingOutlined} from "@ant-design/icons";
-import appColor from "../../../utils/appColor";
 import BasicSalaryModel from "../../../models/BasicSalaryModel";
 import SafeAvatar from "../../../components/SafeAvatar";
 import useHomePageLayout from "../../../hooks/useHomePageLayout";
 import {usePermission} from "../../../hooks/usePermission";
 import {mActions} from "../../../utils/enum";
 import {routeConfig} from "../../../utils/pageRoutes";
-import {useActionLoading} from "../../../hooks/useActionLoading";
 import { CommonActionButton } from "../(panelCommonUtils)/CommonAction";
+import {useApiServices} from "../../../api/useApiServices";
 
 export default function Page() {
-    const {withLoading} = useActionLoading();
-    const apiLoading = withLoading();
+    const { isLoading, basicSalary: callApi } = useApiServices();
 
     const {hasPermission} = usePermission();
     const canAdd = !!hasPermission(mActions.add, routeConfig.basicSalary.key);
@@ -53,7 +45,7 @@ export default function Page() {
     }, [basicSalaryData]);
 
     const handleUpdatedData = (data) => {
-        updateAppDataField(AppDataFields.basicSalaryData, data?.data);
+        updateAppDataField(AppDataFields.basicSalaryData, data);
     };
 
     const filteredData = useMemo(() => {
@@ -62,32 +54,21 @@ export default function Page() {
         return allData.filter(
             data =>
                 (
-                    data?.user?.fullName?.toLowerCase().includes(query)
+                    data?.user?.userName?.toLowerCase().includes(query)
                 )
         );
     }, [allData, searchText]);
 
     const deleteRecord = async (record) => {
-        await apiLoading.run(async () => {
-            await apiCall({
-                method: HttpMethod.DELETE,
-                url: endpoints.deleteBasicSalary(record?._id),
-                successCallback: handleUpdatedData,
-            });
-        });
+        const data = await callApi.deleteBasicSalary(record?._id);
+        handleUpdatedData(data || []);
     };
 
     const handleAddUpdateRecord = async (formValues) => {
-        await apiLoading.run(async () => {
-            await apiCall({
-                method: HttpMethod.POST,
-                url: endpoints.addUpdateBasicSalary(selectedRecord?._id),
-                data: formValues,
-                successCallback: (data) => {
-                    handleUpdatedData(data);
-                    setIsModelOpen(false);
-                },
-            });
+        await callApi.addUpdateBasicSalary(selectedRecord?._id, formValues, async (data) => {
+            setIsModelOpen(false);
+            setSelectedRecord(null);
+            handleUpdatedData(data || []);
         });
     };
 
@@ -102,9 +83,9 @@ export default function Page() {
 
     const columns = [
         {
-            title: appString.fullName,
+            title: appString.userName,
             dataIndex: appKeys.user,
-            key: 'user.fullName',
+            key: 'user.userName',
             render: (text, record) => {
                 const rowUserRecord = record?.user;
                 return (
@@ -113,7 +94,7 @@ export default function Page() {
                             userData={rowUserRecord}
                             size="default"
                         />
-                        <div className="flex-1 font-medium">{rowUserRecord?.fullName}</div>
+                        <div className="flex-1 font-medium">{rowUserRecord?.userName}</div>
                     </div>
                 );
             },
@@ -190,6 +171,7 @@ export default function Page() {
                             </div>
                         </div>
                     )}
+                    scroll={{x: "max-content"}}
                 />
             </Card>
             {isModelOpen && (
@@ -198,7 +180,7 @@ export default function Page() {
                     setIsModelOpen={setIsModelOpen}
                     activeUsersData={activeUsersData}
                     selectedRecord={selectedRecord}
-                    loading={apiLoading.loading}
+                    loading={isLoading}
                     onSubmit={handleAddUpdateRecord}
                 />
             )}

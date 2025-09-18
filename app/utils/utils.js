@@ -247,7 +247,6 @@ export function detectPlatform(userAgent) {
 }
 
 export const decryptValue = (value) => {
-    console.log("value", value)
     if (!value || !value.includes(':')) return value;
 
     try {

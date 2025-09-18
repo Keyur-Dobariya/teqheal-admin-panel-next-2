@@ -12,6 +12,9 @@ import {XOutlined} from "@ant-design/icons";
 import validationRules from "../utils/validationRules";
 import {useModelCommonHook} from "./useModelCommonHook";
 import {useApiServices} from "../api/useApiServices";
+import {endpoints} from "../api/apiEndpoints";
+import apiCall, {HttpMethod} from "../api/apiServiceProvider";
+import {useActionLoading} from "../hooks/useActionLoading";
 
 const {TextArea} = Input;
 
@@ -94,20 +97,37 @@ export function useEmpManageModel({
                 }
             }
 
-            await updateRecord(selectedRecord?._id, formData);
+            // await updateRecord(selectedRecord?._id, formData);
 
+            // await new Promise((resolve) => setTimeout(resolve, 2000));
+            // hideModel();
+
+            await apiCall({
+                method: HttpMethod.POST,
+                url: endpoints.addUpdateUser(selectedRecord?._id),
+                isMultipart: true,
+                formData,
+                successCallback: (data) => {
+                    onSuccess(data?.data);
+                    setProfilePhoto(null);
+                    hideModel();
+                },
+            });
+
+            // const data = await addUpdateUser(selectedRecord?._id, formData);
+            // setProfilePhoto(null);
+            // onSuccess(data);
+            // hideModel();
         } catch (error) {
             console.error("Form validation/API call failed:", error);
         }
     };
 
     const updateRecord = async (id, postData) => {
-        await new Promise(async () => {
-            const data = await addUpdateUser(id, postData);
-            setProfilePhoto(null);
-            hideModel();
-            onSuccess(data);
-        });
+        const data = await addUpdateUser(id, postData);
+        setProfilePhoto(null);
+        // hideModel();
+        onSuccess(data);
         // try {
         //     const data = await addUpdateUser(id, postData);
         //     setProfilePhoto(null);
@@ -138,6 +158,13 @@ export function useEmpManageModel({
                 confirmLoading={isLoading}
                 okText={modelTitle}
                 cancelText="Cancel"
+                afterOpenChange={(open) => {
+                    if (open) {
+                        console.log("Modal opened ✅");
+                    } else {
+                        console.log("Modal closed ❌");
+                    }
+                }}
             >
                 <div
                     ref={containerRef}

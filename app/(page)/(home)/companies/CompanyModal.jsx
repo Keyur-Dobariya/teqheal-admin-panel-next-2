@@ -130,6 +130,7 @@ export const CompanyModal = ({
                                 field="companyIcon"
                                 photo={companyIcon}
                                 onSelect={(file) => setCompanyIcon(file)}
+                                onShowError={() => setCompanyIcon(null)}
                             />
                         </div>
 

@@ -60,7 +60,7 @@ export const TableExtraData = ({ title, value, isTag = false, tagColor = 'blue' 
     </Col>;
 }
 
-export const UploadSinglePhoto = ({field, photo, onSelect}) => {
+export const UploadSinglePhoto = ({field, photo, onSelect, onShowError}) => {
     return (
         <Upload
             name={field}
@@ -80,6 +80,7 @@ export const UploadSinglePhoto = ({field, photo, onSelect}) => {
                         : URL.createObjectURL(photo)
                     }
                     alt="avatar"
+                    onError={onShowError}
                     style={{width: '100%'}}
                 />
             ) : (
@@ -143,14 +144,14 @@ export const UserSelect = ({
                 <Option
                     key={user._id}
                     value={user._id}
-                    label={user.fullName}
+                    label={user.userName}
                 >
                     <div className="flex items-center gap-2 text-[14px]">
                         <SafeAvatar
                             userData={user}
                             size="small"
                         />
-                        {user.fullName}
+                        {user.userName}
                     </div>
                 </Option>
             ))}

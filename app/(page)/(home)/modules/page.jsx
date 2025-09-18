@@ -110,6 +110,7 @@ export default function Page() {
                             />
                         </div>
                     )}
+                    scroll={{x: "max-content"}}
                     loading={fetchLoading}
                     pagination={{pageSize: 100}}
                 />

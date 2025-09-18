@@ -67,6 +67,7 @@ const appKeys = {
     female: 'female',
     other: 'other',
     userData: 'userData',
+    punchInAt: 'punchInAt',
     totalHours: 'totalHours',
     workingHours: 'workingHours',
     missingHours: 'missingHours',

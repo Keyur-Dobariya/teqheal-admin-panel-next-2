@@ -8,6 +8,7 @@ export const AppDataFields = {
     dashboardData: "dashboardData",
     loginUserData: "loginUserData",
     usersData: "usersData",
+    rolesData: "rolesData",
     clientsData: "clientsData",
     projectsData: "projectsData",
     leavesData: "leavesData",

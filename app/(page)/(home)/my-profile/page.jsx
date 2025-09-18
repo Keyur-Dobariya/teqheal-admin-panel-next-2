@@ -9,18 +9,15 @@ import {AppDataFields, useAppData} from "../../../masterData/AppDataContext";
 function ProfileContent() {
     const searchParams = useSearchParams();
     const employeeCode = searchParams.get('user');
-    const { usersData, loginUserData, updateAppDataField } = useAppData();
+    const { usersData } = useAppData();
+
+    const filterUserData = usersData?.find((u) => u.employeeCode === employeeCode);
 
     if (!employeeCode) {
         return <div>Loading...</div>;
     }
 
-    return <CardProfilePage profileData={loginUserData} handleEditSuccess={(updatedUser) => {
-        const updatedUsers = usersData.map(user =>
-            user._id === updatedUser._id ? updatedUser : user
-        );
-        updateAppDataField(AppDataFields.usersData, updatedUsers);
-    }} />;
+    return <CardProfilePage profileData={filterUserData} />;
 }
 
 export default function Page() {
