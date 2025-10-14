@@ -1,4 +1,4 @@
-export const isDevMode = true;
+export const isDevMode = false;
 
 // firebase target:apply hosting default whogetsa
 // firebase deploy --only hosting:devtracker
@@ -137,6 +137,9 @@ const endpoints = {
     updateRolePermissionForAll: `${environment.apiBaseUrl}/api/rolePermission/updateForAll`,
     rolePermissionUpdateAllCompany: `${environment.apiBaseUrl}/api/rolePermission/updateAllCompany`,
     rolePermissionUpdateSingleCompany: `${environment.apiBaseUrl}/api/rolePermission/updateCompany/:companyId`,
+    createOrder: `${environment.apiBaseUrl}/api/createOrder`,
+    verifyPayment: `${environment.apiBaseUrl}/api/verifyPayment`,
+    paymentWebhook: `${environment.apiBaseUrl}/api/paymentWebhook`,
 };
 
 const checkParam = (value) => {
